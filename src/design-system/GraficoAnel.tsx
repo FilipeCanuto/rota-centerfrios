@@ -1,0 +1,56 @@
+import { useId, useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Button } from "@/components/ui/button";
+import { formatarPercentual } from "./formatar";
+
+interface Props {
+  valor: number; // 0..n
+  rotulo: string;
+  resumo: string;
+  tabela: { indicador: string; valor: string }[];
+  tamanho?: "grande" | "pequeno";
+}
+
+/** Gráfico em anel com resumo em texto e alternância "Ver como tabela". */
+export function GraficoAnel({ valor, rotulo, resumo, tabela, tamanho = "grande" }: Props) {
+  const [comoTabela, setComoTabela] = useState(false);
+  const id = useId();
+  const p = Math.max(0, Math.min(1, valor));
+  const atingido = valor >= 1;
+  const dados = [{ v: p }, { v: 1 - p }];
+  const dim = tamanho === "grande" ? "size-44" : "size-32";
+
+  return (
+    <figure className="flex flex-col items-center gap-3" aria-labelledby={`${id}-cap`}>
+      {comoTabela ? (
+        <table className="w-full text-left text-sm">
+          <caption className="sr-only">{rotulo}</caption>
+          <thead><tr className="border-b"><th scope="col" className="py-2 font-semibold">Indicador</th><th scope="col" className="py-2 text-right font-semibold">Valor</th></tr></thead>
+          <tbody>
+            {tabela.map((l) => (
+              <tr key={l.indicador} className="border-b last:border-0"><th scope="row" className="py-2 font-normal">{l.indicador}</th><td className="numeros py-2 text-right">{l.valor}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className={`relative ${dim}`} aria-hidden="true">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={dados} dataKey="v" innerRadius="74%" outerRadius="100%" startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
+                <Cell fill={atingido ? "var(--color-ouro)" : "var(--color-primary)"} />
+                <Cell fill="var(--trilha)" />
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 grid place-items-center">
+            <span className={`numeros font-display font-extrabold ${tamanho === "grande" ? "text-3xl" : "text-2xl"}`}>{formatarPercentual(valor)}</span>
+          </div>
+        </div>
+      )}
+      <figcaption id={`${id}-cap`} className="text-center text-sm text-muted-foreground">{resumo}</figcaption>
+      <Button variant="ghost" size="sm" onClick={() => setComoTabela((v) => !v)} aria-pressed={comoTabela}>
+        {comoTabela ? "Ver como gráfico" : "Ver como tabela"}
+      </Button>
+    </figure>
+  );
+}
