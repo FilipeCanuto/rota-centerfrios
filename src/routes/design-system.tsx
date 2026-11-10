@@ -101,7 +101,7 @@ function DesignSystem() {
   return (
     <main id="conteudo" className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
       <header className="flex flex-col gap-3">
-        <Logo className="h-10" />
+        <Logo className="h-10 self-start" />
         <h1 className="text-3xl font-extrabold sm:text-4xl">Design system Polar</h1>
         <p className="max-w-2xl text-muted-foreground">Elegante e sóbrio: bordas finas, sombras quase nulas, cantos de 12px em cartões e 8px em botões. O ouro aparece só em conquistas.</p>
       </header>
