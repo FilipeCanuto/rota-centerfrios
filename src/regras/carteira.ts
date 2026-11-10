@@ -49,7 +49,7 @@ export type StatusRecompra = "em_dia" | "atencao" | "urgente" | "sem_historico";
 export function intervaloMedioCompras(datas: string[], minimo: number): number | null {
   const unicas = [...new Set(datas.map((d) => d.slice(0, 10)))].sort();
   if (unicas.length < minimo) return null;
-  const total = diasEntre(paraData(unicas[0]), paraData(unicas[unicas.length - 1]));
+  const total = diasEntre(paraData(unicas[0]!), paraData(unicas[unicas.length - 1]!));
   return total / (unicas.length - 1);
 }
 

@@ -15,7 +15,7 @@ import {
 
 // Novembro/2026: dia 1 é domingo; 21 dias úteis (seg-sex).
 const d = (s: string) => {
-  const [a, m, dd] = s.split("-").map(Number);
+  const [a = 1970, m = 1, dd = 1] = s.split("-").map(Number);
   return new Date(a, m - 1, dd);
 };
 

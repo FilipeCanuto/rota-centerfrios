@@ -1,7 +1,7 @@
 /** Utilidades de datas puras (sem fuso: trabalhamos com datas locais "AAAA-MM-DD"). */
 export function paraData(v: string | Date): Date {
   if (v instanceof Date) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
-  const [a, m, d] = v.slice(0, 10).split("-").map(Number);
+  const [a = 1970, m = 1, d = 1] = v.slice(0, 10).split("-").map(Number);
   return new Date(a, m - 1, d);
 }
 
