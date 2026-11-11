@@ -6,7 +6,7 @@ export type Perfil = "vendedor" | "supervisor" | "diretoria" | "administrador";
 
 export interface Sessao {
   authId: string;
-  usuario: { id: string; nome: string; apelido_copiloto: string; tema: string; perfil: Perfil; demo: boolean } | null;
+  usuario: { id: string; nome: string; apelido_copiloto: string; tema: string; demo: boolean } | null;
   papeis: Perfil[];
   empresas: { id: string; nome: string }[];
 }
@@ -15,7 +15,7 @@ async function carregarSessao(): Promise<Sessao | null> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
   const [{ data: usuario }, { data: papeis }, { data: empresas }] = await Promise.all([
-    supabase.from("usuarios").select("id,nome,apelido_copiloto,tema,perfil,demo").eq("auth_user_id", u.user.id).maybeSingle(),
+    supabase.from("usuarios").select("id,nome,apelido_copiloto,tema,demo").eq("auth_user_id", u.user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", u.user.id),
     supabase.from("empresas").select("id,nome").order("created_at"),
   ]);

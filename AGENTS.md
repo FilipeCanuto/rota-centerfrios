@@ -32,6 +32,7 @@ use the editor.
 ## Project rules
 - Folders: `src/design-system` (tokens/components), `src/modulos/<módulo>` (screens + data hooks), `src/regras` (pure calculation rules, tested in `regras.test.ts`), `src/integracoes` (interfaces + "manual" implementations). Why: integrations can be swapped without touching screens.
 - All business limits are read from the `configuracoes_regras` table via `montarConfiguracao`; never hardcode thresholds in screens. Why: diretoria edits them.
-- Every data table carries `empresa_id`, `created_at`, `origem` and (for demo-able data) `demo`; access is enforced by RLS helpers `pode_ver_vendedor`/`tem_empresa`. Why: multi-company + role visibility.
+- Company-owned data carries `empresa_id`, `created_at`, `origem` and (for demo-able data) `demo`; companies identify themselves by `id`. Access is enforced by RLS helpers `pode_ver_vendedor`/`tem_empresa`. Why: multi-company + role visibility.
+- Authorization uses only protected company-scoped roles, never the deprecated user profile column; global director access is separate from administrative access, and full user updates use the checked administrative function. Why: prevent administrative access from exposing commercial portfolios or bypassing column restrictions.
 - The signup trigger atomically claims an administrator-pre-registered user, consumes pending roles into the protected role table, and preserves existing company memberships. Why: new accounts must not receive implicit privileges or demo identities.
 - Status is always icon + word (`SeloStatus`); charts always ship a text summary and a "Ver como tabela" toggle (`GraficoAnel`). Why: WCAG 2.2 AA requirement.
