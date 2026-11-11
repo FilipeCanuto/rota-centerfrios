@@ -50,6 +50,13 @@
       "when": 1794366134521,
       "tag": "0006_feriados",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794366351302,
+      "tag": "0007_indices_politicas_otimizadas",
+      "breakpoints": true
     }
   ]
 }
