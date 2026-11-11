@@ -12,7 +12,7 @@ test("lista de clientes abre a ficha 360 com todas as seções", async ({ page }
     "Notas",
     "Itens mais comprados (12 meses)",
     "Orçamentos (1)",
-    "Compras (2)",
+    "Últimas compras",
     "Contatos recentes",
     "Mudar de carteira",
   ])

@@ -10,23 +10,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAnunciar } from "@/design-system/Anunciador";
 import { usePessoasVisiveis, useRemanejar, type Ficha } from "./dados";
 
 /** Só para supervisor e diretoria. Quem decide se pode é o banco (90 dias, equipe, empresa). */
 export function RemanejarCliente({
   ficha,
   diasSemCompra,
+  meuId,
 }: {
   ficha: Ficha;
   diasSemCompra: number;
+  meuId: string;
 }) {
   const id = useId();
   const pessoas = (usePessoasVisiveis().data ?? []).filter(
-    (p) => p.id !== ficha.cliente.vendedor_id,
+    // O banco confere se o destino é vendedor da equipe e da empresa; aqui só tira quem não faz sentido.
+    (p) => p.id !== ficha.cliente.vendedor_id && p.id !== meuId,
   );
   const remanejar = useRemanejar(ficha.cliente.id);
-  const anunciar = useAnunciar();
   const [novo, setNovo] = useState("");
   const [motivo, setMotivo] = useState("");
   const [erro, setErro] = useState<string | null>(null);
@@ -39,8 +40,7 @@ export function RemanejarCliente({
     try {
       await remanejar.mutateAsync({ novoVendedorId: novo, motivo });
       const nome = pessoas.find((p) => p.id === novo)?.nome ?? "o novo vendedor";
-      toast.success(`Cliente passado para ${nome}.`);
-      anunciar(`Cliente passado para ${nome}. A troca ficou registrada.`);
+      toast.success(`Cliente passado para ${nome}. A troca ficou registrada.`);
       setNovo("");
       setMotivo("");
     } catch (err) {

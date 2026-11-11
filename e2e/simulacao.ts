@@ -80,6 +80,7 @@ const CLIENTES_LISTA = PAINEL.clientes.map((c, i) => ({
 const FICHA = {
   cliente: {
     ...CLIENTES_LISTA[0],
+    data_ultima_compra: diasAtras(120),
     telefone: "5582999990000",
     email: null,
     documento: null,
@@ -88,7 +89,7 @@ const FICHA = {
   compras: [
     {
       id: "v1",
-      data: diasAtras(50),
+      data: diasAtras(120),
       valor: 3200,
       codigo_shop9: "NF1",
       itens: [{ produto: "Freezer horizontal 500 L", quantidade: 1, valor_total: 3200 }],

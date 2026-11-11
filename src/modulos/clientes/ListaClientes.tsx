@@ -23,7 +23,7 @@ import {
   useListaClientes,
   useOpcoesFiltro,
   usePessoasVisiveis,
-  useRegrasDaEmpresa,
+  useRegrasPorEmpresa,
   type FiltrosClientes,
 } from "./dados";
 
@@ -39,7 +39,10 @@ export function ListaClientes() {
   const { data: sessao } = useSessao();
   const empresas = useEmpresasAtivas();
   const gestao = !!sessao?.papeis.some((p) => p === "supervisor" || p === "diretoria");
-  const cfg = useRegrasDaEmpresa(empresas[0]).data ?? REGRAS_PADRAO;
+  const regras = useRegrasPorEmpresa(empresas).data ?? {};
+  const cfgDe = (empresa: string) => regras[empresa] ?? REGRAS_PADRAO;
+  const dias = Object.fromEntries(empresas.map((e) => [e, cfgDe(e).cliente_sem_compra_dias]));
+  const diasTexto = [...new Set(Object.values(dias))].join(" ou ");
   const [filtros, setFiltros] = useState<FiltrosClientes>(FILTROS_VAZIOS);
   const [texto, setTexto] = useState("");
   const [pagina, setPagina] = useState(0);
@@ -50,7 +53,7 @@ export function ListaClientes() {
   }, [texto]);
   useEffect(() => setPagina(0), [filtros]);
 
-  const lista = useListaClientes(empresas, filtros, pagina, cfg.cliente_sem_compra_dias);
+  const lista = useListaClientes(empresas, filtros, pagina, dias);
   const opcoes = useOpcoesFiltro(empresas).data;
   const pessoas = usePessoasVisiveis().data ?? [];
   const nomeVendedor = new Map(pessoas.map((p) => [p.id, p.nome]));
@@ -107,7 +110,7 @@ export function ListaClientes() {
             onCheckedChange={(v) => mudar({ semCompra90: v === true })}
           />
           <Label htmlFor={`${id}-sem-compra`} className="font-normal">
-            Só clientes sem compra há {cfg.cliente_sem_compra_dias} dias ou mais
+            Só clientes sem compra há {diasTexto} dias ou mais
           </Label>
           {filtrando && (
             <Button
@@ -130,6 +133,11 @@ export function ListaClientes() {
             ? `${lista.data.total} ${lista.data.total === 1 ? "cliente" : "clientes"}`
             : "Carteira"}
         </h2>
+        {lista.isError && lista.data && (
+          <p role="alert" className="mb-3 font-semibold text-perigo">
+            Não foi possível atualizar a lista com os filtros novos. Mostrando o resultado anterior.
+          </p>
+        )}
         {lista.error && !lista.data ? (
           <EstadoErro
             titulo="Não foi possível carregar os clientes."
@@ -137,7 +145,8 @@ export function ListaClientes() {
             tentando={lista.isFetching}
           />
         ) : !lista.data ? (
-          <div className="flex flex-col gap-2" aria-label="Carregando clientes">
+          <div className="flex flex-col gap-2" role="status">
+            <span className="sr-only">Carregando clientes…</span>
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-16 rounded-lg" />
             ))}
@@ -181,10 +190,10 @@ export function ListaClientes() {
                           {e}
                         </span>
                       ))}
-                      {clienteSemCompra(c.data_ultima_compra, hoje, cfg) ? (
+                      {clienteSemCompra(c.data_ultima_compra, hoje, cfgDe(c.empresa_id)) ? (
                         <SeloStatus tom="atencao">
                           {c.data_ultima_compra
-                            ? `Sem compra há ${cfg.cliente_sem_compra_dias}+ dias`
+                            ? `Sem compra há ${cfgDe(c.empresa_id).cliente_sem_compra_dias}+ dias`
                             : "Nunca comprou"}
                         </SeloStatus>
                       ) : (
