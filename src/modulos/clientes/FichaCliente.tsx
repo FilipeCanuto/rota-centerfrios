@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, ClipboardCheck, MessageCircle, UserX } from "lucide-react";
+import { ArrowLeft, CalendarPlus, ClipboardCheck, MessageCircle, UserX } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -139,6 +139,13 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
                 <MessageCircle aria-hidden="true" /> Abrir WhatsApp
                 <span className="sr-only"> (abre em nova aba)</span>
               </a>
+            </Button>
+          )}
+          {ehDono && (
+            <Button asChild variant="outline">
+              <Link to="/agenda" search={{ cliente: c.id, nome: c.nome, empresa: c.empresa_id }}>
+                <CalendarPlus aria-hidden="true" /> Agendar
+              </Link>
             </Button>
           )}
           {ehDono && (

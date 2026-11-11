@@ -1,25 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays } from "lucide-react";
-import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { TelaAgenda } from "@/modulos/agenda/TelaAgenda";
+
+interface BuscaAgenda {
+  cliente?: string;
+  nome?: string;
+  empresa?: string;
+}
 
 export const Route = createFileRoute("/_authenticated/agenda")({
   head: () => ({
     meta: [
       { title: "Agenda — Rota CENTERFRIOS" },
-      { name: "description", content: "Tarefas e visitas agendadas." },
-      { property: "og:title", content: "Agenda — Rota CENTERFRIOS" },
-      { property: "og:description", content: "Tarefas e visitas agendadas." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "description", content: "Retornos, visitas, ligações e tarefas do vendedor." },
     ],
   }),
-  component: () => (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-extrabold sm:text-3xl">Agenda</h1>
-      <EstadoVazio icone={CalendarDays} titulo="Sua agenda vai aparecer aqui">
-        Os próximos passos que você registra em cada contato viram tarefas aqui, organizadas por
-        dia, junto com as visitas planejadas.
-      </EstadoVazio>
-    </div>
-  ),
+  validateSearch: (s: Record<string, unknown>): BuscaAgenda => {
+    const texto = (k: string) => (typeof s[k] === "string" ? (s[k] as string) : undefined);
+    const [cliente, nome, empresa] = [texto("cliente"), texto("nome"), texto("empresa")];
+    return cliente && nome && empresa ? { cliente, nome, empresa } : {};
+  },
+  component: Agenda,
 });
+
+function Agenda() {
+  const { cliente, nome, empresa } = Route.useSearch();
+  return (
+    <TelaAgenda
+      novoPara={
+        cliente && nome && empresa ? { clienteId: cliente, nome, empresaId: empresa } : undefined
+      }
+    />
+  );
+}

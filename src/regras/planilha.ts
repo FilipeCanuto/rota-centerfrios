@@ -17,7 +17,7 @@ export interface LinhaCsv {
  * Aspas só abrem no começo do campo (`Freezer 20"` é texto). Linhas vazias são puladas.
  */
 export function lerCsv(texto: string): LinhaCsv[] {
-  const t = texto.replace(/^﻿/, "").replace(/\r\n?/g, "\n");
+  const t = texto.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   const sep = separador(t.split("\n", 1)[0] ?? "");
   const linhas: LinhaCsv[] = [];
   let valores: string[] = [];
