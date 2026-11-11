@@ -33,12 +33,10 @@ test("importa clientes: prévia com erro por linha e resultado do banco", async 
 test("recusa arquivo que não é CSV", async ({ page }) => {
   await simularBackend(page, { importacoes: [] });
   await page.goto("/configuracoes/importacao");
-  await page
-    .getByLabel("Arquivo CSV exportado do Shop9")
-    .setInputFiles({
-      name: "x.xlsx",
-      mimeType: "application/octet-stream",
-      buffer: Buffer.from("x"),
-    });
+  await page.getByLabel("Arquivo CSV exportado do Shop9").setInputFiles({
+    name: "x.xlsx",
+    mimeType: "application/octet-stream",
+    buffer: Buffer.from("x"),
+  });
   await expect(page.getByRole("alert").filter({ hasText: "Use um arquivo .csv" })).toBeVisible();
 });
