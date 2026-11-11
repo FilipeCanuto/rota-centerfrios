@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { VersaoPinguim } from "@/regras";
 
 export type Perfil = "vendedor" | "supervisor" | "diretoria" | "administrador";
 
@@ -10,6 +11,8 @@ export interface Sessao {
     id: string;
     nome: string;
     apelido_copiloto: string;
+    pinguim_versao: VersaoPinguim;
+    copiloto_minimizado: boolean;
     tema: string;
     demo: boolean;
   } | null;
@@ -23,7 +26,7 @@ async function carregarSessao(): Promise<Sessao | null> {
   const [{ data: usuario }, { data: papeis }, { data: empresas }] = await Promise.all([
     supabase
       .from("usuarios")
-      .select("id,nome,apelido_copiloto,tema,demo")
+      .select("id,nome,apelido_copiloto,pinguim_versao,copiloto_minimizado,tema,demo")
       .eq("auth_user_id", u.user.id)
       .maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", u.user.id),

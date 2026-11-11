@@ -5,6 +5,7 @@ export * from "./carteira";
 export * from "./painel";
 export * from "./orcamentos";
 export * from "./gamificacao";
+export * from "./copiloto";
 export * from "./saude";
 export * from "./planilha";
 export * from "./importacao";

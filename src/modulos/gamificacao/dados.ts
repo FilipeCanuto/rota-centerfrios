@@ -21,8 +21,11 @@ export function useMeusPontos(
         supabase.rpc("calcular_pontos_dia", args),
         supabase.rpc("atualizar_selos", args),
       ]);
-      if (p.error) throw p.error;
-      if (s.error) throw s.error;
+      // Vendedor só em outra empresa não tem carteira aqui: o banco recusa (42501) e a seção some.
+      for (const r of [p, s]) {
+        if (r.error?.code === "42501") return null;
+        if (r.error) throw r.error;
+      }
       const [pontos, selos] = await Promise.all([
         supabase
           .from("pontos")
@@ -202,12 +205,13 @@ export function useSalvarAjustes(empresaId: string) {
   return useMutation({
     mutationFn: async (a: { pesos: Record<string, number>; hashtag: string }) => {
       for (const [chave, valor] of Object.entries(a.pesos)) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("configuracoes_regras")
           .update({ valor })
           .eq("empresa_id", empresaId)
-          .eq("chave", chave);
-        if (error) throw error;
+          .eq("chave", chave)
+          .select("chave");
+        if (error || !data?.length) throw error ?? new Error("Peso não encontrado");
       }
       const { error } = await supabase
         .from("configuracoes_texto")

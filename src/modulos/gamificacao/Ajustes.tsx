@@ -2,13 +2,23 @@ import { useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EstadoErro } from "@/design-system/EstadoErro";
 import { Label } from "@/components/ui/label";
 import { CHAVES_PESO, useAjustes, useSalvarAjustes } from "./dados";
 
 /** Pesos e hashtag da campanha: só a diretoria enxerga e grava (RLS de configuracoes_*). */
 export function AjustesGamificacao({ empresaId }: { empresaId: string }) {
   const q = useAjustes(empresaId, true);
-  if (!q.data) return null;
+  if (q.isPending) return <Skeleton className="h-24 w-full" />;
+  if (q.isError || !q.data)
+    return (
+      <EstadoErro
+        titulo="Não foi possível carregar os ajustes."
+        aoTentar={() => void q.refetch()}
+        tentando={q.isFetching}
+      />
+    );
   return <Form key={JSON.stringify(q.data)} empresaId={empresaId} inicial={q.data} />;
 }
 
@@ -22,7 +32,7 @@ function Form({
   const id = useId();
   const salvar = useSalvarAjustes(empresaId);
   const [pesos, setPesos] = useState<Record<string, string>>(
-    Object.fromEntries(CHAVES_PESO.map((c) => [c.chave, String(inicial.pesos[c.chave] ?? 0)])),
+    Object.fromEntries(CHAVES_PESO.map((c) => [c.chave, String(inicial.pesos[c.chave] ?? "")])),
   );
   const [hashtag, setHashtag] = useState(inicial.hashtag);
   const [erro, setErro] = useState<string | null>(null);
@@ -30,6 +40,8 @@ function Form({
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     const numeros = Object.fromEntries(CHAVES_PESO.map((c) => [c.chave, Number(pesos[c.chave])]));
+    if (CHAVES_PESO.some((c) => !pesos[c.chave]?.trim()))
+      return setErro("Preencha todos os pesos.");
     if (Object.values(numeros).some((n) => !Number.isInteger(n) || n < 0))
       return setErro("Os pesos devem ser números inteiros, zero ou maiores.");
     setErro(null);

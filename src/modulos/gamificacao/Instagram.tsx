@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EstadoErro } from "@/design-system/EstadoErro";
 import { Textarea } from "@/components/ui/textarea";
 import { useAnunciar } from "@/design-system/Anunciador";
 import { SeloStatus } from "@/design-system/SeloStatus";
@@ -32,7 +34,15 @@ export function InstagramPosts({ empresaId }: { empresaId: string }) {
     <div className="cartao flex flex-col gap-4 p-5">
       <h3 className="text-lg font-bold">Posts do Instagram</h3>
       {sessao?.papeis.includes("vendedor") && <FormPost empresaId={empresaId} />}
-      {lista.length === 0 ? (
+      {posts.isPending ? (
+        <Skeleton className="h-16 w-full" />
+      ) : posts.isError ? (
+        <EstadoErro
+          titulo="Não foi possível carregar os posts."
+          aoTentar={() => void posts.refetch()}
+          tentando={posts.isFetching}
+        />
+      ) : lista.length === 0 ? (
         <p className="text-muted-foreground">Nenhum post enviado ainda.</p>
       ) : (
         <ul className="divide-y">
@@ -49,7 +59,8 @@ function FormPost({ empresaId }: { empresaId: string }) {
   const id = useId();
   const enviar = useEnviarPost();
   const anunciar = useAnunciar();
-  const hashtag = useHashtag(empresaId).data ?? "";
+  const consulta = useHashtag(empresaId);
+  const hashtag = consulta.data ?? "";
   const [url, setUrl] = useState("");
   const [legenda, setLegenda] = useState("");
   const [data, setData] = useState(formatarISO(hojeEmMaceio()));
@@ -59,7 +70,8 @@ function FormPost({ empresaId }: { empresaId: string }) {
     e.preventDefault();
     if (!/^https?:\/\//i.test(url.trim())) return setErro("Cole o endereço do post (https://…).");
     if (!legenda.trim()) return setErro("Cole a legenda do post.");
-    if (!legendaValida(legenda, hashtag))
+    // Sem a hashtag carregada, quem decide é o servidor na validação.
+    if (consulta.isSuccess && !legendaValida(legenda, hashtag))
       return setErro(
         `A legenda precisa citar ${MENCAO_INSTAGRAM}${hashtag ? ` ou ${hashtag}` : ""}.`,
       );
@@ -176,6 +188,7 @@ function ItemPost({ post, meu }: { post: PostInstagram; meu: boolean }) {
               <Label htmlFor={`${id}-m`}>Motivo da recusa</Label>
               <Input
                 id={`${id}-m`}
+                ref={(el) => el?.focus()}
                 className="min-h-11"
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}

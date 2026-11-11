@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { GraficoAnel } from "@/design-system/GraficoAnel";
-import { Pinguim } from "@/design-system/Pinguim";
+import { Copiloto } from "@/modulos/copiloto/Copiloto";
 import { Progresso } from "@/design-system/Progresso";
 import { SeloStatus, type TomStatus } from "@/design-system/SeloStatus";
 import { formatarDataLonga, formatarMoeda, formatarPercentual } from "@/design-system/formatar";
@@ -86,7 +86,14 @@ export function PainelInicio() {
         <Carregando />
       ) : (
         <>
-          <Copiloto apelido={usuario.apelido_copiloto} p={p} />
+          <Copiloto
+            usuario={usuario}
+            contexto={{
+              clientesHoje: p.plano.length,
+              orcamentosParados: p.orcamentosParados,
+              atingimento: p.atingimento,
+            }}
+          />
           <div className="grid gap-5 lg:grid-cols-[2fr_1fr]">
             <MetaMes p={p} />
             <Cobertura p={p} />
@@ -116,21 +123,6 @@ function Carregando() {
       </div>
       <Skeleton className="h-40 rounded-xl" />
     </div>
-  );
-}
-
-function Copiloto({ apelido, p }: { apelido: string; p: Painel }) {
-  const msg = integracoes.copiloto.mensagemDoDia({
-    apelido,
-    clientesHoje: p.plano.length,
-    orcamentosParados: p.orcamentosParados,
-    atingimento: p.atingimento,
-  });
-  return (
-    <section aria-label="Copiloto" className="cartao entrada flex items-center gap-4 p-5">
-      <Pinguim className="size-14 shrink-0 text-foreground" />
-      <p className="font-display text-lg font-semibold leading-snug">{msg}</p>
-    </section>
   );
 }
 

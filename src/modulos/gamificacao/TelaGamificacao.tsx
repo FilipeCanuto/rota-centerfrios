@@ -45,7 +45,7 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
   return (
     <section className="flex flex-col gap-5" aria-label={nome ?? "Pontos"}>
       {nome && <h2 className="text-xl font-bold">{nome}</h2>}
-      {ehVendedor && (
+      {ehVendedor && meus.data !== null && (
         <div className="cartao p-5">
           <h3 className="mb-3 text-lg font-bold">Meus pontos no mês</h3>
           {meus.isPending ? (
@@ -56,7 +56,7 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
               aoTentar={() => void meus.refetch()}
               tentando={meus.isFetching}
             />
-          ) : (
+          ) : !meus.data ? null : (
             <>
               <p className="numeros text-4xl font-extrabold">
                 {meus.data.totalMes} <span className="text-lg font-semibold">pontos</span>
@@ -66,8 +66,8 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
                   <div key={k}>
                     <dt className="text-sm text-muted-foreground">{rotulo}</dt>
                     <dd className="numeros font-semibold">
-                      {meus.data.porIndicador[k] ?? 0}
-                      {(meus.data.hoje[k] ?? 0) > 0 && ` (+${meus.data.hoje[k]} hoje)`}
+                      {meus.data?.porIndicador[k] ?? 0}
+                      {(meus.data?.hoje[k] ?? 0) > 0 && ` (+${meus.data?.hoje[k]} hoje)`}
                     </dd>
                   </div>
                 ))}
@@ -75,8 +75,7 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
               <h4 className="mb-2 mt-5 font-semibold">Selos</h4>
               {meus.data.selos.length === 0 ? (
                 <p className="text-muted-foreground">
-                  Nenhum selo ainda. Cobertura de 100% da carteira ou 5 dias seguidos de meta de
-                  vendas conquistam o primeiro.
+                  Nenhum selo ainda. Cumpra as metas para conquistar o primeiro.
                 </p>
               ) : (
                 <ul className="flex flex-col gap-2">
@@ -149,7 +148,7 @@ function Ranking({ empresaId, hoje }: { empresaId: string; hoje: string }) {
                 {l.eh_voce && " (você)"}
               </span>
               {l.posicao === 1 && l.pontos > 0 && (
-                <Award className="size-4 text-primary" aria-label="Primeiro lugar" />
+                <Award className="size-4 text-primary" role="img" aria-label="Primeiro lugar" />
               )}
               <span className="numeros ml-auto font-semibold">{l.pontos} pts</span>
             </li>

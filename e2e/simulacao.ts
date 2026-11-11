@@ -178,6 +178,8 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
       id: USUARIO_ID,
       nome: "Clara",
       apelido_copiloto: "Clarinha",
+      pinguim_versao: "consultor",
+      copiloto_minimizado: false,
       tema: "auto",
       demo: false,
     },
