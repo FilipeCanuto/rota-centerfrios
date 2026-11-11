@@ -16,10 +16,10 @@ export interface GestaoEmpresa {
 }
 
 /** Uma chamada por empresa; a RLS do chamador decide quais vendedores aparecem (equipe ou todos). */
-export function useGestao(empresas: string[], hoje: string) {
+export function useGestao(empresas: string[], hoje: string, ativo: boolean) {
   return useQuery({
     queryKey: ["gestao", empresas.join(","), hoje],
-    enabled: empresas.length > 0,
+    enabled: ativo && empresas.length > 0,
     queryFn: async (): Promise<GestaoEmpresa[]> => {
       const [cfg, fer, ...paineis] = await Promise.all([
         supabase

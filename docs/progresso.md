@@ -24,8 +24,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
 | 10 | Gamificação | `fase1/restante` | Concluída e revisada (aguarda PR) |
 | 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
-| 12 | Gestão | `fase1/restante` | Concluída (aguarda revisão e PR) |
-| 13 | Notificações | — | Depende da mensagem 15 |
+| 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
+| 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
 | Nº | Assunto | Situação |
@@ -80,11 +80,14 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Gestão:** `/gestao` (supervisor e diretoria) usa `painel_gestao` por empresa; a RLS decide quem aparece. Mostra total da equipe e um cartão por vendedor (meta, esperado até hoje, cobertura, orçamentos parados, sem compra, esquecidos). Não há classificação "no ritmo/atrasado": o plano não define faixas.
 
+- **Notificações (versão mínima):** `/notificacoes` lista, marca como lida (uma ou todas) e o sino do cabeçalho mostra o contador de não lidas. Os alertas do dia viram notificações ao abrir o Início (chave com a data; no máximo 30 por chamada). O cabeçalho passou a usar `cobertura_vendedor` e as notificações, sem montar o painel inteiro.
+- **Gestão (revisão):** o papel supervisor/diretoria é lido de forma global, não por empresa; a RLS limita os dados de cada empresa.
+
 ## Pendências abertas
+- **Notificações — pendentes:** tela de preferências (tipos desligados, horário de expediente por pessoa) e o silêncio fora do expediente, aos domingos e feriados (horário padrão aprovado: seg–sex 8h–18h, sábado 8h–12h). A tabela `preferencias_notificacao` já existe no banco; falta a tela e a regra de exibição.
 - Refinamento visual do Pinguim e animações (revisão geral).
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.
-- Cabeçalho ainda calcula o painel inteiro para o sino e o selo de cobertura: troca pelo `cobertura_vendedor` e pelas notificações na etapa 13.
 - Remoção das colunas legadas `usuarios.perfil` e `empresas.empresa_id`: precisa da permissão "backward incompatible migrations" no Lovable.
 - Login Google com Gmail: teste manual (está em `docs/lancamento.md`).
 - Formatação Prettier dos arquivos antigos: passo 7.

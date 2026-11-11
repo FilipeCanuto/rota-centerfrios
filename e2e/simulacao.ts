@@ -194,6 +194,19 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,
     "rpc/gerar_tarefas_dos_alertas": 0,
+    "rpc/cobertura_vendedor": { total: 50, cobertos: 22 },
+    "rpc/registrar_notificacoes": 0,
+    notificacoes: [
+      {
+        id: "n1",
+        tipo: "orcamento_parado",
+        titulo: "Orçamento parado: Cliente Teste 1",
+        corpo: "2+ dias úteis sem interação.",
+        link: "/inicio#alertas",
+        lida_em: null,
+        created_at: new Date().toISOString(),
+      },
+    ],
     "rpc/painel_gestao": [
       {
         vendedor_id: "v1",

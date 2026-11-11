@@ -21,6 +21,7 @@ import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
+import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authenticated/notificacoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
@@ -87,6 +88,12 @@ const AuthenticatedMaisRoute = AuthenticatedMaisRouteImport.update({
   path: '/mais',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificacoesRoute =
+  AuthenticatedNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   id: '/orcamentos',
   path: '/orcamentos',
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/inicio': typeof AuthenticatedInicioRoute
   '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
@@ -146,6 +154,7 @@ export interface FileRoutesByTo {
   '/inicio': typeof AuthenticatedInicioRoute
   '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
@@ -166,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
+  '/_authenticated/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/links'
     | '/mais'
+    | '/notificacoes'
     | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/inicio'
     | '/links'
     | '/mais'
+    | '/notificacoes'
     | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
@@ -223,6 +235,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inicio'
     | '/_authenticated/links'
     | '/_authenticated/mais'
+    | '/_authenticated/notificacoes'
     | '/_authenticated/orcamentos'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMaisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notificacoes': {
+      id: '/_authenticated/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AuthenticatedNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/orcamentos': {
       id: '/_authenticated/orcamentos'
       path: '/orcamentos'
@@ -370,6 +390,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
+  AuthenticatedNotificacoesRoute: typeof AuthenticatedNotificacoesRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
@@ -385,6 +406,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
+  AuthenticatedNotificacoesRoute: AuthenticatedNotificacoesRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedConfiguracoesFeriadosRoute:

@@ -1,4 +1,5 @@
 import { Users } from "lucide-react";
+import { SeloStatus } from "@/design-system/SeloStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
@@ -20,8 +21,8 @@ export function TelaGestao() {
   const { data: sessao } = useSessao();
   const empresas = useEmpresasAtivas();
   const hojeData = hojeEmMaceio();
-  const q = useGestao(empresas, formatarISO(hojeData));
   const permitido = sessao?.papeis.some((p) => p === "supervisor" || p === "diretoria");
+  const q = useGestao(empresas, formatarISO(hojeData), !!permitido);
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,6 +59,8 @@ export function TelaGestao() {
 
 function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: string | undefined }) {
   const total = somarEquipe(g.linhas);
+  // Sem nome de empresa não há h2 acima: os títulos dos cartões sobem um nível.
+  const Titulo = nome ? "h3" : "h2";
   if (g.linhas.length === 0)
     return (
       <EstadoVazio icone={Users} titulo={nome ? `${nome}: nenhum vendedor` : "Nenhum vendedor"}>
@@ -68,7 +71,7 @@ function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: strin
     <section className="flex flex-col gap-4" aria-label={nome ?? "Equipe"}>
       {nome && <h2 className="text-xl font-bold">{nome}</h2>}
       <div className="cartao p-5">
-        <h3 className="mb-2 text-lg font-bold">Total da equipe</h3>
+        <Titulo className="mb-2 text-lg font-bold">Total da equipe</Titulo>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
           <Dado k="Meta do mês" v={formatarMoeda(total.meta)} />
           <Dado k="Faturado no mês" v={formatarMoeda(total.faturado)} />
@@ -78,7 +81,7 @@ function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: strin
       </div>
       <ul className="grid gap-4 lg:grid-cols-2">
         {g.linhas.map((l) => (
-          <Vendedor key={l.vendedor_id} l={l} g={g} hoje={hoje} />
+          <Vendedor key={l.vendedor_id} l={l} g={g} hoje={hoje} Titulo={Titulo} />
         ))}
       </ul>
     </section>
@@ -94,13 +97,23 @@ function Dado({ k, v }: { k: string; v: string }) {
   );
 }
 
-function Vendedor({ l, g, hoje }: { l: LinhaGestao; g: GestaoEmpresa; hoje: Date }) {
+function Vendedor({
+  l,
+  g,
+  hoje,
+  Titulo,
+}: {
+  l: LinhaGestao;
+  g: GestaoEmpresa;
+  hoje: Date;
+  Titulo: "h2" | "h3";
+}) {
   const r = resumirVendedor(l, hoje, g.cfg, g.feriados);
   const metaCob = l.meta?.meta_cobertura ?? 0;
   return (
     <li className="cartao flex flex-col gap-3 p-5">
       <div>
-        <h3 className="text-lg font-bold">{l.nome}</h3>
+        <Titulo className="text-lg font-bold">{l.nome}</Titulo>
         {l.equipe && <p className="text-sm text-muted-foreground">{l.equipe}</p>}
       </div>
       {r.atingimento === null ? (
@@ -109,6 +122,13 @@ function Vendedor({ l, g, hoje }: { l: LinhaGestao; g: GestaoEmpresa; hoje: Date
         <>
           <p className="font-semibold">{`Meta de vendas: ${pct(r.atingimento)} (esperado até hoje ${pct(r.esperado)})`}</p>
           <Progresso valor={Math.min(r.atingimento, 1)} rotulo="Atingimento da meta de vendas" />
+          {r.esperado !== null && (
+            <div>
+              <SeloStatus tom={r.atingimento >= r.esperado ? "sucesso" : "atencao"}>
+                {r.atingimento >= r.esperado ? "No ritmo da meta" : "Abaixo do esperado até hoje"}
+              </SeloStatus>
+            </div>
+          )}
           <p className="numeros text-sm">
             {formatarMoeda(Number(l.faturado_mes))} de {formatarMoeda(Number(l.meta?.meta_vendas))}
           </p>
@@ -120,6 +140,15 @@ function Vendedor({ l, g, hoje }: { l: LinhaGestao; g: GestaoEmpresa; hoje: Date
           k="Cobertura do mês"
           v={`${pct(r.cobertura)}${metaCob > 0 ? ` (meta ${metaCob}%)` : ""}`}
         />
+        {r.cobertura !== null && metaCob > 0 && (
+          <div className="col-span-2">
+            <SeloStatus tom={r.cobertura * 100 >= metaCob ? "sucesso" : "atencao"}>
+              {r.cobertura * 100 >= metaCob
+                ? "Meta de cobertura batida"
+                : "Abaixo da meta de cobertura"}
+            </SeloStatus>
+          </div>
+        )}
         <Dado k="Orçamentos parados" v={String(r.orcamentosParados)} />
         <Dado
           k={`Sem compra há ${g.cfg.cliente_sem_compra_dias}+ dias`}
