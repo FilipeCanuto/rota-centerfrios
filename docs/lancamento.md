@@ -19,7 +19,12 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Cadastrar as metas do mês de Clara e Humberto (diretoria).
 - [ ] Conferir as contas fixas: Filipe Canuto (administrador + diretoria) e Willames Costa (administrador), nas duas empresas.
 
-## 4. Testes de acesso
+## 4. Login
+- [ ] No Lovable Cloud (Authentication → URL Configuration), incluir o endereço publicado e `/redefinir-senha` (ex.: `https://<endereço>/redefinir-senha`) nas URLs de redirecionamento permitidas. Sem isso, o link de "Esqueci minha senha" não abre a tela de nova senha.
+- [ ] Testar "Esqueci minha senha" com uma conta real: o e-mail chega, o link abre a tela "Crie uma nova senha" e a senha nova funciona.
+- [ ] Testar "Primeiro acesso" de um vendedor convidado: cria a senha, confirma pelo e-mail e entra.
+
+## 5. Testes de acesso
 - [ ] Login com Google de uma conta `@gmail.com`: tem que ser **recusado** com "Acesso restrito a e-mails da CENTERFRIOS e da 381 Distribuidora."
 - [ ] Login de alguém de `@centerfrios.com` sem convite: tem que ser recusado com "Seu acesso ainda não foi liberado."
 - [ ] Vendedor: vê só a própria carteira, meta e agenda; não vê a carteira do colega.
@@ -27,6 +32,6 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Diretoria: vê as duas empresas; edita metas, regras e feriados.
 - [ ] Administrador: gerencia usuários e links; não vê carteira, vendas nem metas.
 
-## 5. Publicação
+## 6. Publicação
 - [ ] Juntar ao `main` os PRs aprovados da revisão e publicar pelo Lovable.
 - [ ] Abrir o app publicado no celular de Clara e Humberto e instalar como aplicativo.

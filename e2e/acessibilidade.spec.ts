@@ -5,6 +5,7 @@ import { simularBackend } from "./simulacao";
 /** Todas as telas, verificadas com axe (WCAG 2.2 AA) em cada projeto (celular/desktop × claro/escuro). */
 const ROTAS = [
   { url: "/auth", titulo: "Entrar na Rota", logado: false },
+  { url: "/redefinir-senha", titulo: "Crie uma nova senha", logado: false },
   { url: "/design-system", titulo: "Design system Polar", logado: false },
   { url: "/pagina-que-nao-existe", titulo: "404", logado: false },
   { url: "/inicio", titulo: "Olá, Clara", logado: true },
