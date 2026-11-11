@@ -480,6 +480,45 @@ export type Database = {
           },
         ]
       }
+      papeis_pre_cadastro: {
+        Row: {
+          created_at: string
+          empresa_id: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          role: Database["public"]["Enums"]["app_role"]
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          role: Database["public"]["Enums"]["app_role"]
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          role?: Database["public"]["Enums"]["app_role"]
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "papeis_pre_cadastro_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "papeis_pre_cadastro_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pontos: {
         Row: {
           created_at: string
