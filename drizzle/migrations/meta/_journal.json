@@ -36,6 +36,13 @@
       "when": 1794364970848,
       "tag": "0004_permissoes_por_empresa",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794365609535,
+      "tag": "0005_remanejamento_auditoria",
+      "breakpoints": true
     }
   ]
 }
