@@ -1013,6 +1013,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      cobertura_vendedor: {
+        Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
+        Returns: Json
+      }
       eh_admin: { Args: never; Returns: boolean }
       has_role:
         | {
@@ -1031,6 +1035,10 @@ export type Database = {
             Returns: boolean
           }
       meu_usuario_id: { Args: never; Returns: string }
+      painel_vendedor: {
+        Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
+        Returns: Json
+      }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
       remanejar_cliente: {
         Args: {

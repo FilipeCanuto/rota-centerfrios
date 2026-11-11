@@ -57,6 +57,13 @@
       "when": 1794366351302,
       "tag": "0007_indices_politicas_otimizadas",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794366655174,
+      "tag": "0008_painel_vendedor_agregado",
+      "breakpoints": true
     }
   ]
 }
