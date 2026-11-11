@@ -581,6 +581,7 @@ export type Database = {
           registro_id: string | null
           tabela: string | null
           usuario_id: string | null
+          vendedor_id: string | null
         }
         Insert: {
           acao: string
@@ -592,6 +593,7 @@ export type Database = {
           registro_id?: string | null
           tabela?: string | null
           usuario_id?: string | null
+          vendedor_id?: string | null
         }
         Update: {
           acao?: string
@@ -603,6 +605,7 @@ export type Database = {
           registro_id?: string | null
           tabela?: string | null
           usuario_id?: string | null
+          vendedor_id?: string | null
         }
         Relationships: [
           {
@@ -615,6 +618,13 @@ export type Database = {
           {
             foreignKeyName: "registro_auditoria_usuario_id_fkey"
             columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registro_auditoria_vendedor_id_fkey"
+            columns: ["vendedor_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
@@ -951,6 +961,17 @@ export type Database = {
         }
       }
       apagar_dados_demo: { Args: never; Returns: undefined }
+      auditar: {
+        Args: {
+          _acao: string
+          _detalhes: Json
+          _empresa: string
+          _registro: string
+          _tabela: string
+          _vendedor: string
+        }
+        Returns: undefined
+      }
       eh_admin: { Args: never; Returns: boolean }
       has_role:
         | {
@@ -970,6 +991,14 @@ export type Database = {
           }
       meu_usuario_id: { Args: never; Returns: string }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
+      remanejar_cliente: {
+        Args: {
+          _cliente_id: string
+          _motivo: string
+          _novo_vendedor_id: string
+        }
+        Returns: undefined
+      }
       tem_empresa: { Args: { _empresa_id: string }; Returns: boolean }
       ve_tudo: { Args: never; Returns: boolean }
     }
