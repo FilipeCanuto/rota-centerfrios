@@ -21,6 +21,7 @@ import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/m
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
 import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
+import { Route as AuthenticatedConfiguracoesImportacaoRouteImport } from './routes/_authenticated/configuracoes.importacao'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,12 @@ const AuthenticatedConfiguracoesFeriadosRoute =
     path: '/configuracoes/feriados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConfiguracoesImportacaoRoute =
+  AuthenticatedConfiguracoesImportacaoRouteImport.update({
+    id: '/configuracoes/importacao',
+    path: '/configuracoes/importacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/mais': typeof AuthenticatedMaisRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
+  '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/mais': typeof AuthenticatedMaisRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
+  '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRoutesById {
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
+  '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRouteTypes {
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/mais'
     | '/clientes/$id'
     | '/configuracoes/feriados'
+    | '/configuracoes/importacao'
     | '/clientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/mais'
     | '/clientes/$id'
     | '/configuracoes/feriados'
+    | '/configuracoes/importacao'
     | '/clientes'
   id:
     | '__root__'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mais'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
+    | '/_authenticated/configuracoes/importacao'
     | '/_authenticated/clientes/'
   fileRoutesById: FileRoutesById
 }
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesFeriadosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes/importacao': {
+      id: '/_authenticated/configuracoes/importacao'
+      path: '/configuracoes/importacao'
+      fullPath: '/configuracoes/importacao'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesImportacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -272,6 +292,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
+  AuthenticatedConfiguracoesImportacaoRoute: typeof AuthenticatedConfiguracoesImportacaoRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
 }
 
@@ -283,6 +304,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedConfiguracoesFeriadosRoute:
     AuthenticatedConfiguracoesFeriadosRoute,
+  AuthenticatedConfiguracoesImportacaoRoute:
+    AuthenticatedConfiguracoesImportacaoRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
 }
 
