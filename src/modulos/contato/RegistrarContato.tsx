@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAnunciar } from "@/design-system/Anunciador";
 import { supabase } from "@/integrations/supabase/client";
-import { formatarISO } from "@/regras";
+import { formatarISO, hojeEmMaceio } from "@/regras";
 
 const TIPOS = [
   { v: "whatsapp", r: "WhatsApp" },
@@ -88,7 +88,7 @@ export function RegistrarContato({ cliente, vendedorId, aberto, aoFechar }: { cl
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor={`${id}-data`}>Quando</Label>
-              <Input id={`${id}-data`} type="date" className="min-h-11" min={formatarISO(new Date())} value={dataProx} onChange={(e) => setDataProx(e.target.value)} />
+              <Input id={`${id}-data`} type="date" className="min-h-11" min={formatarISO(hojeEmMaceio())} value={dataProx} onChange={(e) => setDataProx(e.target.value)} />
             </div>
           </fieldset>
           {erro && <p id={`${id}-erro`} role="alert" className="font-semibold text-perigo">{erro}</p>}

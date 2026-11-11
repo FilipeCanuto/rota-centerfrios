@@ -1,45 +1,39 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { formatarISO, inicioDoMes, montarConfiguracao, type Interacao } from "@/regras";
-import { calcularPainel } from "./calcular";
+import { calcularPainel, configuracaoPorEmpresa, dataLocal, feriadosDaEmpresa, paraData, type PainelBanco } from "@/regras";
 
 export function chavePainel(usuarioId: string | undefined, empresas: string[]) {
   return ["painel", usuarioId, empresas.join(",")];
 }
 
+/** Lê os agregados do banco (sem limite de linhas) e aplica as regras testadas de src/regras. */
 export function usePainel(usuarioId: string | undefined, empresas: string[]) {
   return useQuery({
     queryKey: chavePainel(usuarioId, empresas),
     enabled: !!usuarioId && empresas.length > 0,
     queryFn: async () => {
-      const hoje = new Date();
-      const hojeISO = formatarISO(hoje);
-      const inicioMes = formatarISO(inicioDoMes(hoje));
-      const umAno = new Date(hoje); umAno.setFullYear(hoje.getFullYear() - 1);
+      const hojeISO = dataLocal(new Date());
+      const hoje = paraData(hojeISO);
+      const desde = `${hoje.getFullYear() - 1}-01-01`;
 
-      const [cli, ven, int, orc, orcMes, met, pts, cfg] = await Promise.all([
-        supabase.from("clientes").select("id,nome,telefone,segmento,cidade,empresa_id").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).order("nome"),
-        supabase.from("vendas").select("cliente_id,data_faturamento,valor").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).gte("data_faturamento", formatarISO(umAno)).range(0, 9999),
-        supabase.from("interacoes").select("cliente_id,tipo,cliente_respondeu,resultado,data").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).gte("data", umAno.toISOString()).range(0, 9999),
-        supabase.from("orcamentos").select("id,cliente_id,valor,data,ultimo_followup").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).eq("status", "aberto"),
-        supabase.from("orcamentos").select("data").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).gte("data", inicioMes),
-        supabase.from("metas").select("meta_vendas,meta_orcamentos,meta_cobertura,meta_reativacao").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).eq("mes", inicioMes),
-        supabase.from("pontos").select("pontos").eq("vendedor_id", usuarioId!).in("empresa_id", empresas).eq("data", hojeISO),
-        supabase.from("configuracoes_regras").select("chave,valor"),
+      const [cfg, fer, ...paineis] = await Promise.all([
+        supabase.from("configuracoes_regras").select("empresa_id,chave,valor").in("empresa_id", empresas),
+        supabase.from("feriados").select("data,empresa_id").gte("data", desde),
+        ...empresas.map((e) => supabase.rpc("painel_vendedor", { _empresa_id: e, _vendedor_id: usuarioId!, _hoje: hojeISO })),
       ]);
-      for (const r of [cli, ven, int, orc, orcMes, met, pts, cfg]) if (r.error) throw r.error;
+      for (const r of [cfg, fer, ...paineis]) if (r.error) throw r.error;
 
+      const regras = configuracaoPorEmpresa(cfg.data ?? [], empresas);
+      const linhasFeriados = fer.data ?? [];
       return calcularPainel({
         hoje,
-        cfg: montarConfiguracao(cfg.data ?? []),
-        clientes: cli.data ?? [],
-        vendas: (ven.data ?? []).map((v) => ({ ...v, valor: Number(v.valor) })),
-        interacoes: (int.data ?? []) as Interacao[],
-        orcamentosAbertos: (orc.data ?? []).map((o) => ({ ...o, valor: Number(o.valor) })),
-        orcamentosMes: orcMes.data?.length ?? 0,
-        orcamentosHoje: (orcMes.data ?? []).filter((o) => o.data === hojeISO).length,
-        metas: (met.data ?? []).map((m) => ({ ...m, meta_vendas: Number(m.meta_vendas), meta_cobertura: Number(m.meta_cobertura) })),
-        pontosHoje: (pts.data ?? []).reduce((s, p) => s + p.pontos, 0),
+        feriadosGerais: new Set(linhasFeriados.filter((l) => l.empresa_id === null || empresas.includes(l.empresa_id)).map((l) => l.data)),
+        empresas: empresas.map((e, i) => ({
+          cfg: regras.get(e)!,
+          feriados: feriadosDaEmpresa(linhasFeriados, e),
+          // O formato é o contrato de painel_vendedor (migração 0008).
+          dados: paineis[i]!.data as unknown as PainelBanco,
+        })),
       });
     },
   });
