@@ -58,8 +58,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **PWA sem guardar dados no aparelho:** o service worker só mostra a página "sem conexão"; nenhum dado da carteira fica no celular. Não roda na prévia do Lovable.
 - **Ícones do app:** continuam os atuais (sem versão maskable) até a marca nova, que espera a escolha do nome.
 
-- **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). *A confirmar pela diretoria.*
-- **Remanejamento:** a diretoria também pode remanejar (decidido na mensagem 03), além do supervisor.
+- **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). *Aprovado pela diretoria em 11/11/2026.*
+- **Remanejamento:** supervisor e diretoria; a diretoria tem acesso total (aprovado em 11/11/2026).
 
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
