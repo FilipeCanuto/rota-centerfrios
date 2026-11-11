@@ -120,6 +120,13 @@
       "when": 1794396583499,
       "tag": "0016_central_links_arquivos",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794397777933,
+      "tag": "0017_gamificacao_pontos_selos",
+      "breakpoints": true
     }
   ]
 }

@@ -185,6 +185,44 @@ export type Database = {
           },
         ]
       }
+      configuracoes_texto: {
+        Row: {
+          chave: string
+          created_at: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          valor: string
+        }
+        Insert: {
+          chave: string
+          created_at?: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          valor?: string
+        }
+        Update: {
+          chave?: string
+          created_at?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          valor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuracoes_texto_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           created_at: string
@@ -846,6 +884,76 @@ export type Database = {
           },
         ]
       }
+      posts_instagram: {
+        Row: {
+          created_at: string
+          data_post: string
+          demo: boolean
+          empresa_id: string
+          id: string
+          legenda: string
+          motivo_recusa: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          status: string
+          url: string
+          validado_em: string | null
+          validado_por: string | null
+          vendedor_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_post: string
+          demo?: boolean
+          empresa_id: string
+          id?: string
+          legenda: string
+          motivo_recusa?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          status?: string
+          url: string
+          validado_em?: string | null
+          validado_por?: string | null
+          vendedor_id?: string
+        }
+        Update: {
+          created_at?: string
+          data_post?: string
+          demo?: boolean
+          empresa_id?: string
+          id?: string
+          legenda?: string
+          motivo_recusa?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          status?: string
+          url?: string
+          validado_em?: string | null
+          validado_por?: string | null
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_instagram_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_instagram_validado_por_fkey"
+            columns: ["validado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_instagram_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registro_auditoria: {
         Row: {
           acao: string
@@ -917,6 +1025,7 @@ export type Database = {
           id: string
           nome: string
           origem: Database["public"]["Enums"]["origem_dado"]
+          referencia: string | null
           vendedor_id: string
         }
         Insert: {
@@ -928,6 +1037,7 @@ export type Database = {
           id?: string
           nome: string
           origem?: Database["public"]["Enums"]["origem_dado"]
+          referencia?: string | null
           vendedor_id: string
         }
         Update: {
@@ -939,6 +1049,7 @@ export type Database = {
           id?: string
           nome?: string
           origem?: Database["public"]["Enums"]["origem_dado"]
+          referencia?: string | null
           vendedor_id?: string
         }
         Relationships: [
@@ -1255,6 +1366,10 @@ export type Database = {
         }
       }
       apagar_dados_demo: { Args: never; Returns: Json }
+      atualizar_selos: {
+        Args: { _dia: string; _empresa_id: string; _vendedor_id: string }
+        Returns: Json
+      }
       auditar: {
         Args: {
           _acao: string
@@ -1265,6 +1380,10 @@ export type Database = {
           _vendedor: string
         }
         Returns: undefined
+      }
+      calcular_pontos_dia: {
+        Args: { _dia: string; _empresa_id: string; _vendedor_id: string }
+        Returns: Json
       }
       carregar_dados_demo: { Args: { _vendedores?: string[] }; Returns: Json }
       carregar_feriados_nacionais: { Args: never; Returns: number }
@@ -1280,6 +1399,26 @@ export type Database = {
       ficha_cliente: {
         Args: { _cliente_id: string; _hoje?: string }
         Returns: Json
+      }
+      gam_dia_util: {
+        Args: { _dia: string; _empresa: string }
+        Returns: boolean
+      }
+      gam_permitido: {
+        Args: { _empresa: string; _vendedor: string }
+        Returns: undefined
+      }
+      gam_regra: {
+        Args: { _chave: string; _empresa: string; _padrao: number }
+        Returns: number
+      }
+      gam_uteis_restantes: {
+        Args: { _dia: string; _empresa: string }
+        Returns: number
+      }
+      gam_vendas_batida: {
+        Args: { _dia: string; _empresa: string; _vendedor: string }
+        Returns: boolean
       }
       gerar_tarefas_dos_alertas: { Args: { _itens: Json }; Returns: number }
       has_role:
@@ -1332,6 +1471,16 @@ export type Database = {
         Returns: Json
       }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
+      ranking: {
+        Args: { _empresa_id: string; _fim: string; _inicio: string }
+        Returns: {
+          eh_voce: boolean
+          nome: string
+          pontos: number
+          posicao: number
+          vendedor_id: string
+        }[]
+      }
       remanejar_cliente: {
         Args: {
           _cliente_id: string
@@ -1341,6 +1490,30 @@ export type Database = {
         Returns: undefined
       }
       tem_empresa: { Args: { _empresa_id: string }; Returns: boolean }
+      validar_post_instagram: {
+        Args: { _aprovar: boolean; _motivo: string; _post_id: string }
+        Returns: {
+          created_at: string
+          data_post: string
+          demo: boolean
+          empresa_id: string
+          id: string
+          legenda: string
+          motivo_recusa: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          status: string
+          url: string
+          validado_em: string | null
+          validado_por: string | null
+          vendedor_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "posts_instagram"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       ve_tudo: { Args: never; Returns: boolean }
     }
     Enums: {
