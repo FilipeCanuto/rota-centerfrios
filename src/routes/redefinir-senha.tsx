@@ -29,12 +29,29 @@ function RedefinirSenha() {
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
+  const [email, setEmail] = useState("");
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setTemSessao(!!data.session));
+    // Só um link de recuperação abre esta tela. Uma sessão comum (aparelho já logado)
+    // não permite trocar a senha sem saber a atual.
+    const veioDoLink = /type=recovery|[?&]code=/.test(
+      window.location.search + window.location.hash,
+    );
+    if (!veioDoLink) {
+      setTemSessao(false);
+      return;
+    }
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "PASSWORD_RECOVERY" || s) setTemSessao(true);
+      if (e === "PASSWORD_RECOVERY") {
+        setTemSessao(true);
+        setEmail(s?.user.email ?? "");
+      }
     });
-    return () => data.subscription.unsubscribe();
+    const limite = setTimeout(() => setTemSessao((v) => v ?? false), 8000);
+    return () => {
+      clearTimeout(limite);
+      data.subscription.unsubscribe();
+    };
   }, []);
 
   async function enviar(e: React.FormEvent) {
@@ -45,7 +62,14 @@ function RedefinirSenha() {
     setEnviando(true);
     const { error } = await supabase.auth.updateUser({ password: senha });
     setEnviando(false);
-    if (error) return setErro("Não foi possível salvar a nova senha. Peça um novo link.");
+    if (error)
+      return setErro(
+        /different from the old/i.test(error.message)
+          ? "A nova senha precisa ser diferente da anterior."
+          : /weak|short|characters/i.test(error.message)
+            ? "Escolha uma senha mais forte, com pelo menos 6 caracteres."
+            : "Não foi possível salvar a nova senha. Peça um novo link.",
+      );
     navigate({ to: "/inicio", replace: true });
   }
 
@@ -66,6 +90,15 @@ function RedefinirSenha() {
             </div>
           ) : (
             <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
+              {/* Para o gerenciador de senhas saber de qual conta é a senha nova. */}
+              <input
+                type="email"
+                name="username"
+                autoComplete="username"
+                value={email}
+                readOnly
+                hidden
+              />
               <div className="grid gap-1.5">
                 <Label htmlFor={`${id}-senha`}>Nova senha</Label>
                 <div className="flex gap-2">
@@ -85,7 +118,8 @@ function RedefinirSenha() {
                     variant="outline"
                     size="icon"
                     aria-pressed={verSenha}
-                    aria-label={verSenha ? "Esconder senha" : "Mostrar senha"}
+                    aria-controls={`${id}-senha`}
+                    aria-label="Mostrar senha"
                     onClick={() => setVerSenha((v) => !v)}
                   >
                     {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
