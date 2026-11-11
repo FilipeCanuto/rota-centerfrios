@@ -304,6 +304,66 @@ export type Database = {
           },
         ]
       }
+      importacoes: {
+        Row: {
+          arquivo: string | null
+          atualizadas: number
+          created_at: string
+          empresa_id: string
+          erros: Json
+          id: string
+          ignoradas: number
+          inseridas: number
+          origem: Database["public"]["Enums"]["origem_dado"]
+          tipo: string
+          total_linhas: number
+          usuario_id: string | null
+        }
+        Insert: {
+          arquivo?: string | null
+          atualizadas?: number
+          created_at?: string
+          empresa_id: string
+          erros?: Json
+          id?: string
+          ignoradas?: number
+          inseridas?: number
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          tipo: string
+          total_linhas?: number
+          usuario_id?: string | null
+        }
+        Update: {
+          arquivo?: string | null
+          atualizadas?: number
+          created_at?: string
+          empresa_id?: string
+          erros?: Json
+          id?: string
+          ignoradas?: number
+          inseridas?: number
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          tipo?: string
+          total_linhas?: number
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "importacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "importacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interacoes: {
         Row: {
           cliente_id: string
@@ -1210,6 +1270,34 @@ export type Database = {
             }
             Returns: boolean
           }
+      importacao_registrar: {
+        Args: {
+          _arquivo: string
+          _empresa_id: string
+          _erros: Json
+          _ins: number
+          _tipo: string
+          _total: number
+          _upd: number
+        }
+        Returns: Json
+      }
+      importacao_validar: {
+        Args: { _empresa_id: string; _linhas: Json }
+        Returns: undefined
+      }
+      importar_clientes: {
+        Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
+        Returns: Json
+      }
+      importar_orcamentos: {
+        Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
+        Returns: Json
+      }
+      importar_vendas: {
+        Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
+        Returns: Json
+      }
       meu_usuario_id: { Args: never; Returns: string }
       painel_vendedor: {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
