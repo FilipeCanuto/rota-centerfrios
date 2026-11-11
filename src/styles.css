@@ -201,6 +201,8 @@
   html {
     font-size: 100%;
     -webkit-text-size-adjust: 100%;
+    /* A barra inferior fixa não pode esconder o elemento com foco. */
+    scroll-padding-bottom: 5rem;
   }
   body {
     background-color: var(--background);

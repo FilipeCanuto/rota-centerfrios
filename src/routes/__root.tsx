@@ -149,9 +149,22 @@ function RootComponent() {
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(() => {
+    // Página "sem conexão" quando o app instalado abre sem internet (só no app publicado).
+    const previa =
+      window.self !== window.top || /lovableproject\.com|id-preview--/.test(location.host);
+    if (import.meta.env.PROD && !previa && "serviceWorker" in navigator)
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ProvedorTema aoMudar={salvarTemaDoUsuario}>
+      <ProvedorTema
+        aoMudar={async (t) => {
+          await salvarTemaDoUsuario(t);
+          queryClient.invalidateQueries({ queryKey: ["sessao"] });
+        }}
+      >
         <ProvedorAnunciador>
           <Outlet />
           <Toaster position="top-center" />

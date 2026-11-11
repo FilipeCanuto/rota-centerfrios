@@ -1,6 +1,6 @@
 # Rota CENTERFRIOS
 
-Implement exactly the screenshot and nothing else
+Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora. Plano em `docs/estrategia.md`, regras do projeto em `CLAUDE.md`, andamento em `docs/progresso.md` e checklist do primeiro uso em `docs/lancamento.md`.
 
 This project was built with [Lovable](https://lovable.dev).
 

@@ -222,7 +222,7 @@ function MetasDoDia({ p }: { p: Painel }) {
                 </span>
               </div>
               <Progresso valor={prog} rotulo={`${m.nome}: ${fmt(m.atual)} de ${fmt(m.alvo)}`} />
-              {prog >= 1 && <span className="text-sm font-semibold text-sucesso">✓ Concluída</span>}
+              {prog >= 1 && <SeloStatus tom="sucesso">Concluída</SeloStatus>}
             </li>
           );
         })}

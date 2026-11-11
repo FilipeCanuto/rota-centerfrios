@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 export type Tema = "claro" | "escuro" | "auto";
 const CHAVE = "rota-tema";
 
-const Ctx = createContext<{ tema: Tema; definirTema: (t: Tema) => void }>({
+const Ctx = createContext<{ tema: Tema; definirTema: (t: Tema, salvar?: boolean) => void }>({
   tema: "auto",
   definirTema: () => {},
 });
@@ -38,10 +38,11 @@ export function ProvedorTema({
   }, [tema]);
 
   const definirTema = useCallback(
-    (t: Tema) => {
+    /** `salvar = false` aplica sem gravar no cadastro (ex.: tema vindo do próprio cadastro). */
+    (t: Tema, salvar = true) => {
       localStorage.setItem(CHAVE, t);
       setTema(t);
-      aoMudar?.(t);
+      if (salvar) aoMudar?.(t);
     },
     [aoMudar],
   );
