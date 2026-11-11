@@ -13,14 +13,14 @@ export function Pinguim({ className = "size-16" }: { className?: string }) {
       <circle cx="35.5" cy="22" r="1.4" fill="currentColor" />
       <path
         d="M29 26.5 32 29l3-2.5"
-        stroke="var(--color-ouro)"
+        stroke="var(--cor-destaque)"
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M24 57h7M33 57h7"
-        stroke="var(--color-ouro)"
+        stroke="var(--cor-destaque)"
         strokeWidth="2.4"
         strokeLinecap="round"
       />
