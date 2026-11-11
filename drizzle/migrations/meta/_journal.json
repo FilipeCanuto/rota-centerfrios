@@ -92,6 +92,13 @@
       "when": 1794369157512,
       "tag": "0012_feriados_moveis_copia_anual",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794394683800,
+      "tag": "0013_ficha_cliente_shop9",
+      "breakpoints": true
     }
   ]
 }

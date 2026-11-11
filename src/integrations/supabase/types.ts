@@ -81,10 +81,14 @@ export type Database = {
       clientes: {
         Row: {
           cidade: string | null
+          codigo_shop9: string | null
           created_at: string
           data_ultima_compra: string | null
           demo: boolean
+          documento: string | null
+          email: string | null
           empresa_id: string
+          etiquetas: string[]
           id: string
           nome: string
           origem: Database["public"]["Enums"]["origem_dado"]
@@ -94,10 +98,14 @@ export type Database = {
         }
         Insert: {
           cidade?: string | null
+          codigo_shop9?: string | null
           created_at?: string
           data_ultima_compra?: string | null
           demo?: boolean
+          documento?: string | null
+          email?: string | null
           empresa_id: string
+          etiquetas?: string[]
           id?: string
           nome: string
           origem?: Database["public"]["Enums"]["origem_dado"]
@@ -107,10 +115,14 @@ export type Database = {
         }
         Update: {
           cidade?: string | null
+          codigo_shop9?: string | null
           created_at?: string
           data_ultima_compra?: string | null
           demo?: boolean
+          documento?: string | null
+          email?: string | null
           empresa_id?: string
+          etiquetas?: string[]
           id?: string
           nome?: string
           origem?: Database["public"]["Enums"]["origem_dado"]
@@ -356,6 +368,80 @@ export type Database = {
           },
         ]
       }
+      itens_venda: {
+        Row: {
+          cliente_id: string
+          codigo_produto: string | null
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          produto: string
+          quantidade: number
+          valor_total: number
+          venda_id: string
+          vendedor_id: string | null
+        }
+        Insert: {
+          cliente_id: string
+          codigo_produto?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          produto: string
+          quantidade?: number
+          valor_total?: number
+          venda_id: string
+          vendedor_id?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          codigo_produto?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id?: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          produto?: string
+          quantidade?: number
+          valor_total?: number
+          venda_id?: string
+          vendedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_venda_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       links: {
         Row: {
           created_at: string
@@ -460,15 +546,83 @@ export type Database = {
           },
         ]
       }
+      notas_cliente: {
+        Row: {
+          autor_id: string | null
+          cliente_id: string
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          texto: string
+          vendedor_id: string | null
+        }
+        Insert: {
+          autor_id?: string | null
+          cliente_id: string
+          created_at?: string
+          demo?: boolean
+          empresa_id: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          texto: string
+          vendedor_id?: string | null
+        }
+        Update: {
+          autor_id?: string | null
+          cliente_id?: string
+          created_at?: string
+          demo?: boolean
+          empresa_id?: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          texto?: string
+          vendedor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_cliente_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_cliente_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_cliente_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_cliente_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orcamentos: {
         Row: {
           cliente_id: string
+          codigo_shop9: string | null
           created_at: string
           data: string
           demo: boolean
           empresa_id: string
           id: string
+          observacao: string | null
           origem: Database["public"]["Enums"]["origem_dado"]
+          proximo_followup: string | null
           status: string
           ultimo_followup: string | null
           valor: number
@@ -476,12 +630,15 @@ export type Database = {
         }
         Insert: {
           cliente_id: string
+          codigo_shop9?: string | null
           created_at?: string
           data?: string
           demo?: boolean
           empresa_id: string
           id?: string
+          observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          proximo_followup?: string | null
           status?: string
           ultimo_followup?: string | null
           valor?: number
@@ -489,12 +646,15 @@ export type Database = {
         }
         Update: {
           cliente_id?: string
+          codigo_shop9?: string | null
           created_at?: string
           data?: string
           demo?: boolean
           empresa_id?: string
           id?: string
+          observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          proximo_followup?: string | null
           status?: string
           ultimo_followup?: string | null
           valor?: number
@@ -921,6 +1081,7 @@ export type Database = {
       vendas: {
         Row: {
           cliente_id: string
+          codigo_shop9: string | null
           created_at: string
           data_faturamento: string
           demo: boolean
@@ -932,6 +1093,7 @@ export type Database = {
         }
         Insert: {
           cliente_id: string
+          codigo_shop9?: string | null
           created_at?: string
           data_faturamento: string
           demo?: boolean
@@ -943,6 +1105,7 @@ export type Database = {
         }
         Update: {
           cliente_id?: string
+          codigo_shop9?: string | null
           created_at?: string
           data_faturamento?: string
           demo?: boolean
@@ -1027,6 +1190,10 @@ export type Database = {
         Returns: Json
       }
       eh_admin: { Args: never; Returns: boolean }
+      ficha_cliente: {
+        Args: { _cliente_id: string; _hoje?: string }
+        Returns: Json
+      }
       has_role:
         | {
             Args: {
