@@ -1001,7 +1001,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      apagar_dados_demo: { Args: never; Returns: undefined }
+      apagar_dados_demo: { Args: never; Returns: Json }
       auditar: {
         Args: {
           _acao: string
@@ -1013,6 +1013,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      carregar_dados_demo: { Args: { _vendedores?: string[] }; Returns: Json }
+      carregar_feriados_nacionais: { Args: never; Returns: number }
       cobertura_vendedor: {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
         Returns: Json
