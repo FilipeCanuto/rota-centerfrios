@@ -1,4 +1,8 @@
 # Restrição de acesso por convite
+- [x] Adicionar abrangência empresa, data_movel e cópia anual de feriados em 0012; manter tipos gerados e telas intactas.
+- [x] Marcar Paixão de Cristo pela ferramenta de dados; três testes de diretoria e teste transacional de RLS vendedor passaram, incluindo duplicação e 29/02; todos os feriados temporários apagados (20 nacionais finais).
+- [x] Corrigir identidades e papéis das duas contas preservando logins e vínculos; limpar demo antes e recriar com vendedores fictícios depois (somente dados, sem necessidade de estrutura).
+- [x] Conferir acesso autenticado, carteiras vazias nas contas reais e auditoria de permissões; sete testes passaram, src/ e migrações antigas intactos. Painel pessoal preexistente não apresenta visão global de diretoria, fora do escopo de telas.
 - [x] Restringir atualização administrativa e auditar alterações em 0011; nove testes autenticados passaram, temporários apagados e git ls-files tests/__pycache__ vazio.
 - [ ] Ignorar __pycache__/ e *.pyc: .gitignore gerenciado pela plataforma, alteração bloqueada; depende de edição pelo usuário.
 - [x] Reclassificar empresas reais e criar limpeza/recriação demo e carga idempotente de feriados em migrações novas; correção de aliases em 0010 sem editar 0009.

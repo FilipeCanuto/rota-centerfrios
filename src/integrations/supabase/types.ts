@@ -253,6 +253,7 @@ export type Database = {
           abrangencia: string
           created_at: string
           data: string
+          data_movel: boolean
           empresa_id: string | null
           id: string
           localidade: string | null
@@ -263,6 +264,7 @@ export type Database = {
           abrangencia: string
           created_at?: string
           data: string
+          data_movel?: boolean
           empresa_id?: string | null
           id?: string
           localidade?: string | null
@@ -273,6 +275,7 @@ export type Database = {
           abrangencia?: string
           created_at?: string
           data?: string
+          data_movel?: boolean
           empresa_id?: string | null
           id?: string
           localidade?: string | null
@@ -1017,6 +1020,10 @@ export type Database = {
       carregar_feriados_nacionais: { Args: never; Returns: number }
       cobertura_vendedor: {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
+        Returns: Json
+      }
+      copiar_feriados_para_ano: {
+        Args: { _ano_destino: number; _ano_origem: number }
         Returns: Json
       }
       eh_admin: { Args: never; Returns: boolean }
