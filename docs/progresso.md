@@ -24,7 +24,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
 | 10 | Gamificação | `fase1/restante` | Concluída e revisada (aguarda PR) |
 | 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
-| 12 | Gestão | — | Depende da mensagem 15 |
+| 12 | Gestão | `fase1/restante` | Concluída (aguarda revisão e PR) |
 | 13 | Notificações | — | Depende da mensagem 15 |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
@@ -77,6 +77,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Copiloto (versão mínima):** mensagem por regras e modelos (`integracoes.copiloto`), apelido e versão do Pinguim escolhidos pelo vendedor, botão de minimizar e "Ouvir" (voz do aparelho). Pinguim estático em SVG com 4 expressões (neutro, feliz, atento, comemorando) e 4 versões (consultor, panificador, açougueiro, pizzaiolo). A expressão vem de `expressaoDoCopiloto` (regra testada).
 - **Revisão da gamificação:** após aprovar/recusar um post, o foco volta ao início da página (a linha some da lista); ajustar na revisão geral. Vendedor só de uma empresa não vê a seção de pontos da outra (o banco recusa e a seção some).
+
+- **Gestão:** `/gestao` (supervisor e diretoria) usa `painel_gestao` por empresa; a RLS decide quem aparece. Mostra total da equipe e um cartão por vendedor (meta, esperado até hoje, cobertura, orçamentos parados, sem compra, esquecidos). Não há classificação "no ritmo/atrasado": o plano não define faixas.
 
 ## Pendências abertas
 - Refinamento visual do Pinguim e animações (revisão geral).

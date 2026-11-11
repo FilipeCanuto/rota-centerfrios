@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileText, FileUp, Link2, Palette, Trash2, Trophy } from "lucide-react";
+import { CalendarOff, FileText, FileUp, Link2, Palette, Trash2, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -40,6 +40,7 @@ function Mais() {
   const anunciar = useAnunciar();
   const admin = data?.papeis.includes("administrador");
   const diretoria = data?.papeis.includes("diretoria");
+  const gestor = diretoria || data?.papeis.includes("supervisor");
 
   async function apagarDemo() {
     try {
@@ -65,6 +66,17 @@ function Mais() {
               <FileText aria-hidden="true" /> Orçamentos
             </Link>
           </Button>
+          {gestor && (
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto min-h-11 whitespace-normal text-left"
+            >
+              <Link to="/gestao">
+                <Users aria-hidden="true" /> Gestão da equipe
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
             <Link to="/gamificacao">
               <Trophy aria-hidden="true" /> Pontos e selos

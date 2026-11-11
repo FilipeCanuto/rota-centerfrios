@@ -194,6 +194,21 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,
     "rpc/gerar_tarefas_dos_alertas": 0,
+    "rpc/painel_gestao": [
+      {
+        vendedor_id: "v1",
+        nome: "Clara",
+        equipe: "Loja",
+        meta: { meta_vendas: 110000, meta_cobertura: 70 },
+        faturado_mes: 45000,
+        faturado_hoje: 1200,
+        clientes_total: 50,
+        clientes_cobertos: 22,
+        orcamentos_abertos: [],
+        clientes_sem_compra_90: 4,
+        esquecidos: 6,
+      },
+    ],
     links: [
       {
         id: "l1",

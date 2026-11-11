@@ -16,6 +16,7 @@ const ROTAS = [
   { url: "/orcamentos", titulo: "Orçamentos", logado: true },
   { url: "/links", titulo: "Links e arquivos", logado: true },
   { url: "/gamificacao", titulo: "Pontos e selos", logado: true },
+  { url: "/gestao", titulo: "Gestão", logado: true },
   { url: "/mais", titulo: "Mais", logado: true },
   { url: "/configuracoes/importacao", titulo: "Importar planilhas do Shop9", logado: true },
   { url: "/configuracoes/feriados", titulo: "Feriados e dias sem expediente", logado: true },

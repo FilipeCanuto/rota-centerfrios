@@ -17,6 +17,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedGamificacaoRouteImport } from './routes/_authenticated/gamificacao'
+import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
@@ -66,6 +67,11 @@ const AuthenticatedGamificacaoRoute =
     path: '/gamificacao',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
+  id: '/gestao',
+  path: '/gestao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/conversas'
     | '/gamificacao'
+    | '/gestao'
     | '/inicio'
     | '/links'
     | '/mais'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/conversas'
     | '/gamificacao'
+    | '/gestao'
     | '/inicio'
     | '/links'
     | '/mais'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda'
     | '/_authenticated/conversas'
     | '/_authenticated/gamificacao'
+    | '/_authenticated/gestao'
     | '/_authenticated/inicio'
     | '/_authenticated/links'
     | '/_authenticated/mais'
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamificacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gestao': {
+      id: '/_authenticated/gestao'
+      path: '/gestao'
+      fullPath: '/gestao'
+      preLoaderRoute: typeof AuthenticatedGestaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inicio': {
       id: '/_authenticated/inicio'
       path: '/inicio'
@@ -347,6 +366,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
   AuthenticatedGamificacaoRoute: typeof AuthenticatedGamificacaoRoute
+  AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
@@ -361,6 +381,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
   AuthenticatedGamificacaoRoute: AuthenticatedGamificacaoRoute,
+  AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
