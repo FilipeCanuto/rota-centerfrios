@@ -1,6 +1,6 @@
 # Restrição de acesso por convite
-- [ ] Aplicar remanejamento protegido, auditoria automática e supervisor por empresa em migração nova.
-- [ ] Testar nove cenários de remanejamento/auditoria e apagar dados temporários.
+- [x] Aplicar remanejamento protegido, auditoria automática e supervisor por empresa em migração nova.
+- [x] Testar nove cenários de remanejamento/auditoria e apagar dados temporários (11 testes passaram).
 - [x] Corrigir RLS e papéis por empresa em uma migração nova; regenerar tipos.
 - [x] Conferir permissões com quatro contas temporárias e remover contas e registros temporários.
 - [x] Verificar compilação e documentar resultados de RLS.
