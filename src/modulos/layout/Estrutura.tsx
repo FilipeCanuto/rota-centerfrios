@@ -1,11 +1,21 @@
 import { Outlet } from "@tanstack/react-router";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { ProvedorEmpresa } from "@/modulos/sessao/sessao";
+import { useEffect } from "react";
+import { useTema, type Tema } from "@/design-system/tema";
+import { ProvedorEmpresa, useSessao } from "@/modulos/sessao/sessao";
 import { BarraInferior } from "./BarraInferior";
 import { Cabecalho } from "./Cabecalho";
 import { MenuLateral } from "./MenuLateral";
 
 export function Estrutura() {
+  const { data: sessao } = useSessao();
+  const { tema, definirTema } = useTema();
+  const temaSalvo = sessao?.usuario?.tema as Tema | undefined;
+  // O tema escolhido em outro aparelho vale aqui também.
+  useEffect(() => {
+    if (temaSalvo && temaSalvo !== tema) definirTema(temaSalvo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando o cadastro muda
+  }, [temaSalvo]);
   return (
     <ProvedorEmpresa>
       <a href="#conteudo" className="pular-link">
