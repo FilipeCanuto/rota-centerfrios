@@ -86,7 +86,7 @@ export function BuscaGlobal() {
                 value={c.id}
                 onSelect={() => {
                   setAberto(false);
-                  navigate({ to: "/clientes" });
+                  navigate({ to: "/clientes/$id", params: { id: c.id } });
                 }}
                 className="min-h-11"
               >
