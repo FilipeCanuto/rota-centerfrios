@@ -6,7 +6,13 @@ export type Perfil = "vendedor" | "supervisor" | "diretoria" | "administrador";
 
 export interface Sessao {
   authId: string;
-  usuario: { id: string; nome: string; apelido_copiloto: string; tema: string; demo: boolean } | null;
+  usuario: {
+    id: string;
+    nome: string;
+    apelido_copiloto: string;
+    tema: string;
+    demo: boolean;
+  } | null;
   papeis: Perfil[];
   empresas: { id: string; nome: string }[];
 }
@@ -15,7 +21,11 @@ async function carregarSessao(): Promise<Sessao | null> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
   const [{ data: usuario }, { data: papeis }, { data: empresas }] = await Promise.all([
-    supabase.from("usuarios").select("id,nome,apelido_copiloto,tema,demo").eq("auth_user_id", u.user.id).maybeSingle(),
+    supabase
+      .from("usuarios")
+      .select("id,nome,apelido_copiloto,tema,demo")
+      .eq("auth_user_id", u.user.id)
+      .maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", u.user.id),
     supabase.from("empresas").select("id,nome").order("created_at"),
   ]);
@@ -39,7 +49,10 @@ export function podeVerAmbas(papeis: Perfil[]) {
 
 // ---- Empresa selecionada ----
 type Selecao = string | "ambas";
-const CtxEmpresa = createContext<{ empresa: Selecao; definir: (e: Selecao) => void }>({ empresa: "ambas", definir: () => {} });
+const CtxEmpresa = createContext<{ empresa: Selecao; definir: (e: Selecao) => void }>({
+  empresa: "ambas",
+  definir: () => {},
+});
 
 export function ProvedorEmpresa({ children }: { children: ReactNode }) {
   const { data } = useSessao();
@@ -50,7 +63,7 @@ export function ProvedorEmpresa({ children }: { children: ReactNode }) {
     const ids = data.empresas.map((e) => e.id);
     const ambas = podeVerAmbas(data.papeis);
     if (salvo && (ids.includes(salvo) || (salvo === "ambas" && ambas))) setEmpresa(salvo);
-    else setEmpresa(ambas ? "ambas" : ids[0] ?? "ambas");
+    else setEmpresa(ambas ? "ambas" : (ids[0] ?? "ambas"));
   }, [data]);
   const definir = (e: Selecao) => {
     localStorage.setItem("rota-empresa", e);
@@ -66,4 +79,10 @@ export function useEmpresasAtivas(): string[] {
   const { empresa } = useEmpresa();
   if (!data) return [];
   return empresa === "ambas" ? data.empresas.map((e) => e.id) : [empresa];
+}
+
+/** Guarda o tema escolhido no cadastro do usuário, para valer em outros aparelhos. */
+export async function salvarTemaDoUsuario(tema: string) {
+  const { data } = await supabase.auth.getUser();
+  if (data.user) await supabase.from("usuarios").update({ tema }).eq("auth_user_id", data.user.id);
 }

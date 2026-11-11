@@ -1,4 +1,4 @@
-import type { CanalMensagens, Copiloto, FonteVendas } from "./tipos";
+import type { CanalMensagens, Copiloto, FonteInstagram, FonteVendas, Voz } from "./tipos";
 
 /** Telefone só com dígitos e com DDI 55 quando faltar. Pelo tamanho: 10–11 dígitos é nacional (DDD + número). */
 export function normalizarTelefone(t: string): string {
@@ -29,9 +29,48 @@ export const copilotoPorRegras: Copiloto = {
     if (clientesHoje === 0 && orcamentosParados === 0)
       return `${apelido} aqui: carteira em dia. Que tal prospectar um cliente novo hoje?`;
     const partes: string[] = [];
-    if (clientesHoje > 0) partes.push(`${clientesHoje} ${clientesHoje === 1 ? "cliente precisa" : "clientes precisam"} de você hoje`);
-    if (orcamentosParados > 0) partes.push(`${orcamentosParados} ${orcamentosParados === 1 ? "orçamento está parado" : "orçamentos estão parados"}`);
-    const fecho = atingimento >= 1 ? " Meta batida — bora passar dela!" : atingimento >= 0.7 ? " A meta está perto." : "";
+    if (clientesHoje > 0)
+      partes.push(
+        `${clientesHoje} ${clientesHoje === 1 ? "cliente precisa" : "clientes precisam"} de você hoje`,
+      );
+    if (orcamentosParados > 0)
+      partes.push(
+        `${orcamentosParados} ${orcamentosParados === 1 ? "orçamento está parado" : "orçamentos estão parados"}`,
+      );
+    const fecho =
+      atingimento >= 1
+        ? " Meta batida — bora passar dela!"
+        : atingimento >= 0.7
+          ? " A meta está perto."
+          : "";
     return `${apelido} aqui: ${partes.join(" e ")}.${fecho}`;
+  },
+};
+
+/**
+ * Instagram sem API: não há leitura automática de posts (lista vazia). No modo manual, o vendedor
+ * registra o post na tela de gamificação e o supervisor valida; isso vive no banco, não aqui.
+ */
+export const instagramManual: FonteInstagram = {
+  nome: "Instagram (registro manual)",
+  conectado: false,
+  async buscarPosts() {
+    return [];
+  },
+};
+
+/** Voz do próprio aparelho (Web Speech API), até a voz do copiloto chegar na Fase 3. */
+export const vozDoAparelho: Voz = {
+  nome: "Voz do aparelho",
+  disponivel: () => typeof window !== "undefined" && "speechSynthesis" in window,
+  falar(texto) {
+    if (!vozDoAparelho.disponivel()) return;
+    window.speechSynthesis.cancel();
+    const fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = "pt-BR";
+    window.speechSynthesis.speak(fala);
+  },
+  parar() {
+    if (vozDoAparelho.disponivel()) window.speechSynthesis.cancel();
   },
 };

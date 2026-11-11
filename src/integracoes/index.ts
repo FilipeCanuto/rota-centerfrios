@@ -1,4 +1,10 @@
-import { copilotoPorRegras, vendasPorPlanilha, whatsappManual } from "./manual";
+import {
+  copilotoPorRegras,
+  instagramManual,
+  vendasPorPlanilha,
+  vozDoAparelho,
+  whatsappManual,
+} from "./manual";
 export * from "./tipos";
 export { normalizarTelefone } from "./manual";
 
@@ -7,4 +13,6 @@ export const integracoes = {
   mensagens: whatsappManual,
   vendas: vendasPorPlanilha,
   copiloto: copilotoPorRegras,
+  instagram: instagramManual,
+  voz: vozDoAparelho,
 };

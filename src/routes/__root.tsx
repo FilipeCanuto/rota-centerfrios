@@ -11,7 +11,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ProvedorAnunciador } from "@/design-system/Anunciador";
-import { ProvedorTema, scriptTemaInicial, type Tema } from "@/design-system/tema";
+import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
+import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
@@ -86,18 +87,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Rota CENTERFRIOS" },
-      { name: "description", content: "Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora." },
+      {
+        name: "description",
+        content: "Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora.",
+      },
       { name: "author", content: "CENTERFRIOS" },
       { name: "theme-color", content: "#1B4FA0" },
       { property: "og:title", content: "Rota CENTERFRIOS" },
-      { property: "og:description", content: "Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora." },
+      {
+        property: "og:description",
+        content: "Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
@@ -138,14 +148,9 @@ function RootComponent() {
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
-  async function salvarTema(t: Tema) {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) await supabase.from("usuarios").update({ tema: t }).eq("auth_user_id", data.user.id);
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
-      <ProvedorTema aoMudar={salvarTema}>
+      <ProvedorTema aoMudar={salvarTemaDoUsuario}>
         <ProvedorAnunciador>
           <Outlet />
           <Toaster position="top-center" />
