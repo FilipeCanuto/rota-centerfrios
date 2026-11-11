@@ -6,7 +6,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *):not(.claro, .claro *));
 
 @theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -85,6 +85,7 @@
   --polar-cinza-300: oklch(0.864 0.025 259.8); /* #C9D3E3 */
   --polar-cinza-500: oklch(0.505 0.031 262.2); /* #5B6577 */
   --polar-cinza-400: oklch(0.671 0.034 261.7); /* #8A96AB */
+  --polar-noite-650: oklch(0.32 0.055 262);
   --polar-cinza-claro: oklch(0.768 0.031 262.5); /* #A9B4C8 */
   --polar-texto-claro: oklch(0.945 0.012 264.5); /* #E9EDF5 */
   --polar-ouro-500: oklch(0.797 0.145 84.4); /* #E8B43A */
@@ -137,7 +138,7 @@
   --cor-sobre-perigo: var(--polar-noite-900);
   --cor-campo: var(--polar-cinza-400);
   --cor-divisoria: var(--polar-noite-500);
-  --cor-trilha: oklch(0.32 0.055 262);
+  --cor-trilha: var(--polar-noite-650);
   color-scheme: dark;
 }
 
@@ -153,12 +154,12 @@
   /* Nomes do shadcn/ui, ligados aos semânticos */
   --background: var(--cor-fundo);
   --foreground: var(--cor-texto);
-  --card: var(--cartao-fundo);
+  --card: var(--cor-superficie);
   --card-foreground: var(--cor-texto);
   --popover: var(--cor-superficie);
   --popover-foreground: var(--cor-texto);
-  --primary: var(--botao-primario-fundo);
-  --primary-foreground: var(--botao-primario-texto);
+  --primary: var(--cor-primaria);
+  --primary-foreground: var(--cor-sobre-primaria);
   --primary-suave: var(--cor-primaria-suave);
   --secondary: var(--cor-superficie-2);
   --secondary-foreground: var(--cor-texto);
@@ -174,7 +175,7 @@
   --destructive: var(--cor-perigo);
   --destructive-foreground: var(--cor-sobre-perigo);
   --campo: var(--cor-campo);
-  --border: var(--cartao-borda);
+  --border: var(--cor-divisoria);
   --input: var(--cor-campo);
   --ring: var(--cor-primaria);
   --trilha: var(--cor-trilha);
@@ -226,9 +227,9 @@
   font-variant-numeric: tabular-nums;
 }
 @utility cartao {
-  background: var(--card);
+  background: var(--cartao-fundo);
   color: var(--card-foreground);
-  border: 1px solid var(--border);
+  border: 1px solid var(--cartao-borda);
   border-radius: 12px;
   box-shadow: var(--sombra-cartao);
 }

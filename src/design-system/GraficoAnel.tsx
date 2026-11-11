@@ -58,6 +58,17 @@ export function GraficoAnel({ valor, rotulo, resumo, tabela, tamanho = "grande" 
               strokeWidth="13"
               className="stroke-trilha"
             />
+            {atingido && (
+              // Contorno marinho: o ouro sozinho não chega a 3:1 sobre o fundo claro.
+              <circle
+                cx="50"
+                cy="50"
+                r={RAIO}
+                fill="none"
+                strokeWidth="16"
+                className="stroke-foreground"
+              />
+            )}
             <circle
               cx="50"
               cy="50"
