@@ -1,6 +1,6 @@
 # Restrição de acesso por convite
-- [ ] Criar feriados em migração nova, carregar as 20 datas nacionais e regenerar tipos.
-- [ ] Conferir 19 dias úteis em novembro/2026, RLS e auditoria; apagar dados temporários.
+- [x] Criar feriados em migração nova, carregar as 20 datas nacionais e regenerar tipos.
+- [x] Conferir 19 dias úteis em novembro/2026, RLS e auditoria; apagar dados temporários (7 testes passaram).
 - [x] Aplicar remanejamento protegido, auditoria automática e supervisor por empresa em migração nova.
 - [x] Testar nove cenários de remanejamento/auditoria e apagar dados temporários (11 testes passaram).
 - [x] Corrigir RLS e papéis por empresa em uma migração nova; regenerar tipos.
