@@ -71,6 +71,13 @@
       "when": 1794367027476,
       "tag": "0009_gestao_demonstracao_feriados",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794367131389,
+      "tag": "0010_corrigir_aliases_carga_demo",
+      "breakpoints": true
     }
   ]
 }
