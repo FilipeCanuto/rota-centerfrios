@@ -43,7 +43,13 @@ export const shop9PorPlanilha: FonteShop9 = {
         _arquivo: arquivo,
         _linhas: linhas.slice(i, i + LOTE) as Json,
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        total.falha =
+          i === 0
+            ? error.message
+            : `${error.message} (as primeiras ${i} linhas já foram gravadas; reimportar o arquivo não duplica).`;
+        return total;
+      }
       const r = data as unknown as ResultadoImportacao;
       total.importacao_id ||= r.importacao_id;
       total.inseridas += r.inseridas;

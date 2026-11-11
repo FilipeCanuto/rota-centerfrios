@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CAMPOS, type ErroLinha, type TipoImportacao } from "@/regras";
+import { CAMPOS, type ErroLinha, type LinhaImportacao, type TipoImportacao } from "@/regras";
 
 const NENHUMA = "-1";
 
@@ -99,6 +99,61 @@ export function ListaErros({ erros, titulo }: { erros: ErroLinha[]; titulo: stri
           E mais {erros.length - 50}. Baixe o relatório para ver todos.
         </p>
       )}
+    </section>
+  );
+}
+
+const ROTULOS: Record<string, string> = Object.fromEntries(
+  Object.values(CAMPOS).flatMap((cs) => cs.map((c) => [c.chave, c.rotulo])),
+);
+
+/** As 5 primeiras linhas já convertidas (datas, valores, telefone), para conferir antes de gravar. */
+export function Previa({ linhas }: { linhas: LinhaImportacao[] }) {
+  const id = useId();
+  if (!linhas.length) return null;
+  const colunas = Object.keys(linhas[0]!).filter((k) => k !== "linha" && k !== "itens");
+  const mostrar = (v: unknown) => (v === null || v === "" ? "—" : String(v));
+  return (
+    <section aria-labelledby={id}>
+      <h3 id={id} className="mb-2 font-bold">
+        Como vai ficar (primeiras {Math.min(5, linhas.length)})
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="border-b">
+              <th scope="col" className="py-2 pr-3 font-semibold">
+                Linha
+              </th>
+              {colunas.map((c) => (
+                <th key={c} scope="col" className="py-2 pr-3 font-semibold">
+                  {ROTULOS[c] ?? c}
+                </th>
+              ))}
+              {"itens" in linhas[0]! && (
+                <th scope="col" className="py-2 font-semibold">
+                  Itens
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {linhas.slice(0, 5).map((l) => (
+              <tr key={l.linha} className="border-b last:border-0">
+                <td className="numeros py-2 pr-3">{l.linha}</td>
+                {colunas.map((c) => (
+                  <td key={c} className="py-2 pr-3">
+                    {mostrar(l[c])}
+                  </td>
+                ))}
+                {"itens" in l && (
+                  <td className="numeros py-2">{(l["itens"] as unknown[]).length}</td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

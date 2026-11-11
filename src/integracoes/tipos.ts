@@ -10,6 +10,8 @@ export interface ResultadoImportacao {
   atualizadas: number;
   ignoradas: number;
   erros: { linha: number; campo: string; mensagem: string }[];
+  /** Preenchido se um lote falhou: os lotes anteriores já foram gravados. */
+  falha?: string;
 }
 
 export interface FonteShop9 {

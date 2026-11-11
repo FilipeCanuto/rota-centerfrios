@@ -1,5 +1,5 @@
 import { FileUp, Upload } from "lucide-react";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +14,17 @@ import {
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import type { ResultadoImportacao } from "@/integracoes";
 import { useSessao } from "@/modulos/sessao/sessao";
-import { lerCsv, montarLinhas, sugerirMapeamento, type TipoImportacao } from "@/regras";
+import {
+  colunasRepetidas,
+  lerCsv,
+  montarLinhas,
+  sugerirMapeamento,
+  type LinhaCsv,
+  type TipoImportacao,
+} from "@/regras";
 import { baixarErros, lerArquivo, useImportar } from "./dados";
 import { Historico } from "./Historico";
-import { ListaErros, Mapeamento } from "./Mapeamento";
+import { ListaErros, Mapeamento, Previa } from "./Mapeamento";
 
 const TIPOS: { valor: TipoImportacao; rotulo: string }[] = [
   { valor: "clientes", rotulo: "Clientes" },
@@ -30,12 +37,15 @@ export function TelaImportacao() {
   const { data: sessao } = useSessao();
   const [empresa, setEmpresa] = useState("");
   const [tipo, setTipo] = useState<TipoImportacao>("clientes");
-  const [arquivo, setArquivo] = useState<{ nome: string; dados: string[][] } | null>(null);
+  const [arquivo, setArquivo] = useState<{ nome: string; dados: LinhaCsv[] } | null>(null);
   const [mapa, setMapa] = useState<Record<string, number>>({});
   const [erroArquivo, setErroArquivo] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoImportacao | null>(null);
   const importar = useImportar();
+  const [erroGravar, setErroGravar] = useState<string | null>(null);
+  const resultadoRef = useRef<HTMLHeadingElement>(null);
 
+  const repetidas = colunasRepetidas(tipo, mapa);
   const previa = useMemo(
     () => (arquivo ? montarLinhas(tipo, arquivo.dados.slice(1), mapa) : null),
     [arquivo, tipo, mapa],
@@ -62,17 +72,18 @@ export function TelaImportacao() {
     const dados = lerCsv(await lerArquivo(f));
     if (dados.length < 2) return setErroArquivo("A planilha está vazia ou só tem o cabeçalho.");
     setArquivo({ nome: f.name, dados });
-    setMapa(sugerirMapeamento(tipo, dados[0]!));
+    setMapa(sugerirMapeamento(tipo, dados[0]!.valores));
   }
 
   function trocarTipo(t: TipoImportacao) {
     setTipo(t);
     setResultado(null);
-    if (arquivo) setMapa(sugerirMapeamento(t, arquivo.dados[0]!));
+    if (arquivo) setMapa(sugerirMapeamento(t, arquivo.dados[0]!.valores));
   }
 
   async function confirmar() {
     if (!arquivo || !previa || !empresa) return;
+    setErroGravar(null);
     try {
       setResultado(
         await importar.mutateAsync({
@@ -83,8 +94,10 @@ export function TelaImportacao() {
         }),
       );
     } catch (e) {
-      setErroArquivo(`A importação não foi gravada: ${(e as Error).message}`);
+      setErroGravar(`A importação não foi gravada: ${(e as Error).message}`);
+      return;
     }
+    requestAnimationFrame(() => resultadoRef.current?.focus());
   }
 
   return (
@@ -155,16 +168,29 @@ export function TelaImportacao() {
           <h2 id={`${id}-p2`} className="text-lg font-bold">
             2. Colunas e prévia
           </h2>
-          <Mapeamento tipo={tipo} cabecalho={arquivo.dados[0]!} mapa={mapa} aoMudar={setMapa} />
+          <Mapeamento
+            tipo={tipo}
+            cabecalho={arquivo.dados[0]!.valores}
+            mapa={mapa}
+            aoMudar={setMapa}
+          />
           <p role="status" className="font-semibold">
             {previa.linhas.length} {tipo === "vendas" ? "notas" : "linhas"} prontas para gravar;{" "}
             {previa.erros.length} com erro (não serão gravadas).
           </p>
+          {repetidas.length > 0 && (
+            <p role="alert" className="font-semibold text-perigo">
+              A mesma coluna foi escolhida para mais de um campo: {repetidas.join(", ")}.
+            </p>
+          )}
+          <Previa linhas={previa.linhas} />
           <ListaErros erros={previa.erros} titulo="Linhas com erro na planilha" />
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={confirmar}
-              disabled={!empresa || !previa.linhas.length || importar.isPending}
+              disabled={
+                !empresa || !previa.linhas.length || repetidas.length > 0 || importar.isPending
+              }
             >
               <Upload aria-hidden="true" />{" "}
               {importar.isPending ? "Gravando…" : `Gravar ${previa.linhas.length} no sistema`}
@@ -175,6 +201,11 @@ export function TelaImportacao() {
               </Button>
             )}
           </div>
+          {erroGravar && (
+            <p role="alert" className="font-semibold text-perigo">
+              {erroGravar}
+            </p>
+          )}
           {!empresa && (
             <p className="text-sm text-muted-foreground">Escolha a empresa para poder gravar.</p>
           )}
@@ -183,13 +214,23 @@ export function TelaImportacao() {
 
       {resultado && (
         <section aria-labelledby={`${id}-p3`} className="cartao grid gap-4 p-5">
-          <h2 id={`${id}-p3`} className="text-lg font-bold">
+          <h2
+            id={`${id}-p3`}
+            ref={resultadoRef}
+            tabIndex={-1}
+            className="text-lg font-bold outline-none"
+          >
             3. Resultado
           </h2>
           <p role="status">
             {resultado.inseridas} novos, {resultado.atualizadas} atualizados e {resultado.ignoradas}{" "}
             recusados pelo sistema. A importação ficou registrada no histórico.
           </p>
+          {resultado.falha && (
+            <p role="alert" className="font-semibold text-perigo">
+              A importação parou no meio: {resultado.falha}
+            </p>
+          )}
           <ListaErros erros={resultado.erros} titulo="Recusados pelo sistema" />
           {resultado.erros.length > 0 && (
             <Button

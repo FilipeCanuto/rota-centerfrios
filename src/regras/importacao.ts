@@ -1,4 +1,6 @@
-import { lerData, lerNumero, normalizarCabecalho } from "./planilha";
+import { lerData, lerNumero, lerTelefone, normalizarCabecalho, type LinhaCsv } from "./planilha";
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type TipoImportacao = "clientes" | "vendas" | "orcamentos";
 
@@ -168,13 +170,6 @@ const STATUS: Record<string, string> = {
   cancelado: "perdido",
 };
 
-/** Telefone com DDI 55, só dígitos (vazio se não houver). */
-function telefone(s: string): string {
-  const d = s.replace(/\D/g, "");
-  if (!d) return "";
-  return d.length <= 11 ? `55${d}` : d;
-}
-
 /**
  * Converte as linhas da planilha (sem o cabeçalho) no formato das funções importar_* do banco.
  * Linhas com erro não seguem; duplicados no mesmo arquivo viram erro (a primeira ocorrência vale).
@@ -182,9 +177,8 @@ function telefone(s: string): string {
  */
 export function montarLinhas(
   tipo: TipoImportacao,
-  dados: string[][],
+  dados: LinhaCsv[],
   mapa: Record<string, number>,
-  primeiraLinha = 2,
 ): { linhas: LinhaImportacao[]; erros: ErroLinha[] } {
   const erros: ErroLinha[] = [];
   const valor = (l: string[], chave: string) =>
@@ -192,13 +186,16 @@ export function montarLinhas(
   const vistos = new Map<string, LinhaImportacao>();
   const linhas: LinhaImportacao[] = [];
 
-  dados.forEach((l, i) => {
-    const n = primeiraLinha + i;
+  const notasComErro = new Set<string>();
+  dados.forEach(({ numero: n, valores: l }) => {
     const erro = (campo: string, mensagem: string): void => {
       erros.push({ linha: n, campo, mensagem });
     };
     const faltando = CAMPOS[tipo].find((c) => c.obrigatorio && !valor(l, c.chave));
-    if (faltando) return erro(faltando.chave, `${faltando.rotulo} vazio.`);
+    if (faltando) {
+      if (tipo === "vendas" && valor(l, "codigo_shop9")) notasComErro.add(valor(l, "codigo_shop9"));
+      return erro(faltando.chave, `${faltando.rotulo} vazio.`);
+    }
     const codigo = valor(l, "codigo_shop9");
 
     if (tipo === "clientes") {
@@ -208,12 +205,19 @@ export function montarLinhas(
           `Código ${codigo} repetido no arquivo (vale a primeira linha).`,
         );
       const email = valor(l, "email");
-      if (email && !/^\S+@\S+\.\S+$/.test(email)) return erro("email", "E-mail inválido.");
+      if (email && !EMAIL.test(email)) return erro("email", "E-mail inválido.");
+      if (!EMAIL.test(valor(l, "vendedor_email")))
+        return erro(
+          "vendedor_email",
+          "E-mail do vendedor inválido (a coluna precisa ter o e-mail, não o nome).",
+        );
+      const fone = lerTelefone(valor(l, "telefone"));
+      if (fone === null) return erro("telefone", "Telefone inválido: use DDD e número.");
       const nova: LinhaImportacao = {
         linha: n,
         codigo_shop9: codigo,
         nome: valor(l, "nome"),
-        telefone: telefone(valor(l, "telefone")),
+        telefone: fone,
         documento: valor(l, "documento").replace(/\D/g, ""),
         email,
         segmento: valor(l, "segmento"),
@@ -251,18 +255,28 @@ export function montarLinhas(
     }
 
     // vendas: uma linha por nota ou por item
+    // Uma linha com erro invalida a nota inteira: gravar só parte dos itens deixaria a venda errada.
+    const erroNota = (campo: string, mensagem: string) => {
+      notasComErro.add(codigo);
+      erro(campo, mensagem);
+    };
     const data = lerData(valor(l, "data_faturamento"));
-    if (!data) return erro("data_faturamento", "Data inválida (use dd/mm/aaaa).");
+    if (!data) return erroNota("data_faturamento", "Data inválida (use dd/mm/aaaa).");
     const valorNota = valor(l, "valor") ? lerNumero(valor(l, "valor")) : null;
     if (valor(l, "valor") && (valorNota === null || valorNota < 0))
-      return erro("valor", "Valor inválido.");
+      return erroNota("valor", "Valor inválido.");
+    const qtd = valor(l, "quantidade") ? lerNumero(valor(l, "quantidade")) : 1;
+    if (qtd === null || qtd <= 0) return erroNota("quantidade", "Quantidade inválida.");
+    const valorItem = valor(l, "valor_item") ? lerNumero(valor(l, "valor_item")) : null;
+    if (valor(l, "valor_item") && (valorItem === null || valorItem < 0))
+      return erroNota("valor_item", "Valor do item inválido.");
     const produto = valor(l, "produto");
     const item = produto
       ? {
           produto,
           codigo_produto: valor(l, "codigo_produto"),
-          quantidade: lerNumero(valor(l, "quantidade")) ?? 1,
-          valor_total: lerNumero(valor(l, "valor_item")) ?? 0,
+          quantidade: qtd,
+          valor_total: valorItem ?? 0,
         }
       : null;
     const existente = vistos.get(codigo);
@@ -271,11 +285,12 @@ export function montarLinhas(
         existente["cliente_codigo"] !== valor(l, "cliente_codigo") ||
         existente["data_faturamento"] !== data
       )
-        return erro("codigo_shop9", `Nota ${codigo} aparece com outro cliente ou outra data.`);
+        return erroNota("codigo_shop9", `Nota ${codigo} aparece com outro cliente ou outra data.`);
       if (item) (existente["itens"] as unknown[]).push(item);
       return;
     }
-    if (valorNota === null && !item) return erro("valor", "Informe o valor da nota ou os itens.");
+    if (valorNota === null && valorItem === null)
+      return erroNota("valor", "Informe o valor da nota ou o valor de cada item.");
     const nova: LinhaImportacao = {
       linha: n,
       codigo_shop9: codigo,
@@ -288,10 +303,35 @@ export function montarLinhas(
     linhas.push(nova);
   });
 
-  if (tipo === "vendas")
-    for (const v of linhas) {
+  if (tipo === "vendas") {
+    for (const codigo of notasComErro) {
+      const nota = vistos.get(codigo);
+      if (nota)
+        erros.push({
+          linha: nota.linha,
+          campo: "codigo_shop9",
+          mensagem: `Nota ${codigo} não será gravada: há linha com erro nela.`,
+        });
+    }
+    const validas = linhas.filter((v) => !notasComErro.has(String(v["codigo_shop9"])));
+    for (const v of validas) {
       const itens = v["itens"] as { valor_total: number }[];
       if (v["valor"] === null) v["valor"] = itens.reduce((s, i) => s + i.valor_total, 0);
     }
+    return { linhas: validas, erros: erros.sort((a, b) => a.linha - b.linha) };
+  }
   return { linhas, erros };
+}
+
+/** Campos que apontam para a mesma coluna (cada coluna deve alimentar um campo só). */
+export function colunasRepetidas(tipo: TipoImportacao, mapa: Record<string, number>): string[] {
+  const usadas = new Map<number, string>();
+  const repetidos: string[] = [];
+  for (const c of CAMPOS[tipo]) {
+    const i = mapa[c.chave] ?? -1;
+    if (i < 0) continue;
+    if (usadas.has(i)) repetidos.push(c.rotulo);
+    else usadas.set(i, c.rotulo);
+  }
+  return repetidos;
 }

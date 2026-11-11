@@ -63,6 +63,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Importação só de CSV:** o Excel salva como CSV (Arquivo → Salvar como → CSV). Ler .xlsx exigiria uma biblioteca pesada; fica para quando o Shop9 for integrado direto.
 
+- **Importação de vendas:** se uma linha de uma nota tem erro, a nota inteira fica de fora (gravar só parte dos itens deixaria a venda errada). Se um lote de 5.000 falhar, os anteriores já foram gravados; reimportar não duplica.
+- **Sem confirmação antes de gravar:** a importação é refeita reimportando o arquivo corrigido; a prévia mostra as primeiras linhas convertidas.
+
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.
