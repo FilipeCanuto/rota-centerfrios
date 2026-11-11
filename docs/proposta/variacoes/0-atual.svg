@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Rota CENTERFRIOS</title>
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#13306B"/>
+      <stop offset="1" stop-color="#0A1730"/>
+    </linearGradient>
+    <!-- a rota vem de longe: o começo da linha surge aos poucos -->
+    <linearGradient id="chegada" gradientUnits="userSpaceOnUse" x1="64" y1="0" x2="168" y2="0">
+      <stop offset="0" stop-color="#F7F8FB" stop-opacity="0"/>
+      <stop offset="1" stop-color="#F7F8FB"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#fundo)"/>
+  <!-- a rota: uma única linha que sai do chão, desenha o pinguim e segue até a meta -->
+  <path d="M64 424 C120 424 150 418 162 392 C176 360 150 320 160 270 C168 220 196 196 206 170 C214 128 240 100 274 98 C306 96 328 116 334 138 L362 150 L334 160 C330 176 322 186 320 200 C360 240 372 320 352 376 C340 408 318 424 290 424 L408 424"
+        fill="none" stroke="url(#chegada)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- peito branco, o traço que lembra o pinguim da marca -->
+  <path d="M304 218 C332 262 336 326 316 374" fill="none" stroke="#F7F8FB" stroke-width="12" stroke-linecap="round" opacity=".5"/>
+  <!-- olho -->
+  <circle cx="296" cy="128" r="9" fill="#F7F8FB"/>
+  <!-- ponto atingido: o único ouro -->
+  <circle cx="442" cy="424" r="18" fill="#E8B43A"/>
+</svg>
