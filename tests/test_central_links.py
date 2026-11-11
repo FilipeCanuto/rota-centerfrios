@@ -30,8 +30,8 @@ class Links(unittest.TestCase):
  def up(self,who,path): return requests.post(self.url+f'/storage/v1/object/arquivos/{path}',headers={**self.h[who],'Content-Type':'application/pdf'},data=PDF)
  def test_fluxo(self):
   r=self.up(ADM,f'{TAG}/catalogo.pdf'); self.assertTrue(r.ok,r.text)
-  r=self.rest(ADM,'POST','links',json=[{'empresa_id':None,'titulo':TAG+' Catálogo','arquivo_path':f'{TAG}/catalogo.pdf','mensagem_whatsapp':'Segue o catálogo','publico':'interno'},
-   {'empresa_id':None,'titulo':TAG+' Inativo','url':'https://example.com','ativo':False,'publico':'interno'}]); self.assertTrue(r.ok,r.text)
+  r=self.rest(ADM,'POST','links',json=[{'empresa_id':None,'titulo':TAG+' Catálogo','arquivo_path':f'{TAG}/catalogo.pdf','mensagem_whatsapp':'Segue o catálogo','publico':'interno','url':None,'ativo':True},
+   {'empresa_id':None,'titulo':TAG+' Inativo','url':'https://example.com','ativo':False,'publico':'interno','arquivo_path':None,'mensagem_whatsapp':None}]); self.assertTrue(r.ok,r.text)
   self.assertEqual(len(self.rest(ADM,'GET','links',params={'titulo':f'like.{TAG}*'}).json()),2)
   vis=[l['titulo'] for l in self.rest(V,'GET','links',params={'titulo':f'like.{TAG}*'}).json()]; self.assertEqual(vis,[TAG+' Catálogo'])
   r=requests.post(self.url+f'/storage/v1/object/sign/arquivos/{TAG}/catalogo.pdf',headers={**self.h[V],'Content-Type':'application/json'},json={'expiresIn':604800}); self.assertTrue(r.ok,r.text)
