@@ -18,8 +18,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
 | 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
 | 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
-| 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda envio) |
-| 7 | Agenda | — | Depende da mensagem 12 |
+| 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda PR) |
+| 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
 | 8 | Orçamentos | — | Depende da mensagem 10 |
 | 9 | Central de links e arquivos | — | Depende da mensagem 13 |
 | 10 | Gamificação | — | Depende da mensagem 14 |
@@ -46,6 +46,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **Selo "Resposta relâmpago":** fica para a Fase 2 (depende do WhatsApp).
 
 ## Decisões técnicas
+- **Retorno automático sem repetir:** o índice do banco evita duplicar só no mesmo dia. A tela consulta antes e pula o cliente que já tem retorno automático aberto, de qualquer dia. Assim não foi preciso mudar o banco.
+- **Agendar leva só o id do cliente no endereço:** o nome é buscado na tela (não fica no histórico do navegador), e o endereço é limpo assim que o formulário abre.
+- **Virada do dia com a Agenda aberta:** as tarefas automáticas do novo dia só aparecem ao recarregar a página. Fica assim no piloto.
 - **Teste e2e com backend simulado:** login real exigiria digitar credenciais num host que não é local. A sessão e as respostas são simuladas em `e2e/simulacao.ts`; as regras de acesso (RLS) são testadas pelo Lovable no banco.
 - **axe com modal aberto:** a regra `aria-hidden-focus` é desligada só enquanto um diálogo do Radix está aberto (ele prende o foco; o fundo não é alcançável).
 - **Anel de meta em SVG** no lugar do Recharts: mais leve e sem elementos focáveis escondidos.

@@ -36,6 +36,8 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Supervisor: vê a equipe; consegue remanejar só cliente com 90 dias ou mais sem compra, e a troca aparece na auditoria.
 - [ ] Diretoria: vê as duas empresas; edita metas, regras e feriados.
 - [ ] Administrador: gerencia usuários e links; não vê carteira, vendas nem metas.
+- [ ] Agenda: abrir a Agenda num dia com plano do dia cria um retorno por cliente; abrir de novo no dia seguinte, sem concluir, **não** cria outro retorno para o mesmo cliente.
+- [ ] Agenda: "Agendar" no plano do dia e na ficha abre a nova tarefa com o cliente; salvar e editar funcionam com o banco real.
 
 ## 6. Publicação
 - [ ] Juntar ao `main` os PRs aprovados da revisão e publicar pelo Lovable.
