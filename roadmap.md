@@ -1,11 +1,11 @@
 # Restrição de acesso por convite
-- [ ] Reclassificar empresas reais e criar limpeza/recriação demo e carga idempotente de feriados em migração nova.
-- [ ] Verificar preservação de dados reais, contas, casos demo, permissões e auditoria; recriar demonstração nas contas atuais.
+- [x] Reclassificar empresas reais e criar limpeza/recriação demo e carga idempotente de feriados em migrações novas; correção de aliases em 0010 sem editar 0009.
+- [x] Verificar preservação de dados reais, contas, casos demo, permissões e auditoria; oito testes passaram, demonstração recriada nas contas atuais.
 - [x] Criar painel_vendedor e cobertura_vendedor em migração nova; manter tipos regenerados.
 - [x] Conferir agregação com 1.500 vendas, fuso local, RLS e cobertura; apagar dados temporários (9 testes passaram).
 - [x] Otimizar índices e chamadas constantes nas políticas em migração nova, preservando src/.
 - [x] Repetir quatro perfis e conferir 20 feriados; limpar todos os testes.
-- [ ] Carga de feriados na migração: ferramenta permite DDL e backfill estrutural, não carga inicial independente.
+- [x] Carga de feriados versionada resolvida pela função carregar_feriados_nacionais; fluxo de produção documentado na migração 0009.
 - [ ] EXPLAIN autenticado: API não disponibiliza planos (HTTP 406).
 - [x] Criar feriados em migração nova, carregar as 20 datas nacionais e regenerar tipos.
 - [x] Conferir 19 dias úteis em novembro/2026, RLS e auditoria; apagar dados temporários (7 testes passaram).
