@@ -25,22 +25,23 @@ class AcessoConvite(unittest.TestCase):
                       if '=' in line and not line.startswith('#'))
         cls.public_headers = {'apikey': values['VITE_SUPABASE_PUBLISHABLE_KEY'].strip('"')}
 
-    def rejected_signup(self, email):
+    def rejected_signup(self, email, expected_message):
         response = requests.post(self.url + '/auth/v1/signup', headers=self.public_headers,
                                  json={'email': email, 'password': secrets.token_urlsafe(32)}, timeout=30)
         self.assertEqual(response.status_code, 500, response.json().get('code'))
-        self.assertEqual(response.json().get('code'), 'unexpected_failure')
+        self.assertEqual(response.json().get('code'), 'P0001')
+        self.assertEqual(response.json().get('message'), expected_message)
         users = requests.get(self.url + '/auth/v1/admin/users', headers=self.headers,
                              params={'per_page': 1000}, timeout=30)
         self.assertTrue(users.ok)
         self.assertFalse(any(u['email'].lower() == email.lower() for u in users.json()['users']))
-        print(email, ': recusado; resposta pública:', response.json().get('msg'))
+        print(email, ': recusado; resposta pública:', response.json().get('message'))
 
     def test_1_dominio_nao_permitido(self):
-        self.rejected_signup('teste@gmail.com')
+        self.rejected_signup('teste@gmail.com', 'Acesso restrito a e-mails da CENTERFRIOS e da 381 Distribuidora.')
 
     def test_2_sem_convite(self):
-        self.rejected_signup('nao.convidado@centerfrios.com')
+        self.rejected_signup('nao.convidado@centerfrios.com', 'Seu acesso ainda não foi liberado. Peça o convite ao administrador.')
 
     def test_3_convite_consumido_sem_privilegios_implicitos(self):
         email = 'convidado.teste@grupo381.com.br'
@@ -64,7 +65,7 @@ class AcessoConvite(unittest.TestCase):
             pending = read('papeis_pre_cadastro', {'usuario_id': 'eq.' + rows[0]['id'], 'select': 'role'})
             self.assertEqual(pending, [])
             memberships = read('usuario_empresas', {'usuario_id': 'eq.' + rows[0]['id'], 'select': 'empresa_id'})
-            self.assertLessEqual(len(memberships), 1)
+            self.assertEqual(memberships, [{'empresa_id': '028cfc17-c343-4e3d-89b7-aba0125d829d'}])
             print(email, ': associado; somente vendedor; nenhum papel pendente; sem vínculos automáticos.')
         finally:
             deleted = requests.delete(self.url + '/auth/v1/admin/users/' + user_id,
