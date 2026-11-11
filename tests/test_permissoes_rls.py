@@ -118,8 +118,12 @@ class PermissoesRLS(unittest.TestCase):
         rows=self.ok(self.api('administrador','POST','user_roles',{'user_id':self.accounts['vendedor']['id'],'role':'vendedor','empresa_id':D381}))
         self.assertEqual(rows[0]['empresa_id'],D381); self.note('Administrador','Criar user_roles','Permitido')
     def test_15_admin_cria_link(self):
-        rows=self.ok(self.api('administrador','POST','links',{'id':fixture('180'),'empresa_id':CF,'titulo':'Teste RLS link','url':'https://example.com'}))
-        self.assertEqual(rows[0]['id'],fixture('180')); self.note('Administrador','Criar links','Permitido')
+        headers={**self.accounts['administrador']['headers'],'Prefer':'return=minimal'}
+        response=requests.post(self.url+'/rest/v1/links',headers=headers,json={'id':fixture('180'),'empresa_id':CF,'titulo':'Teste RLS link','url':'https://example.com'},timeout=30)
+        self.assertEqual(response.status_code,201,response.text[:300])
+        # No membership: insertion is allowed but reading its representation is not.
+        response=requests.get(self.url+'/rest/v1/links',headers=self.service,params={'id':'eq.'+fixture('180'),'select':'id'},timeout=30)
+        self.assertEqual(response.json(),[{'id':fixture('180')}]); self.note('Administrador','Criar links','Permitido; sem leitura fora dos vínculos')
     def test_16_admin_nao_altera_regra(self):
         rows=self.ok(self.api('administrador','PATCH','configuracoes_regras',{'valor':1},{'id':'eq.'+fixture('160')}))
         self.assertEqual(rows,[]); self.note('Administrador','Alterar regras','0 linhas')
