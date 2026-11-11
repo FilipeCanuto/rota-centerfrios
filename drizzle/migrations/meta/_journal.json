@@ -85,6 +85,13 @@
       "when": 1794367482907,
       "tag": "0011_proteger_atualizacao_administrativa_usuario",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794369157512,
+      "tag": "0012_feriados_moveis_copia_anual",
+      "breakpoints": true
     }
   ]
 }
