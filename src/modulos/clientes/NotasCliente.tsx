@@ -30,9 +30,9 @@ export function NotasCliente({ ficha, meuId }: { ficha: Ficha; meuId: string }) 
       await adicionar.mutateAsync(texto);
       setTexto("");
       anunciar("Nota salva.");
-    } catch {
+    } catch (e) {
       setErro(
-        "Não foi possível salvar a nota. Só é possível anotar em clientes da carteira que você vê.",
+        `Não foi possível salvar a nota. ${(e as { message?: string }).message ?? ""}`.trim(),
       );
     }
   }
@@ -88,7 +88,10 @@ export function NotasCliente({ ficha, meuId }: { ficha: Ficha; meuId: string }) 
                     disabled={apagar.isPending}
                     onClick={() =>
                       apagar.mutate(n.id, {
-                        onSuccess: () => anunciar("Nota apagada."),
+                        onSuccess: () =>
+                          toast("Nota apagada.", {
+                            action: { label: "Desfazer", onClick: () => adicionar.mutate(n.texto) },
+                          }),
                         onError: (e) => toast.error((e as Error).message),
                       })
                     }

@@ -80,7 +80,7 @@ export function ItensMaisComprados({ ficha }: { ficha: Ficha }) {
 
 export function Compras({ ficha }: { ficha: Ficha }) {
   return (
-    <Secao titulo={`Compras (${ficha.compras.length})`}>
+    <Secao titulo="Últimas compras">
       {ficha.compras.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma compra faturada ainda.</p>
       ) : (
@@ -118,6 +118,9 @@ export function OrcamentosCliente({ ficha }: { ficha: Ficha }) {
               <span className="numeros ml-auto font-semibold">
                 {formatarMoeda(Number(o.valor))}
               </span>
+              {o.status === "aberto" && o.proximo_followup && (
+                <p className="w-full text-sm">Próximo retorno: {data(o.proximo_followup)}</p>
+              )}
               {o.observacao && (
                 <p className="w-full text-sm text-muted-foreground">{o.observacao}</p>
               )}
@@ -147,7 +150,7 @@ export function InteracoesCliente({ ficha }: { ficha: Ficha }) {
               }) ? (
                 <SeloStatus tom="sucesso">Qualificado</SeloStatus>
               ) : (
-                <SeloStatus tom="info">Sem resposta</SeloStatus>
+                <SeloStatus tom="info">Não qualificado</SeloStatus>
               )}
               {i.resultado && <p className="w-full text-sm text-muted-foreground">{i.resultado}</p>}
             </li>

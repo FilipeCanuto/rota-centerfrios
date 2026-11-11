@@ -16,6 +16,7 @@ import {
   paraData,
   REGRAS_PADRAO,
   saudeCliente,
+  clienteSemCompra,
   type SaudeCliente,
   type TipoInteracao,
 } from "@/regras";
@@ -56,7 +57,7 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
     </Link>
   );
 
-  if (consulta.error)
+  if (consulta.error && !ficha)
     return (
       <div className="flex flex-col gap-4">
         {voltar}
@@ -70,12 +71,12 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
     );
   if (consulta.isLoading)
     return (
-      <div
-        className="flex flex-col gap-4"
-        aria-busy="true"
-        aria-label="Carregando ficha do cliente"
-      >
+      <div className="flex flex-col gap-4" aria-busy="true">
         {voltar}
+        <h1 className="text-2xl font-extrabold">Ficha do cliente</h1>
+        <p role="status" className="sr-only">
+          Carregando ficha do cliente…
+        </p>
         <Skeleton className="h-28 rounded-xl" />
         <Skeleton className="h-40 rounded-xl" />
       </div>
@@ -163,7 +164,7 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="text-sm text-muted-foreground">{k}</dt>
-              <dd className="numeros font-display text-xl font-bold">{v}</dd>
+              <dd className="numeros font-display text-lg font-bold break-words sm:text-xl">{v}</dd>
             </div>
           ))}
         </dl>
@@ -178,7 +179,20 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
         <InteracoesCliente ficha={ficha} />
       </div>
 
-      {gestao && <RemanejarCliente ficha={ficha} diasSemCompra={cfg.cliente_sem_compra_dias} />}
+      {gestao &&
+        (clienteSemCompra(c.data_ultima_compra, hoje, cfg) ? (
+          <RemanejarCliente
+            ficha={ficha}
+            diasSemCompra={cfg.cliente_sem_compra_dias}
+            meuId={meuId}
+          />
+        ) : (
+          <p className="cartao p-5 text-muted-foreground">
+            <strong className="text-foreground">Mudar de carteira:</strong> só para clientes sem
+            compra há {cfg.cliente_sem_compra_dias} dias ou mais. Este cliente comprou mais
+            recentemente.
+          </p>
+        ))}
 
       {ehDono && (
         <RegistrarContato

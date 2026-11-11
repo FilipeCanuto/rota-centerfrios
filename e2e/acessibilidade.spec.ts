@@ -73,6 +73,8 @@ for (const rota of ROTAS) {
 }
 
 test("componentes abertos passam no axe: busca, notificações, menu e tabela", async ({ page }) => {
+  // Sem animação de entrada: o axe mediria o contraste no meio do esmaecimento.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await simularBackend(page);
   await page.goto("/inicio");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

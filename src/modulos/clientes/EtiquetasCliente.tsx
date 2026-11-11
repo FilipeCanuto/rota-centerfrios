@@ -19,12 +19,14 @@ export function EtiquetasCliente({
   const anunciar = useAnunciar();
   const [nova, setNova] = useState("");
 
-  async function gravar(lista: string[], aviso: string) {
+  async function gravar(lista: string[], aviso: string): Promise<boolean> {
     try {
       await salvar.mutateAsync(lista);
       anunciar(aviso);
+      return true;
     } catch {
       toast.error("Não foi possível salvar as etiquetas.");
+      return false;
     }
   }
 
@@ -67,8 +69,14 @@ export function EtiquetasCliente({
         onSubmit={(ev) => {
           ev.preventDefault();
           const t = nova.trim();
-          if (!t || etiquetas.includes(t)) return;
-          gravar([...etiquetas, t], `Etiqueta ${t} adicionada.`).then(() => setNova(""));
+          if (!t) return;
+          if (etiquetas.some((x) => x.toLowerCase() === t.toLowerCase())) {
+            toast.info(`O cliente já tem a etiqueta ${t}.`);
+            return;
+          }
+          void gravar([...etiquetas, t], `Etiqueta ${t} adicionada.`).then(
+            (ok) => ok && setNova(""),
+          );
         }}
       >
         <div className="grid flex-1 gap-1.5">

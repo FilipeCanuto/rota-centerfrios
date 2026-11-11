@@ -17,7 +17,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 2 | Polar e acessibilidade (passo 4) | `fase1/polar-acessibilidade` / PR #3 | Concluída |
 | 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
 | 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
-| 5 | Clientes e ficha 360 | — | Depende da mensagem 10 |
+| 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
 | 6 | Importação do Shop9 | — | Depende da mensagem 11 |
 | 7 | Agenda | — | Depende da mensagem 12 |
 | 8 | Orçamentos | — | Depende da mensagem 10 |
@@ -33,9 +33,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 10 | Clientes (códigos Shop9, etiquetas, itens de venda, notas, `ficha_cliente`) | Aplicada (0013) |
 | 11 | Importação Shop9 (`importacoes`, `importar_clientes/vendas/orcamentos`) | Aplicada (0014) |
 | 12 | Agenda (tipo, hora, tarefas automáticas dos alertas) | Aplicada (0015) |
-| 13 | Links e arquivos (empresa nula, arquivo, bucket `arquivos`) | A colar |
-| 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | A colar |
-| 15 | Gestão, copiloto, notificações e demonstração completa | A colar |
+| 13 | Links e arquivos (empresa nula, arquivo, bucket `arquivos`) | Aplicada (0016) |
+| 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | Aplicada (0017) |
+| 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
 
 ## Decisões tomadas nesta fase
 - **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *Aprovado.*
@@ -58,7 +58,11 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **PWA sem guardar dados no aparelho:** o service worker só mostra a página "sem conexão"; nenhum dado da carteira fica no celular. Não roda na prévia do Lovable.
 - **Ícones do app:** continuam os atuais (sem versão maskable) até a marca nova, que espera a escolha do nome.
 
+- **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). *Aprovado pela diretoria em 11/11/2026.*
+- **Remanejamento:** supervisor e diretoria; a diretoria tem acesso total (aprovado em 11/11/2026).
+
 ## Pendências abertas
+- Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.
 - Cabeçalho ainda calcula o painel inteiro para o sino e o selo de cobertura: troca pelo `cobertura_vendedor` e pelas notificações na etapa 13.
 - Remoção das colunas legadas `usuarios.perfil` e `empresas.empresa_id`: precisa da permissão "backward incompatible migrations" no Lovable.

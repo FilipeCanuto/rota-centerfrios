@@ -35,7 +35,8 @@ export function useListaClientes(
   empresas: string[],
   f: FiltrosClientes,
   pagina: number,
-  diasSemCompra: number,
+  /** Dias sem compra de cada empresa (o limite é por empresa, como no banco). */
+  diasSemCompra: Record<string, number>,
 ) {
   return useQuery({
     queryKey: ["clientes", empresas.join(","), f, pagina, diasSemCompra],
@@ -59,8 +60,11 @@ export function useListaClientes(
       if (f.etiqueta) q = q.contains("etiquetas", [f.etiqueta]);
       if (f.vendedorId) q = q.eq("vendedor_id", f.vendedorId);
       if (f.semCompra90) {
-        const limite = new Date(Date.now() - diasSemCompra * 86_400_000);
-        q = q.or(`data_ultima_compra.is.null,data_ultima_compra.lte.${dataLocal(limite)}`);
+        const porEmpresa = empresas.map((e) => {
+          const limite = dataLocal(new Date(Date.now() - (diasSemCompra[e] ?? 90) * 86_400_000));
+          return `and(empresa_id.eq.${e},or(data_ultima_compra.is.null,data_ultima_compra.lte.${limite}))`;
+        });
+        q = q.or(porEmpresa.join(","));
       }
       const { data, error, count } = await q;
       if (error) throw error;
@@ -107,6 +111,28 @@ export function usePessoasVisiveis() {
       const { data, error } = await supabase.from("usuarios").select("id,nome").order("nome");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+
+/** Limites das regras de várias empresas de uma vez, por empresa. */
+export function useRegrasPorEmpresa(empresas: string[]) {
+  return useQuery({
+    queryKey: ["regras-empresas", empresas.join(",")],
+    enabled: empresas.length > 0,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<Record<string, ConfiguracaoRegras>> => {
+      const { data, error } = await supabase
+        .from("configuracoes_regras")
+        .select("empresa_id,chave,valor")
+        .in("empresa_id", empresas);
+      if (error) throw error;
+      return Object.fromEntries(
+        empresas.map((e) => [
+          e,
+          montarConfiguracao((data ?? []).filter((l) => l.empresa_id === e)),
+        ]),
+      );
     },
   });
 }
