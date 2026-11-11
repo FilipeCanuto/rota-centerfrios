@@ -25,5 +25,7 @@ class DesempenhoRLS(Original):
     print(table,'plan:',json.dumps(r.json(),ensure_ascii=False))
    else: print(table,'EXPLAIN indisponível pela API:',r.status_code,r.json().get('message'))
   Path('/tmp/desempenho/plans.json').write_text(json.dumps(output,ensure_ascii=False,indent=2))
+  if all(item['status']==406 for item in output.values()):
+   self.skipTest('EXPLAIN autenticado indisponível na API (HTTP 406).')
 # Prevent unittest from also discovering the imported original test class.
 del Original
