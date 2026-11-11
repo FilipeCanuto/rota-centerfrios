@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +49,8 @@ function mensagemPrimeiroAcesso(msg: string): string {
   if (msg.includes("ainda não foi liberado"))
     return "Seu acesso ainda não foi liberado. Peça o convite ao administrador.";
   if (/password/i.test(msg)) return "A senha precisa ter pelo menos 6 caracteres.";
+  if (/database error/i.test(msg))
+    return "Não foi possível liberar o acesso. Use o e-mail da empresa e peça o convite ao administrador.";
   return "Não foi possível criar a senha. Confira o e-mail ou peça ajuda ao administrador.";
 }
 
@@ -63,11 +65,23 @@ function Entrar() {
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const titulo = useRef<HTMLHeadingElement>(null);
   const trocar = (m: Modo) => {
     setModo(m);
+    // O botão clicado some ao trocar de modo: o foco vai para o novo título.
+    requestAnimationFrame(() => titulo.current?.focus());
     setErro(null);
     setAviso(null);
   };
+
+  useEffect(() => {
+    // O login com Google recusado (domínio ou convite) volta com o erro na URL.
+    const params = new URLSearchParams(
+      window.location.search + "&" + window.location.hash.slice(1),
+    );
+    const falha = params.get("error_description");
+    if (falha) setErro(mensagemPrimeiroAcesso(falha));
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -118,7 +132,9 @@ function Entrar() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
-          <h1 className="text-2xl font-extrabold">{TITULOS[modo]}</h1>
+          <h1 ref={titulo} tabIndex={-1} className="text-2xl font-extrabold outline-none">
+            {TITULOS[modo]}
+          </h1>
           <p className="text-muted-foreground">
             Plataforma comercial CENTERFRIOS e 381 Distribuidora
           </p>
@@ -173,7 +189,8 @@ function Entrar() {
                     variant="outline"
                     size="icon"
                     aria-pressed={verSenha}
-                    aria-label={verSenha ? "Esconder senha" : "Mostrar senha"}
+                    aria-controls={`${id}-senha`}
+                    aria-label="Mostrar senha"
                     onClick={() => setVerSenha((v) => !v)}
                   >
                     {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
@@ -196,11 +213,10 @@ function Entrar() {
                 {erro}
               </p>
             )}
-            {aviso && (
-              <p role="status" className="text-sm font-semibold text-sucesso">
-                {aviso}
-              </p>
-            )}
+            {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
+            <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">
+              {aviso}
+            </p>
             <Button type="submit" size="lg" disabled={enviando}>
               {enviando ? "Aguarde…" : BOTOES[modo]}
             </Button>

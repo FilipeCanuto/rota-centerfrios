@@ -15,7 +15,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | --- | --- | --- | --- |
 | 1 | Arquitetura (passo 3) | `fase1/arquitetura` / PR #2 | Concluída |
 | 2 | Polar e acessibilidade (passo 4) | `fase1/polar-acessibilidade` / PR #3 | Concluída |
-| 3 | Login (passo 5, parcial) | — | A fazer |
+| 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
 | 4 | PWA e acabamento (passos 6 e 7) | — | A fazer |
 | 5 | Clientes e ficha 360 | — | Depende da mensagem 10 |
 | 6 | Importação do Shop9 | — | Depende da mensagem 11 |
@@ -51,6 +51,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **Anel de meta em SVG** no lugar do Recharts: mais leve e sem elementos focáveis escondidos.
 - **Ouro com contorno marinho** no anel e na barra quando a meta é atingida: o ouro sozinho não chega a 3:1 sobre fundo claro.
 - **Dependências novas (só de desenvolvimento):** `@playwright/test`, `@axe-core/playwright`, `eslint-plugin-jsx-a11y`, pedidas no plano.
+
+- **Mensagens de recusa no primeiro acesso:** dizem se o e-mail é de fora da empresa ou se ainda não foi convidado. Isso revela se um e-mail corporativo está na lista de convites; aceito por ser um sistema interno, com o limite de tentativas do próprio login.
+- **Tela de nova senha** só abre com o link de recuperação; uma sessão comum não troca a senha.
 
 ## Pendências abertas
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.
