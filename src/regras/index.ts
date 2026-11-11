@@ -4,6 +4,7 @@ export * from "./metas";
 export * from "./carteira";
 export * from "./painel";
 export * from "./orcamentos";
+export * from "./gamificacao";
 export * from "./saude";
 export * from "./planilha";
 export * from "./importacao";

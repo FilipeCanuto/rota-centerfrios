@@ -22,7 +22,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
 | 8 | Orçamentos | `fase1/restante` | Concluída (aguarda PR) |
 | 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
-| 10 | Gamificação | — | Depende da mensagem 14 |
+| 10 | Gamificação | `fase1/restante` | Concluída (aguarda revisão e PR) |
 | 11 | Copiloto e mascote | — | Depende da mensagem 15 |
 | 12 | Gestão | — | Depende da mensagem 15 |
 | 13 | Notificações | — | Depende da mensagem 15 |
@@ -72,6 +72,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **Orçamentos:** o vendedor só altera `ultimo_followup`, `proximo_followup` e `observacao` (permissão por coluna); ganho e perdido vêm da importação do Shop9. "Parado" na tela usa o último retorno ou a data do orçamento; o Início também considera o último contato com o cliente, então os números podem divergir por contatos registrados fora do orçamento.
 
 - **Links e arquivos:** diretoria e administrador criam e editam; todos consultam. Arquivo abre e copia por link assinado de 7 dias; "Enviar pelo WhatsApp" abre o WhatsApp sem destinatário, com a mensagem pronta e o link. Apagar link pede confirmação do navegador.
+
+- **Gamificação:** a tela `/gamificacao` chama `calcular_pontos_dia` e `atualizar_selos` para hoje ao abrir (idempotente) e lê o mês. Pontos e selos nunca são gravados pelo app. Ranking, Instagram (envio, aprovação, recusa) e ajustes de pesos/hashtag (diretoria) usam só as funções e tabelas da migração 0017. Pontos de dias passados só se atualizam quando alguém abre a tela naquele dia; recalcular o histórico fica para a revisão geral.
 
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
