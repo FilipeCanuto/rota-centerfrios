@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileUp, Palette, Trash2 } from "lucide-react";
+import { CalendarOff, FileText, FileUp, Link2, Palette, Trash2, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -40,6 +40,7 @@ function Mais() {
   const anunciar = useAnunciar();
   const admin = data?.papeis.includes("administrador");
   const diretoria = data?.papeis.includes("diretoria");
+  const gestor = diretoria || data?.papeis.includes("supervisor");
 
   async function apagarDemo() {
     try {
@@ -55,6 +56,39 @@ function Mais() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-extrabold sm:text-3xl">Mais</h1>
+      <section aria-labelledby="atalhos" className="cartao p-5">
+        <h2 id="atalhos" className="mb-3 text-lg font-bold">
+          Atalhos
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/orcamentos">
+              <FileText aria-hidden="true" /> Orçamentos
+            </Link>
+          </Button>
+          {gestor && (
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto min-h-11 whitespace-normal text-left"
+            >
+              <Link to="/gestao">
+                <Users aria-hidden="true" /> Gestão da equipe
+              </Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/gamificacao">
+              <Trophy aria-hidden="true" /> Pontos e selos
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/links">
+              <Link2 aria-hidden="true" /> Links e arquivos
+            </Link>
+          </Button>
+        </div>
+      </section>
       <section aria-labelledby="ds" className="cartao p-5">
         <h2 id="ds" className="mb-2 text-lg font-bold">
           Design system Polar

@@ -25,15 +25,17 @@ import { Logo } from "@/design-system/Logo";
 import { formatarPercentual } from "@/design-system/formatar";
 import { useTema, type Tema } from "@/design-system/tema";
 import { supabase } from "@/integrations/supabase/client";
-import { usePainel } from "@/modulos/inicio/dados";
+import { useNotificacoes } from "@/modulos/notificacoes/dados";
 import { podeVerAmbas, useEmpresa, useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import { BuscaGlobal } from "./BuscaGlobal";
+import { useCoberturaCabecalho } from "./dados";
 
 export function Cabecalho() {
   const { data: sessao } = useSessao();
   const { empresa, definir } = useEmpresa();
   const ativas = useEmpresasAtivas();
-  const { data: painel } = usePainel(sessao?.usuario?.id, ativas);
+  const { data: cobertura } = useCoberturaCabecalho(sessao?.usuario?.id, ativas);
+  const { data: notificacoes } = useNotificacoes(sessao?.usuario?.id);
   const { tema, definirTema } = useTema();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -45,7 +47,7 @@ export function Cabecalho() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const alertas = painel?.alertas ?? [];
+  const naoLidas = (notificacoes ?? []).filter((n) => !n.lida_em);
 
   return (
     <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
@@ -84,15 +86,15 @@ export function Cabecalho() {
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <BuscaGlobal />
-          {painel && (
+          {cobertura !== undefined && (
             <Link
               to="/inicio"
               hash="cobertura"
               className="inline-flex min-h-11 items-center gap-1.5 rounded-full border px-2.5 text-sm font-semibold sm:px-3"
-              aria-label={`Cobertura da carteira: ${formatarPercentual(painel.cobertura.percentual)}`}
+              aria-label={`Cobertura da carteira: ${formatarPercentual(cobertura)}`}
             >
               <Users className="size-4 text-primary" aria-hidden="true" />
-              <span className="numeros">{formatarPercentual(painel.cobertura.percentual)}</span>
+              <span className="numeros">{formatarPercentual(cobertura)}</span>
               <span className="hidden text-muted-foreground lg:inline">cobertura</span>
             </Link>
           )}
@@ -102,26 +104,26 @@ export function Cabecalho() {
                 variant="ghost"
                 size="icon"
                 className="relative"
-                aria-label={`Notificações: ${alertas.length} alertas`}
+                aria-label={`Notificações: ${naoLidas.length} não lidas`}
               >
                 <Bell aria-hidden="true" />
-                {alertas.length > 0 && (
+                {naoLidas.length > 0 && (
                   <span
                     className="numeros absolute right-1.5 top-1.5 grid min-w-5 place-items-center rounded-full bg-perigo px-1 text-[0.6875rem] font-bold text-destructive-foreground"
                     aria-hidden="true"
                   >
-                    {alertas.length > 9 ? "9+" : alertas.length}
+                    {naoLidas.length > 9 ? "9+" : naoLidas.length}
                   </span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80">
               <h2 className="mb-2 font-display font-bold">Notificações</h2>
-              {alertas.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum alerta por enquanto.</p>
+              {naoLidas.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma notificação não lida.</p>
               ) : (
                 <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
-                  {alertas.slice(0, 8).map((a) => (
+                  {naoLidas.slice(0, 8).map((a) => (
                     <li key={a.id} className="border-b pb-2 last:border-0">
                       {a.titulo}
                     </li>
@@ -129,9 +131,7 @@ export function Cabecalho() {
                 </ul>
               )}
               <Button asChild variant="link" className="px-0">
-                <Link to="/inicio" hash="alertas">
-                  Ver todos os alertas
-                </Link>
+                <Link to="/notificacoes">Ver todas as notificações</Link>
               </Button>
             </PopoverContent>
           </Popover>

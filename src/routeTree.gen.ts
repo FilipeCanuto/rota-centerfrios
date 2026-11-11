@@ -16,8 +16,13 @@ import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
+import { Route as AuthenticatedGamificacaoRouteImport } from './routes/_authenticated/gamificacao'
+import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
+import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authenticated/notificacoes'
+import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
 import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
@@ -57,14 +62,41 @@ const AuthenticatedConversasRoute = AuthenticatedConversasRouteImport.update({
   path: '/conversas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGamificacaoRoute =
+  AuthenticatedGamificacaoRouteImport.update({
+    id: '/gamificacao',
+    path: '/gamificacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
+  id: '/gestao',
+  path: '/gestao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMaisRoute = AuthenticatedMaisRouteImport.update({
   id: '/mais',
   path: '/mais',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificacoesRoute =
+  AuthenticatedNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
+  id: '/orcamentos',
+  path: '/orcamentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedClientesIndexRoute =
@@ -98,8 +130,13 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
+  '/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -112,8 +149,13 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
+  '/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -128,8 +170,13 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
+  '/_authenticated/gamificacao': typeof AuthenticatedGamificacaoRoute
+  '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
+  '/_authenticated/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -144,8 +191,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/agenda'
     | '/conversas'
+    | '/gamificacao'
+    | '/gestao'
     | '/inicio'
+    | '/links'
     | '/mais'
+    | '/notificacoes'
+    | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -158,8 +210,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/agenda'
     | '/conversas'
+    | '/gamificacao'
+    | '/gestao'
     | '/inicio'
+    | '/links'
     | '/mais'
+    | '/notificacoes'
+    | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -173,8 +230,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/_authenticated/agenda'
     | '/_authenticated/conversas'
+    | '/_authenticated/gamificacao'
+    | '/_authenticated/gestao'
     | '/_authenticated/inicio'
+    | '/_authenticated/links'
     | '/_authenticated/mais'
+    | '/_authenticated/notificacoes'
+    | '/_authenticated/orcamentos'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
     | '/_authenticated/configuracoes/importacao'
@@ -240,6 +302,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConversasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gamificacao': {
+      id: '/_authenticated/gamificacao'
+      path: '/gamificacao'
+      fullPath: '/gamificacao'
+      preLoaderRoute: typeof AuthenticatedGamificacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gestao': {
+      id: '/_authenticated/gestao'
+      path: '/gestao'
+      fullPath: '/gestao'
+      preLoaderRoute: typeof AuthenticatedGestaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inicio': {
       id: '/_authenticated/inicio'
       path: '/inicio'
@@ -247,11 +323,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInicioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/links': {
+      id: '/_authenticated/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof AuthenticatedLinksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mais': {
       id: '/_authenticated/mais'
       path: '/mais'
       fullPath: '/mais'
       preLoaderRoute: typeof AuthenticatedMaisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notificacoes': {
+      id: '/_authenticated/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AuthenticatedNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orcamentos': {
+      id: '/_authenticated/orcamentos'
+      path: '/orcamentos'
+      fullPath: '/orcamentos'
+      preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clientes/': {
@@ -288,8 +385,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
+  AuthenticatedGamificacaoRoute: typeof AuthenticatedGamificacaoRoute
+  AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
+  AuthenticatedNotificacoesRoute: typeof AuthenticatedNotificacoesRoute
+  AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
   AuthenticatedConfiguracoesImportacaoRoute: typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -299,8 +401,13 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
+  AuthenticatedGamificacaoRoute: AuthenticatedGamificacaoRoute,
+  AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
+  AuthenticatedNotificacoesRoute: AuthenticatedNotificacoesRoute,
+  AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedConfiguracoesFeriadosRoute:
     AuthenticatedConfiguracoesFeriadosRoute,
