@@ -1,6 +1,6 @@
 # Restrição de acesso por convite
-- [ ] Criar painel_vendedor e cobertura_vendedor em migração nova; manter tipos regenerados.
-- [ ] Conferir agregação com 1.500 vendas, fuso local, RLS e cobertura; apagar dados temporários.
+- [x] Criar painel_vendedor e cobertura_vendedor em migração nova; manter tipos regenerados.
+- [x] Conferir agregação com 1.500 vendas, fuso local, RLS e cobertura; apagar dados temporários (9 testes passaram).
 - [x] Otimizar índices e chamadas constantes nas políticas em migração nova, preservando src/.
 - [x] Repetir quatro perfis e conferir 20 feriados; limpar todos os testes.
 - [ ] Carga de feriados na migração: ferramenta permite DDL e backfill estrutural, não carga inicial independente.
