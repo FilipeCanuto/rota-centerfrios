@@ -53,7 +53,7 @@ export function PainelInicio() {
   const { data: sessao, isLoading: carregandoSessao } = useSessao();
   const ativas = useEmpresasAtivas();
   const usuario = sessao?.usuario;
-  const { data: p, error, refetch } = usePainel(usuario?.id, ativas);
+  const { data: p, error, refetch, isFetching } = usePainel(usuario?.id, ativas);
   const [contato, setContato] = useState<ClienteContato | null>(null);
   const hoje = hojeEmMaceio();
 
@@ -76,8 +76,12 @@ export function PainelInicio() {
         <h1 className="text-2xl font-extrabold sm:text-3xl">Olá, {usuario?.nome ?? "…"}</h1>
       </div>
 
-      {error ? (
-        <EstadoErro titulo="Não foi possível carregar o painel." aoTentar={() => refetch()} />
+      {error && !p ? (
+        <EstadoErro
+          titulo="Não foi possível carregar o painel."
+          aoTentar={() => refetch()}
+          tentando={isFetching}
+        />
       ) : !p || !usuario ? (
         <Carregando />
       ) : (

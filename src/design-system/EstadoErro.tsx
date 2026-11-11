@@ -6,10 +6,13 @@ export function EstadoErro({
   titulo,
   children,
   aoTentar,
+  tentando = false,
 }: {
   titulo: string;
   children?: React.ReactNode;
   aoTentar?: () => void;
+  /** Verdadeiro enquanto busca de novo: desativa o botão e mostra "Tentando…". */
+  tentando?: boolean;
 }) {
   return (
     <div role="alert" className="cartao entrada flex flex-col items-start gap-3 p-5">
@@ -22,8 +25,8 @@ export function EstadoErro({
           "Verifique a conexão com a internet e tente de novo. Se continuar, avise o administrador."}
       </p>
       {aoTentar && (
-        <Button variant="outline" onClick={aoTentar}>
-          Tentar de novo
+        <Button variant="outline" onClick={aoTentar} disabled={tentando}>
+          {tentando ? "Tentando…" : "Tentar de novo"}
         </Button>
       )}
     </div>

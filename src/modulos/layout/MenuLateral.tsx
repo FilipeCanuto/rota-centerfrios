@@ -1,6 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
@@ -24,7 +32,12 @@ export function MenuLateral() {
                   const ativo = caminho.startsWith(d.url);
                   return (
                     <SidebarMenuItem key={d.url}>
-                      <SidebarMenuButton asChild isActive={ativo} tooltip={d.titulo} className="min-h-11 text-[0.9375rem]">
+                      <SidebarMenuButton
+                        asChild
+                        isActive={ativo}
+                        tooltip={d.titulo}
+                        className="min-h-11 text-[0.9375rem]"
+                      >
                         <Link to={d.url} aria-current={ativo ? "page" : undefined}>
                           <d.icone aria-hidden="true" />
                           <span>{d.titulo}</span>

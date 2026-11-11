@@ -47,7 +47,10 @@ export const copilotoPorRegras: Copiloto = {
   },
 };
 
-/** Instagram sem API: os posts são registrados à mão no app e validados pelo supervisor. */
+/**
+ * Instagram sem API: não há leitura automática de posts (lista vazia). No modo manual, o vendedor
+ * registra o post na tela de gamificação e o supervisor valida; isso vive no banco, não aqui.
+ */
 export const instagramManual: FonteInstagram = {
   nome: "Instagram (registro manual)",
   conectado: false,

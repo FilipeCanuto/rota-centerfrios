@@ -102,8 +102,9 @@ export function RegistrarContato({
       return;
     }
     setErro(null);
+    let tarefaFalhou = false;
     try {
-      await registrar.mutateAsync({
+      ({ tarefaFalhou } = await registrar.mutateAsync({
         empresa_id: cliente.empresa_id,
         cliente_id: cliente.id,
         vendedor_id: vendedorId,
@@ -111,9 +112,17 @@ export function RegistrarContato({
         cliente_respondeu: respondeu === "sim",
         resultado,
         proximo: proximo ? { titulo: proximo, data: dataProx } : undefined,
-      });
+      }));
     } catch (e) {
       setErro((e as Error).message);
+      return;
+    }
+    if (tarefaFalhou) {
+      const aviso = `Contato com ${cliente.nome} registrado, mas a tarefa não foi criada. Agende pela Agenda.`;
+      toast.warning(aviso);
+      anunciar(aviso);
+      limpar();
+      aoFechar();
       return;
     }
     const msg = `Contato com ${cliente.nome} registrado${proximo ? " e próximo passo agendado" : ""}.`;

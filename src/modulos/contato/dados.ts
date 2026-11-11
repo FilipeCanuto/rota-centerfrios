@@ -13,7 +13,7 @@ export interface NovoContato {
   proximo?: { titulo: string; data: string } | undefined;
 }
 
-/** Registra a interação e, se houver, a tarefa do próximo passo. Erro na tarefa não desfaz o contato. */
+/** Registra a interação e, se houver, a tarefa do próximo passo. Se só a tarefa falhar, avisa sem desfazer o contato. */
 export function useRegistrarContato() {
   const qc = useQueryClient();
   return useMutation({
@@ -28,8 +28,10 @@ export function useRegistrarContato() {
           titulo: proximo.titulo,
           data: proximo.data,
         });
-        if (t.error) throw new Error("Contato salvo, mas não foi possível criar a tarefa.");
+        // Não lança erro: o contato já foi gravado e salvar de novo o duplicaria.
+        if (t.error) return { tarefaFalhou: true };
       }
+      return { tarefaFalhou: false };
     },
     onSettled: () => qc.invalidateQueries({ queryKey: ["painel"] }),
   });

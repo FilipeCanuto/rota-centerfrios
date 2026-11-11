@@ -151,6 +151,7 @@ export function TelaFeriados() {
           <EstadoErro
             titulo={`Não foi possível carregar as datas de ${ano}.`}
             aoTentar={() => consulta.refetch()}
+            tentando={consulta.isFetching}
           />
         ) : lista.length === 0 ? (
           <EstadoVazio icone={CalendarOff} titulo={`Nenhuma data em ${ano}`}>

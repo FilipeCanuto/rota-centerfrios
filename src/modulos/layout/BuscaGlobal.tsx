@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -28,7 +27,15 @@ export function BuscaGlobal() {
     return () => window.removeEventListener("keydown", f);
   }, []);
   const [texto, setTexto] = useState("");
-  const { data: clientes, isError } = useBuscaClientes(texto, useEmpresasAtivas(), aberto);
+  const [termo, setTermo] = useState("");
+  // Espera a pessoa parar de digitar para não fazer uma consulta por tecla.
+  useEffect(() => {
+    const t = setTimeout(() => setTermo(texto), 250);
+    return () => clearTimeout(t);
+  }, [texto]);
+  const busca = useBuscaClientes(termo, useEmpresasAtivas(), aberto);
+  const clientes = busca.data ?? [];
+  const telas = DESTINOS.filter((d) => d.titulo.toLowerCase().includes(texto.trim().toLowerCase()));
 
   return (
     <>
@@ -42,7 +49,7 @@ export function BuscaGlobal() {
         <span className="hidden sm:inline">Buscar…</span>
         <kbd className="ml-auto hidden rounded border px-1.5 text-xs sm:inline">Ctrl K</kbd>
       </Button>
-      <CommandDialog open={aberto} onOpenChange={setAberto}>
+      <CommandDialog open={aberto} onOpenChange={setAberto} shouldFilter={false}>
         <CommandInput
           value={texto}
           onValueChange={setTexto}
@@ -50,11 +57,11 @@ export function BuscaGlobal() {
           aria-label="Buscar clientes ou telas"
         />
         <CommandList>
-          <CommandEmpty>
-            {isError ? "Não foi possível buscar clientes. Tente de novo." : "Nada encontrado."}
-          </CommandEmpty>
+          {!busca.isError && telas.length === 0 && clientes.length === 0 && !busca.isFetching && (
+            <p className="py-6 text-center text-sm">Nada encontrado.</p>
+          )}
           <CommandGroup heading="Telas">
-            {DESTINOS.map((d) => (
+            {telas.map((d) => (
               <CommandItem
                 key={d.url}
                 onSelect={() => {
@@ -68,10 +75,15 @@ export function BuscaGlobal() {
             ))}
           </CommandGroup>
           <CommandGroup heading="Clientes">
-            {(clientes ?? []).map((c) => (
+            {busca.isError && (
+              <CommandItem onSelect={() => busca.refetch()} className="min-h-11 text-perigo">
+                Não foi possível buscar clientes. Tentar de novo
+              </CommandItem>
+            )}
+            {clientes.map((c) => (
               <CommandItem
                 key={c.id}
-                value={`${c.nome} ${c.cidade ?? ""}`}
+                value={c.id}
                 onSelect={() => {
                   setAberto(false);
                   navigate({ to: "/clientes" });
