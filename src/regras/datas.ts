@@ -16,7 +16,12 @@ export function formatarISO(d: Date): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-const diaLocal = new Intl.DateTimeFormat("en-CA", { timeZone: FUSO, year: "numeric", month: "2-digit", day: "2-digit" });
+const diaLocal = new Intl.DateTimeFormat("en-CA", {
+  timeZone: FUSO,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 /** Dia de calendário em Maceió de um instante (timestamptz do banco ou Date). Nunca use toISOString().slice(0, 10). */
 export function dataLocal(instante: string | Date): string {
@@ -75,6 +80,13 @@ export function diasUteisDesde(desde: Date, hoje: Date, feriados: Feriados): num
 }
 
 /** Monta o conjunto de feriados que vale para uma empresa (nulo = vale para todas). */
-export function feriadosDaEmpresa(linhas: { data: string; empresa_id: string | null }[], empresaId: string): Feriados {
-  return new Set(linhas.filter((l) => l.empresa_id === null || l.empresa_id === empresaId).map((l) => l.data.slice(0, 10)));
+export function feriadosDaEmpresa(
+  linhas: { data: string; empresa_id: string | null }[],
+  empresaId: string,
+): Feriados {
+  return new Set(
+    linhas
+      .filter((l) => l.empresa_id === null || l.empresa_id === empresaId)
+      .map((l) => l.data.slice(0, 10)),
+  );
 }

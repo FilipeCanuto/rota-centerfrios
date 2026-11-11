@@ -1,6 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { calcularPainel, configuracaoPorEmpresa, dataLocal, feriadosDaEmpresa, paraData, type PainelBanco } from "@/regras";
+import {
+  calcularPainel,
+  configuracaoPorEmpresa,
+  dataLocal,
+  feriadosDaEmpresa,
+  paraData,
+  type PainelBanco,
+} from "@/regras";
 
 export function chavePainel(usuarioId: string | undefined, empresas: string[]) {
   return ["painel", usuarioId, empresas.join(",")];
@@ -17,9 +24,18 @@ export function usePainel(usuarioId: string | undefined, empresas: string[]) {
       const desde = `${hoje.getFullYear() - 1}-01-01`;
 
       const [cfg, fer, ...paineis] = await Promise.all([
-        supabase.from("configuracoes_regras").select("empresa_id,chave,valor").in("empresa_id", empresas),
+        supabase
+          .from("configuracoes_regras")
+          .select("empresa_id,chave,valor")
+          .in("empresa_id", empresas),
         supabase.from("feriados").select("data,empresa_id").gte("data", desde),
-        ...empresas.map((e) => supabase.rpc("painel_vendedor", { _empresa_id: e, _vendedor_id: usuarioId!, _hoje: hojeISO })),
+        ...empresas.map((e) =>
+          supabase.rpc("painel_vendedor", {
+            _empresa_id: e,
+            _vendedor_id: usuarioId!,
+            _hoje: hojeISO,
+          }),
+        ),
       ]);
       for (const r of [cfg, fer, ...paineis]) if (r.error) throw r.error;
 
@@ -27,7 +43,11 @@ export function usePainel(usuarioId: string | undefined, empresas: string[]) {
       const linhasFeriados = fer.data ?? [];
       return calcularPainel({
         hoje,
-        feriadosGerais: new Set(linhasFeriados.filter((l) => l.empresa_id === null || empresas.includes(l.empresa_id)).map((l) => l.data)),
+        feriadosGerais: new Set(
+          linhasFeriados
+            .filter((l) => l.empresa_id === null || empresas.includes(l.empresa_id))
+            .map((l) => l.data),
+        ),
         empresas: empresas.map((e, i) => ({
           cfg: regras.get(e)!,
           feriados: feriadosDaEmpresa(linhasFeriados, e),

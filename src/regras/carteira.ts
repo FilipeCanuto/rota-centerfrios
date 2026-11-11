@@ -15,15 +15,22 @@ export interface Interacao {
  * Interação qualificada: o cliente respondeu, ou visita/ligação com resultado.
  * Mensagem sem resposta não conta. (A mesma definição está em painel_vendedor no banco.)
  */
-export function interacaoQualificada(i: Pick<Interacao, "tipo" | "cliente_respondeu" | "resultado">): boolean {
+export function interacaoQualificada(
+  i: Pick<Interacao, "tipo" | "cliente_respondeu" | "resultado">,
+): boolean {
   if (i.cliente_respondeu) return true;
   if ((i.tipo === "visita" || i.tipo === "ligacao") && !!i.resultado?.trim()) return true;
   return false;
 }
 
 /** Última data com interação qualificada OU compra faturada: compra também é contato qualificado. */
-export function ultimaInteracaoQualificada(ultimaInteracao: string | null, ultimaCompra: string | null): string | null {
-  const datas = [ultimaInteracao, ultimaCompra].filter((d): d is string => !!d).map((d) => d.slice(0, 10));
+export function ultimaInteracaoQualificada(
+  ultimaInteracao: string | null,
+  ultimaCompra: string | null,
+): string | null {
+  const datas = [ultimaInteracao, ultimaCompra]
+    .filter((d): d is string => !!d)
+    .map((d) => d.slice(0, 10));
   return datas.length ? datas.sort().at(-1)! : null;
 }
 
@@ -48,13 +55,18 @@ export function intervaloMedioCompras(datas: string[], minimo: number): number |
   return total / (unicas.length - 1);
 }
 
-export function statusRecompra(datasCompras: string[], hoje: Date, cfg: ConfiguracaoRegras): {
+export function statusRecompra(
+  datasCompras: string[],
+  hoje: Date,
+  cfg: ConfiguracaoRegras,
+): {
   status: StatusRecompra;
   intervaloMedio: number | null;
   diasDesdeUltima: number | null;
 } {
   const intervalo = intervaloMedioCompras(datasCompras, cfg.recompra_minimo_compras);
-  if (intervalo === null || intervalo <= 0) return { status: "sem_historico", intervaloMedio: intervalo, diasDesdeUltima: null };
+  if (intervalo === null || intervalo <= 0)
+    return { status: "sem_historico", intervaloMedio: intervalo, diasDesdeUltima: null };
   const ultima = [...datasCompras].sort().at(-1)!;
   const dias = diasEntre(paraData(ultima), hoje);
   let status: StatusRecompra = "em_dia";
@@ -64,18 +76,33 @@ export function statusRecompra(datasCompras: string[], hoje: Date, cfg: Configur
 }
 
 /** Cliente esquecido: sem interação qualificada (ou compra) há N dias ou mais, ou nunca. */
-export function clienteEsquecido(ultimaQualificada: string | null, hoje: Date, cfg: ConfiguracaoRegras): boolean {
+export function clienteEsquecido(
+  ultimaQualificada: string | null,
+  hoje: Date,
+  cfg: ConfiguracaoRegras,
+): boolean {
   if (!ultimaQualificada) return true;
   return diasEntre(paraData(ultimaQualificada), hoje) >= cfg.cliente_esquecido_dias;
 }
 
 /** Cliente sem compra há N dias ou mais (ou nunca comprou): pode ser remanejado pelo supervisor. */
-export function clienteSemCompra(ultimaCompra: string | null, hoje: Date, cfg: ConfiguracaoRegras): boolean {
+export function clienteSemCompra(
+  ultimaCompra: string | null,
+  hoje: Date,
+  cfg: ConfiguracaoRegras,
+): boolean {
   if (!ultimaCompra) return true;
   return diasEntre(paraData(ultimaCompra), hoje) >= cfg.cliente_sem_compra_dias;
 }
 
 /** Orçamento parado: N dias úteis completos sem interação. */
-export function orcamentoParado(ultimaAtividade: string, hoje: Date, cfg: ConfiguracaoRegras, feriados: Feriados): boolean {
-  return diasUteisDesde(paraData(ultimaAtividade), hoje, feriados) >= cfg.orcamento_parado_dias_uteis;
+export function orcamentoParado(
+  ultimaAtividade: string,
+  hoje: Date,
+  cfg: ConfiguracaoRegras,
+  feriados: Feriados,
+): boolean {
+  return (
+    diasUteisDesde(paraData(ultimaAtividade), hoje, feriados) >= cfg.orcamento_parado_dias_uteis
+  );
 }

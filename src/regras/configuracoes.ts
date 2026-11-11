@@ -22,7 +22,8 @@ export const REGRAS_PADRAO: ConfiguracaoRegras = {
 
 export function montarConfiguracao(linhas: { chave: string; valor: number }[]): ConfiguracaoRegras {
   const c = { ...REGRAS_PADRAO };
-  for (const l of linhas) if (l.chave in c) (c as Record<string, number>)[l.chave] = Number(l.valor);
+  for (const l of linhas)
+    if (l.chave in c) (c as Record<string, number>)[l.chave] = Number(l.valor);
   return c;
 }
 
@@ -31,5 +32,7 @@ export function configuracaoPorEmpresa(
   linhas: { empresa_id: string; chave: string; valor: number }[],
   empresas: string[],
 ): Map<string, ConfiguracaoRegras> {
-  return new Map(empresas.map((e) => [e, montarConfiguracao(linhas.filter((l) => l.empresa_id === e))]));
+  return new Map(
+    empresas.map((e) => [e, montarConfiguracao(linhas.filter((l) => l.empresa_id === e))]),
+  );
 }

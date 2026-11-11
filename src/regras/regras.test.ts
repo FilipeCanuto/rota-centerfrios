@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
   REGRAS_PADRAO as cfg,
-  atingimento, configuracaoPorEmpresa, dataLocal, diasUteisDecorridos, diasUteisDoMes, diasUteisRestantes,
-  feriadosDaEmpresa, hojeEmMaceio, metaDiariaCobertura, metaDoDia, montarConfiguracao, projecao,
+  atingimento,
+  configuracaoPorEmpresa,
+  dataLocal,
+  diasUteisDecorridos,
+  diasUteisDoMes,
+  diasUteisRestantes,
+  feriadosDaEmpresa,
+  hojeEmMaceio,
+  metaDiariaCobertura,
+  metaDoDia,
+  montarConfiguracao,
+  projecao,
 } from "./index";
 
 // Feriados nacionais da tabela `feriados` usados nos testes.
@@ -16,7 +26,8 @@ const d = (s: string) => {
 describe("dias úteis", () => {
   it("novembro/2026 tem 19 dias úteis (Finados e Consciência Negra caem em dia de semana)", () =>
     expect(diasUteisDoMes(d("2026-11-10"), NACIONAIS)).toBe(19));
-  it("sem feriados, novembro/2026 teria 21", () => expect(diasUteisDoMes(d("2026-11-10"), SEM)).toBe(21));
+  it("sem feriados, novembro/2026 teria 21", () =>
+    expect(diasUteisDoMes(d("2026-11-10"), SEM)).toBe(21));
   it("feriado no domingo (15/11) não muda a conta", () =>
     expect(diasUteisDoMes(d("2026-11-10"), new Set(["2026-11-15"]))).toBe(21));
   it("decorridos e restantes incluem hoje quando é dia útil", () => {
@@ -40,14 +51,16 @@ describe("dias úteis", () => {
 describe("fuso de Maceió", () => {
   it("contato às 23h30 de Maceió conta no próprio dia, não no seguinte", () =>
     expect(dataLocal("2026-11-11T02:30:00Z")).toBe("2026-11-10"));
-  it("00h01 de Maceió já é o dia seguinte", () => expect(dataLocal("2026-11-11T03:01:00Z")).toBe("2026-11-11"));
+  it("00h01 de Maceió já é o dia seguinte", () =>
+    expect(dataLocal("2026-11-11T03:01:00Z")).toBe("2026-11-11"));
   it("hoje em Maceió à 00h30 UTC ainda é o dia anterior", () =>
     expect(hojeEmMaceio(new Date("2026-11-11T00:30:00Z")).getDate()).toBe(10));
 });
 
 describe("metas", () => {
   it("atingimento = faturado ÷ meta", () => expect(atingimento(60000, 120000)).toBe(0.5));
-  it("atingimento com meta zero é 0 (sem divisão por zero)", () => expect(atingimento(1000, 0)).toBe(0));
+  it("atingimento com meta zero é 0 (sem divisão por zero)", () =>
+    expect(atingimento(1000, 0)).toBe(0));
   it("mês sem vendas: atingimento 0 e projeção 0", () => {
     expect(atingimento(0, 100000)).toBe(0);
     expect(projecao(0, d("2026-11-10"), NACIONAIS)).toBe(0);
@@ -61,11 +74,14 @@ describe("metas", () => {
   it("meta do dia = (meta − faturado até ontem) ÷ dias úteis restantes", () =>
     // (110.000 − 40.000) ÷ 14
     expect(metaDoDia(110000, 40000, d("2026-11-10"), NACIONAIS)).toBeCloseTo(5000));
-  it("meta do dia nunca é negativa", () => expect(metaDoDia(100, 500, d("2026-11-10"), NACIONAIS)).toBe(0));
+  it("meta do dia nunca é negativa", () =>
+    expect(metaDoDia(100, 500, d("2026-11-10"), NACIONAIS)).toBe(0));
   it("depois do último dia útil (sábado, 31/10), a meta do dia é tudo o que falta", () =>
     expect(metaDoDia(1000, 400, d("2026-10-31"), NACIONAIS)).toBe(600));
   it("feriado entre hoje e o fim do mês aumenta a meta do dia", () =>
-    expect(metaDoDia(1500, 0, d("2026-11-18"), NACIONAIS)).toBeGreaterThan(metaDoDia(1500, 0, d("2026-11-18"), SEM)));
+    expect(metaDoDia(1500, 0, d("2026-11-18"), NACIONAIS)).toBeGreaterThan(
+      metaDoDia(1500, 0, d("2026-11-18"), SEM),
+    ));
   it("meta diária de cobertura = (meta mensal − atingida) ÷ dias úteis restantes", () =>
     // 70% de 18 = 12,6 → 13; faltam 13 − 10 = 3; 3 ÷ 14 → 1
     expect(metaDiariaCobertura(70, 10, 18, d("2026-11-10"), NACIONAIS)).toBe(1));
@@ -77,7 +93,9 @@ describe("metas", () => {
 
 describe("configuração por empresa", () => {
   it("limites vêm da tabela, com reserva para chave ausente", () =>
-    expect(montarConfiguracao([{ chave: "cliente_esquecido_dias", valor: 45 }]).cliente_esquecido_dias).toBe(45));
+    expect(
+      montarConfiguracao([{ chave: "cliente_esquecido_dias", valor: 45 }]).cliente_esquecido_dias,
+    ).toBe(45));
   it("regras de uma empresa não vazam para a outra", () => {
     const m = configuracaoPorEmpresa(
       [

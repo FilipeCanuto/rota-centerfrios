@@ -14,7 +14,12 @@ export function projecao(faturadoAteHoje: number, hoje: Date, feriados: Feriados
 }
 
 /** Meta do dia = (meta do mês − faturado até ontem) ÷ dias úteis restantes. Nunca negativa; sem dia útil restante → tudo o que falta. */
-export function metaDoDia(metaMes: number, faturadoAteOntem: number, hoje: Date, feriados: Feriados): number {
+export function metaDoDia(
+  metaMes: number,
+  faturadoAteOntem: number,
+  hoje: Date,
+  feriados: Feriados,
+): number {
   const restantes = diasUteisRestantes(hoje, feriados);
   const falta = Math.max(0, metaMes - faturadoAteOntem);
   if (restantes <= 0) return falta;
@@ -25,7 +30,13 @@ export function metaDoDia(metaMes: number, faturadoAteOntem: number, hoje: Date,
  * Meta diária de cobertura = (meta mensal de cobertura − cobertura atingida) ÷ dias úteis restantes,
  * em número de clientes, arredondada para cima. `metaPercentual` vem em pontos (70 = 70%). Meta já atingida → 0.
  */
-export function metaDiariaCobertura(metaPercentual: number, cobertos: number, total: number, hoje: Date, feriados: Feriados): number {
+export function metaDiariaCobertura(
+  metaPercentual: number,
+  cobertos: number,
+  total: number,
+  hoje: Date,
+  feriados: Feriados,
+): number {
   if (total <= 0) return 0;
   const falta = Math.max(0, Math.ceil((metaPercentual / 100) * total) - cobertos);
   if (falta === 0) return 0;
