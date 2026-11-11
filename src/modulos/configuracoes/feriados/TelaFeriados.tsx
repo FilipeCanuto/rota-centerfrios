@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnunciar } from "@/design-system/Anunciador";
+import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { useSessao } from "@/modulos/sessao/sessao";
 import { hojeEmMaceio, paraData } from "@/regras";
@@ -147,14 +148,10 @@ export function TelaFeriados() {
             ))}
           </div>
         ) : consulta.error ? (
-          <div role="alert" className="flex flex-col items-start gap-3">
-            <p className="font-semibold text-perigo">
-              Não foi possível carregar as datas de {ano}.
-            </p>
-            <Button variant="outline" onClick={() => consulta.refetch()}>
-              Tentar de novo
-            </Button>
-          </div>
+          <EstadoErro
+            titulo={`Não foi possível carregar as datas de ${ano}.`}
+            aoTentar={() => consulta.refetch()}
+          />
         ) : lista.length === 0 ? (
           <EstadoVazio icone={CalendarOff} titulo={`Nenhuma data em ${ano}`}>
             Adicione os feriados e os dias sem expediente deste ano, ou copie as datas fixas do ano
