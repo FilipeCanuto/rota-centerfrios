@@ -127,6 +127,13 @@
       "when": 1794397777933,
       "tag": "0017_gamificacao_pontos_selos",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794398442905,
+      "tag": "0018_painel_gestao_copiloto_notificacoes_demo",
+      "breakpoints": true
     }
   ]
 }

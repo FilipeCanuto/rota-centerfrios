@@ -16,7 +16,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 1 | Arquitetura (passo 3) | `fase1/arquitetura` / PR #2 | Concluída |
 | 2 | Polar e acessibilidade (passo 4) | `fase1/polar-acessibilidade` / PR #3 | Concluída |
 | 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
-| 4 | PWA e acabamento (passos 6 e 7) | — | A fazer |
+| 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
 | 5 | Clientes e ficha 360 | — | Depende da mensagem 10 |
 | 6 | Importação do Shop9 | — | Depende da mensagem 11 |
 | 7 | Agenda | — | Depende da mensagem 12 |
@@ -54,6 +54,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Mensagens de recusa no primeiro acesso:** dizem se o e-mail é de fora da empresa ou se ainda não foi convidado. Isso revela se um e-mail corporativo está na lista de convites; aceito por ser um sistema interno, com o limite de tentativas do próprio login.
 - **Tela de nova senha** só abre com o link de recuperação; uma sessão comum não troca a senha.
+
+- **PWA sem guardar dados no aparelho:** o service worker só mostra a página "sem conexão"; nenhum dado da carteira fica no celular. Não roda na prévia do Lovable.
+- **Ícones do app:** continuam os atuais (sem versão maskable) até a marca nova, que espera a escolha do nome.
 
 ## Pendências abertas
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.

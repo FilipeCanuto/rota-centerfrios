@@ -7,13 +7,15 @@ import { BarraInferior } from "./BarraInferior";
 import { Cabecalho } from "./Cabecalho";
 import { MenuLateral } from "./MenuLateral";
 
+const TEMAS: Tema[] = ["claro", "escuro", "auto"];
+
 export function Estrutura() {
   const { data: sessao } = useSessao();
   const { tema, definirTema } = useTema();
-  const temaSalvo = sessao?.usuario?.tema as Tema | undefined;
+  const temaSalvo = TEMAS.find((t) => t === sessao?.usuario?.tema);
   // O tema escolhido em outro aparelho vale aqui também.
   useEffect(() => {
-    if (temaSalvo && temaSalvo !== tema) definirTema(temaSalvo);
+    if (temaSalvo && temaSalvo !== tema) definirTema(temaSalvo, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando o cadastro muda
   }, [temaSalvo]);
   return (
