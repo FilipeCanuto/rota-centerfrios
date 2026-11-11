@@ -92,7 +92,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Plataforma comercial dos vendedores CENTERFRIOS e 381 Distribuidora.",
       },
       { name: "author", content: "CENTERFRIOS" },
-      { name: "theme-color", content: "#1B4FA0" },
+      { name: "theme-color", content: "#F7F8FB", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#0A1730", media: "(prefers-color-scheme: dark)" },
       { property: "og:title", content: "Rota CENTERFRIOS" },
       {
         property: "og:description",
