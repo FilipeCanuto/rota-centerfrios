@@ -56,7 +56,7 @@ export function Cabecalho() {
         />
         <Link
           to="/inicio"
-          className="shrink-0 rounded-md md:hidden"
+          className="min-w-0 shrink rounded-md md:hidden"
           aria-label="Rota CENTERFRIOS — Início"
         >
           <Logo className="h-7" />
@@ -82,18 +82,18 @@ export function Cabecalho() {
           </Select>
         )}
 
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           <BuscaGlobal />
           {painel && (
             <Link
               to="/inicio"
               hash="cobertura"
-              className="hidden min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold lg:inline-flex"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border px-2.5 text-sm font-semibold sm:px-3"
               aria-label={`Cobertura da carteira: ${formatarPercentual(painel.cobertura.percentual)}`}
             >
               <Users className="size-4 text-primary" aria-hidden="true" />
               <span className="numeros">{formatarPercentual(painel.cobertura.percentual)}</span>
-              <span className="text-muted-foreground">cobertura</span>
+              <span className="hidden text-muted-foreground lg:inline">cobertura</span>
             </Link>
           )}
           <Popover>

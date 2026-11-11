@@ -157,19 +157,21 @@ function MetaMes({ p }: { p: Painel }) {
             { indicador: "Meta do dia", valor: formatarMoeda(p.metaDoDia) },
           ]}
         />
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
-          {[
-            ["Faturado", formatarMoeda(p.faturadoMes)],
-            ["Falta", formatarMoeda(p.falta)],
-            ["Projeção", formatarMoeda(p.projecao)],
-            ["Meta do dia", formatarMoeda(p.metaDoDia)],
-          ].map(([k, v]) => (
-            <div key={k}>
-              <dt className="text-sm text-muted-foreground">{k}</dt>
-              <dd className="numeros font-display text-xl font-bold">{v}</dd>
-            </div>
-          ))}
-          <div className="col-span-2">
+        <div className="flex flex-col gap-5">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
+            {[
+              ["Faturado", formatarMoeda(p.faturadoMes)],
+              ["Falta", formatarMoeda(p.falta)],
+              ["Projeção", formatarMoeda(p.projecao)],
+              ["Meta do dia", formatarMoeda(p.metaDoDia)],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <dt className="text-sm text-muted-foreground">{k}</dt>
+                <dd className="numeros font-display text-xl font-bold">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <div>
             {p.atingimento >= 1 ? (
               <SeloStatus tom="conquista">Meta atingida</SeloStatus>
             ) : p.projecao >= p.meta.meta_vendas ? (
@@ -178,7 +180,7 @@ function MetaMes({ p }: { p: Painel }) {
               <SeloStatus tom="atencao">Abaixo do ritmo</SeloStatus>
             )}
           </div>
-        </dl>
+        </div>
       </div>
     </Secao>
   );

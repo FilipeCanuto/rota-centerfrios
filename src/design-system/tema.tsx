@@ -3,14 +3,24 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 export type Tema = "claro" | "escuro" | "auto";
 const CHAVE = "rota-tema";
 
-const Ctx = createContext<{ tema: Tema; definirTema: (t: Tema) => void }>({ tema: "auto", definirTema: () => {} });
+const Ctx = createContext<{ tema: Tema; definirTema: (t: Tema) => void }>({
+  tema: "auto",
+  definirTema: () => {},
+});
 
 function aplicar(t: Tema) {
-  const escuro = t === "escuro" || (t === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const escuro =
+    t === "escuro" || (t === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", escuro);
 }
 
-export function ProvedorTema({ children, aoMudar }: { children: ReactNode; aoMudar?: (t: Tema) => void }) {
+export function ProvedorTema({
+  children,
+  aoMudar,
+}: {
+  children: ReactNode;
+  aoMudar?: (t: Tema) => void;
+}) {
   const [tema, setTema] = useState<Tema>("auto");
 
   useEffect(() => {

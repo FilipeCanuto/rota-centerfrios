@@ -62,7 +62,7 @@ function Mais() {
         <p className="mb-4 text-muted-foreground">
           Tokens de cor, tipografia e componentes nos temas claro e escuro.
         </p>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="h-auto whitespace-normal text-left">
           <Link to="/design-system">
             <Palette aria-hidden="true" /> Abrir design system
           </Link>
@@ -76,7 +76,7 @@ function Mais() {
           <p className="mb-4 text-muted-foreground">
             Feriados e dias sem expediente que deixam de contar como dia útil nas metas e prazos.
           </p>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="h-auto whitespace-normal text-left">
             <Link to="/configuracoes/feriados">
               <CalendarOff aria-hidden="true" /> Feriados e dias sem expediente
             </Link>

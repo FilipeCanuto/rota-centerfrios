@@ -12,7 +12,9 @@ export function ProvedorAnunciador({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={anunciar}>
       {children}
-      <div aria-live="polite" role="status" className="sr-only">{msg}</div>
+      <div aria-live="polite" role="status" className="sr-only">
+        {msg}
+      </div>
     </Ctx.Provider>
   );
 }

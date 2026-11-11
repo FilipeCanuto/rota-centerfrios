@@ -17,7 +17,8 @@ export const Route = createFileRoute("/_authenticated/agenda")({
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-extrabold sm:text-3xl">Agenda</h1>
       <EstadoVazio icone={CalendarDays} titulo="Sua agenda vai aparecer aqui">
-        Os próximos passos que você registra em cada contato viram tarefas aqui, organizadas por dia, junto com as visitas planejadas.
+        Os próximos passos que você registra em cada contato viram tarefas aqui, organizadas por
+        dia, junto com as visitas planejadas.
       </EstadoVazio>
     </div>
   ),
