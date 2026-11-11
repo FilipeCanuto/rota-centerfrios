@@ -20,6 +20,7 @@ test("Agendar no plano do dia abre a nova tarefa com o cliente", async ({ page }
     .click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByText("Cliente: Cliente Teste 1")).toBeVisible();
+  await expect(page).not.toHaveURL(/cliente=/);
   await page.getByRole("button", { name: "Salvar tarefa" }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
 });

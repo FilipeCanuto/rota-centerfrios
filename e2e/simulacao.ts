@@ -226,8 +226,13 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
   await page.route(/supabase\.co\/auth\/v1\/user/, (r) => json(r, usuario));
   await page.route(/supabase\.co\/auth\/v1\//, (r) => json(r, {}));
   await page.route(/supabase\.co\/rest\/v1\//, (route) => {
-    const caminho = new URL(route.request().url()).pathname.replace(/^\/rest\/v1\//, "");
+    const url = new URL(route.request().url());
+    const caminho = url.pathname.replace(/^\/rest\/v1\//, "");
     let corpo = tabelas[caminho] ?? [];
+    // Filtro simples por id (ex.: maybeSingle de um cliente).
+    const porId = url.searchParams.get("id");
+    if (Array.isArray(corpo) && porId?.startsWith("eq."))
+      corpo = corpo.filter((l: { id?: string }) => l.id === porId.slice(3));
     if (route.request().method() === "POST" && caminho.startsWith("rpc/") === false) corpo = [];
     const objeto = route.request().headers()["accept"]?.includes("vnd.pgrst.object");
     if (objeto && Array.isArray(corpo)) corpo = corpo[0] ?? null;

@@ -282,14 +282,7 @@ function PlanoDoDia({ p, aoRegistrar }: { p: Painel; aoRegistrar: (c: ClienteCon
                   <span className="sr-only"> com {item.cliente.nome}</span>
                 </Button>
                 <Button asChild variant="ghost" size="sm">
-                  <Link
-                    to="/agenda"
-                    search={{
-                      cliente: item.cliente.id,
-                      nome: item.cliente.nome,
-                      empresa: item.cliente.empresa_id,
-                    }}
-                  >
+                  <Link to="/agenda" search={{ cliente: item.cliente.id }}>
                     <CalendarPlus aria-hidden="true" /> Agendar
                     <span className="sr-only"> {item.cliente.nome}</span>
                   </Link>

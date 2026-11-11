@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { supabase } from "@/integrations/supabase/client";
 import { usePainel } from "@/modulos/inicio/dados";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import { formatarISO, hojeEmMaceio, paraData } from "@/regras";
@@ -28,8 +29,11 @@ const inicioSemana = (iso: string) => somarDias(iso, -((paraData(iso).getDay() +
 
 export function TelaAgenda({
   novoPara,
+  aoUsarNovoPara,
 }: {
-  novoPara?: { clienteId: string; nome: string; empresaId: string } | undefined;
+  /** Id do cliente vindo do "Agendar" do plano do dia ou da ficha. */
+  novoPara?: string | undefined;
+  aoUsarNovoPara?: () => void;
 }) {
   const id = useId();
   const { data: sessao } = useSessao();
@@ -47,12 +51,18 @@ export function TelaAgenda({
       ? [base, base]
       : modo === "semana"
         ? [inicioSemana(base), somarDias(inicioSemana(base), 6)]
-        : [hoje, somarDias(hoje, 30)];
-  const tarefas = useTarefas(eu, inicio, fim, modo !== "semana");
+        : [hoje, somarDias(hoje, 29)];
+  // Atrasadas só na lista e no dia de hoje: em outro dia elas confundiriam.
+  const tarefas = useTarefas(
+    eu,
+    inicio,
+    fim,
+    modo === "lista" || (modo === "dia" && base === hoje),
+  );
 
   // Tarefas automáticas: o plano do dia vira retornos na agenda (o banco não duplica).
   const painel = usePainel(eu, empresas).data;
-  const gerar = useGerarTarefasDosAlertas();
+  const gerar = useGerarTarefasDosAlertas(eu);
   const chavePlano = painel?.plano.map((i) => i.cliente.id).join(",");
   useEffect(() => {
     if (!painel?.plano.length) return;
@@ -67,19 +77,35 @@ export function TelaAgenda({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando o plano muda
   }, [chavePlano]);
 
-  // Vindo do plano do dia ou da ficha ("Agendar"): abre o formulário com o cliente.
+  // Vindo do plano do dia ou da ficha ("Agendar"): abre o formulário com o cliente, para amanhã
+  // (o retorno de hoje já entra sozinho pelo plano do dia).
   useEffect(() => {
-    if (novoPara && eu)
-      setForm(
-        nova({
-          cliente_id: novoPara.clienteId,
-          empresa_id: novoPara.empresaId,
-          nomeCliente: novoPara.nome,
-          titulo: `Retornar para ${novoPara.nome}`,
-        }),
-      );
+    if (!novoPara || !eu) return;
+    let ativo = true;
+    void supabase
+      .from("clientes")
+      .select("nome,empresa_id")
+      .eq("id", novoPara)
+      .maybeSingle()
+      .then(({ data: c }) => {
+        if (!ativo) return;
+        aoUsarNovoPara?.();
+        if (!c) return void toast.error("Cliente não encontrado.");
+        setForm(
+          nova({
+            cliente_id: novoPara,
+            empresa_id: c.empresa_id,
+            nomeCliente: c.nome,
+            titulo: `Retornar para ${c.nome}`,
+            data: somarDias(hoje, 1),
+          }),
+        );
+      });
+    return () => {
+      ativo = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- uma vez por chegada
-  }, [novoPara?.clienteId, eu]);
+  }, [novoPara, eu]);
 
   function nova(
     p: Partial<NovaTarefa> & { nomeCliente?: string },
@@ -97,7 +123,18 @@ export function TelaAgenda({
     };
   }
   const editar = (t: Tarefa) =>
-    setForm({ ...t, vendedor_id: eu ?? "", nomeCliente: t.clientes?.nome });
+    setForm({
+      id: t.id,
+      empresa_id: t.empresa_id,
+      vendedor_id: eu ?? "",
+      cliente_id: t.cliente_id,
+      titulo: t.titulo,
+      data: t.data,
+      hora: t.hora,
+      tipo: t.tipo,
+      observacao: t.observacao,
+      nomeCliente: t.clientes?.nome,
+    });
 
   const titulo =
     modo === "dia"
@@ -185,7 +222,7 @@ export function TelaAgenda({
           <div className="flex flex-col gap-4">
             {[...porDia.entries()].map(([dia, lista]) => (
               <div key={dia} className="cartao px-4">
-                {modo !== "dia" && (
+                {(modo !== "dia" || dia !== base) && (
                   <h3 className="pt-3 font-semibold first-letter:uppercase">
                     <time dateTime={dia}>{diaLongo.format(paraData(dia))}</time>
                   </h3>

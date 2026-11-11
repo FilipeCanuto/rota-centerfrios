@@ -143,7 +143,7 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
           )}
           {ehDono && (
             <Button asChild variant="outline">
-              <Link to="/agenda" search={{ cliente: c.id, nome: c.nome, empresa: c.empresa_id }}>
+              <Link to="/agenda" search={{ cliente: c.id }}>
                 <CalendarPlus aria-hidden="true" /> Agendar
               </Link>
             </Button>

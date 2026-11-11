@@ -29,6 +29,7 @@ export function FormTarefa({
   const id = useId();
   const salvar = useSalvarTarefa();
   const tituloRef = useRef<HTMLInputElement>(null);
+  const dataRef = useRef<HTMLInputElement>(null);
   const [t, setT] = useState(inicial);
   const [erro, setErro] = useState<string | null>(null);
   useEffect(() => {
@@ -45,7 +46,10 @@ export function FormTarefa({
       setErro("Escreva o que fazer.");
       return tituloRef.current?.focus();
     }
-    if (!t.data) return setErro("Escolha a data.");
+    if (!t.data) {
+      setErro("Escolha a data.");
+      return dataRef.current?.focus();
+    }
     setErro(null);
     const linha: NovaTarefa = {
       ...t,
@@ -114,6 +118,7 @@ export function FormTarefa({
               <Label htmlFor={`${id}-data`}>Data</Label>
               <Input
                 id={`${id}-data`}
+                ref={dataRef}
                 type="date"
                 className="min-h-11"
                 value={t.data}

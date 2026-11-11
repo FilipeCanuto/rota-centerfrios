@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TelaAgenda } from "@/modulos/agenda/TelaAgenda";
 
+/** Só o id do cliente vai no endereço; o nome é buscado na tela. */
 interface BuscaAgenda {
   cliente?: string;
-  nome?: string;
-  empresa?: string;
 }
 
 export const Route = createFileRoute("/_authenticated/agenda")({
@@ -14,21 +13,19 @@ export const Route = createFileRoute("/_authenticated/agenda")({
       { name: "description", content: "Retornos, visitas, ligações e tarefas do vendedor." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): BuscaAgenda => {
-    const texto = (k: string) => (typeof s[k] === "string" ? (s[k] as string) : undefined);
-    const [cliente, nome, empresa] = [texto("cliente"), texto("nome"), texto("empresa")];
-    return cliente && nome && empresa ? { cliente, nome, empresa } : {};
-  },
+  validateSearch: (s: Record<string, unknown>): BuscaAgenda =>
+    typeof s["cliente"] === "string" ? { cliente: s["cliente"] } : {},
   component: Agenda,
 });
 
 function Agenda() {
-  const { cliente, nome, empresa } = Route.useSearch();
+  const { cliente } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <TelaAgenda
-      novoPara={
-        cliente && nome && empresa ? { clienteId: cliente, nome, empresaId: empresa } : undefined
-      }
+      novoPara={cliente}
+      // Tira o cliente do endereço: voltar ou recarregar não reabre o formulário.
+      aoUsarNovoPara={() => void navigate({ to: "/agenda", search: {}, replace: true })}
     />
   );
 }

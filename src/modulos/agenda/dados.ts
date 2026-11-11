@@ -72,8 +72,10 @@ export interface NovaTarefa {
 export function useSalvarTarefa() {
   const invalidar = useInvalidar();
   return useMutation({
-    mutationFn: async ({ id, empresa_id, vendedor_id, cliente_id, ...campos }: NovaTarefa) => {
-      // Na edição só vão os campos que o vendedor pode alterar (permissão por coluna).
+    mutationFn: async (t: NovaTarefa) => {
+      // Só colunas reais; na edição, só as que o vendedor pode alterar (permissão por coluna).
+      const { id, empresa_id, vendedor_id, cliente_id, titulo, data, hora, tipo, observacao } = t;
+      const campos = { titulo, data, hora, tipo, observacao };
       const { error } = id
         ? await supabase.from("tarefas_agenda").update(campos).eq("id", id)
         : await supabase
@@ -99,13 +101,30 @@ export function useConcluirTarefa() {
   });
 }
 
-/** Cria (sem duplicar) as tarefas de retorno do plano do dia. O banco ignora as que já existem. */
-export function useGerarTarefasDosAlertas() {
+/**
+ * Cria as tarefas de retorno do plano do dia. Pula o cliente que já tem retorno automático aberto
+ * (de qualquer dia), para um alerta parado não virar um retorno novo por dia; o banco ignora os de hoje.
+ */
+export function useGerarTarefasDosAlertas(vendedorId: string | undefined) {
   const invalidar = useInvalidar();
   return useMutation({
     mutationFn: async (
-      itens: { empresa_id: string; cliente_id: string; motivo_alerta: string; titulo: string }[],
+      todos: { empresa_id: string; cliente_id: string; motivo_alerta: string; titulo: string }[],
     ) => {
+      if (!vendedorId || !todos.length) return 0;
+      const abertas = await supabase
+        .from("tarefas_agenda")
+        .select("cliente_id")
+        .eq("vendedor_id", vendedorId)
+        .eq("concluida", false)
+        .not("motivo_alerta", "is", null)
+        .in(
+          "cliente_id",
+          todos.map((i) => i.cliente_id),
+        );
+      if (abertas.error) throw abertas.error;
+      const ja = new Set((abertas.data ?? []).map((a) => a.cliente_id));
+      const itens = todos.filter((i) => !ja.has(i.cliente_id));
       if (!itens.length) return 0;
       const { data, error } = await supabase.rpc("gerar_tarefas_dos_alertas", {
         _itens: itens as Json,
