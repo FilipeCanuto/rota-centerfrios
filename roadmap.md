@@ -1,4 +1,6 @@
 # Restrição de acesso por convite
+- [ ] Reclassificar empresas reais e criar limpeza/recriação demo e carga idempotente de feriados em migração nova.
+- [ ] Verificar preservação de dados reais, contas, casos demo, permissões e auditoria; recriar demonstração nas contas atuais.
 - [x] Criar painel_vendedor e cobertura_vendedor em migração nova; manter tipos regenerados.
 - [x] Conferir agregação com 1.500 vendas, fuso local, RLS e cobertura; apagar dados temporários (9 testes passaram).
 - [x] Otimizar índices e chamadas constantes nas políticas em migração nova, preservando src/.
