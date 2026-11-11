@@ -105,7 +105,7 @@ A gamificação transforma os resultados do dia em pontos, ranking e selos, e o 
 | --- | --- | --- |
 | Vendas faturadas | Ritmo necessário | (Meta do mês − faturado até ontem) ÷ dias úteis restantes; recalculada todo dia, então quem atrasa vê a meta do dia subir |
 | Orçamentos | Número de orçamentos emitidos no Shop9 | Meta definida pela diretoria por perfil (loja, televendas, CPF) |
-| Cobertura da carteira | Clientes com interação real no dia | Meta mensal de cobertura ÷ dias úteis do mês |
+| Cobertura da carteira | Clientes com interação real no dia | (Meta mensal de cobertura − cobertura atingida) ÷ dias úteis restantes, em número de clientes e arredondada para cima; recalculada todo dia, como a meta de vendas (decisão de 11/11/2026) |
 | Clientes sem comprar | Clientes em alerta de recompra que voltaram a comprar | Meta definida pela diretoria; conta no dia do faturamento |
 | Instagram (Fase 3) | Postagens de divulgação e interação | Ver regras do Instagram abaixo |
 
@@ -157,6 +157,7 @@ Cada número do painel precisa de uma definição única, escrita antes do códi
 | Cliente esquecido | Cliente da carteira ativa sem interação qualificada há mais de 30 dias | Plataforma |
 | Aguardando resposta | Última mensagem da conversa é do cliente. Contado só em horário comercial: aviso ao vendedor com 15 min, ao supervisor com 30 min | WhatsApp |
 | Orçamento parado | Orçamento aberto sem interação há 2 dias úteis | Shop9 + plataforma |
+| Dias úteis | Segunda a sexta, menos os feriados nacionais, estaduais e municipais e os dias sem expediente da empresa (Carnaval, Corpus Christi etc.), todos tratados da mesma forma. A diretoria edita a lista em Configurações → Feriados e dias sem expediente | Plataforma |
 | Saúde do cliente | Combinação de recência, frequência e valor de compra em três faixas: saudável, atenção, em risco | Shop9 |
 
 **Decisões da diretoria (reunião de 10/11/2026)**

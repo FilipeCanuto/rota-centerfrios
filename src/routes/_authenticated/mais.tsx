@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Palette, Trash2 } from "lucide-react";
+import { CalendarOff, Palette, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -30,6 +30,7 @@ function Mais() {
   const qc = useQueryClient();
   const anunciar = useAnunciar();
   const admin = data?.papeis.includes("administrador");
+  const diretoria = data?.papeis.includes("diretoria");
 
   async function apagarDemo() {
     const { error } = await supabase.rpc("apagar_dados_demo");
@@ -46,6 +47,13 @@ function Mais() {
         <p className="mb-4 text-muted-foreground">Tokens de cor, tipografia e componentes nos temas claro e escuro.</p>
         <Button asChild variant="outline"><Link to="/design-system"><Palette aria-hidden="true" /> Abrir design system</Link></Button>
       </section>
+      {diretoria && (
+        <section aria-labelledby="config" className="cartao p-5">
+          <h2 id="config" className="mb-2 text-lg font-bold">Configurações</h2>
+          <p className="mb-4 text-muted-foreground">Feriados e dias sem expediente que deixam de contar como dia útil nas metas e prazos.</p>
+          <Button asChild variant="outline"><Link to="/configuracoes/feriados"><CalendarOff aria-hidden="true" /> Feriados e dias sem expediente</Link></Button>
+        </section>
+      )}
       {admin && (
         <section aria-labelledby="demo" className="cartao p-5">
           <h2 id="demo" className="mb-2 text-lg font-bold">Dados de demonstração</h2>

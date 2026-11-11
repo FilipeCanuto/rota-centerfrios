@@ -1,10 +1,10 @@
 import type { CanalMensagens, Copiloto, FonteVendas } from "./tipos";
 
-/** Telefone só com dígitos e com DDI 55 quando faltar. */
+/** Telefone só com dígitos e com DDI 55 quando faltar. Pelo tamanho: 10–11 dígitos é nacional (DDD + número). */
 export function normalizarTelefone(t: string): string {
   const d = t.replace(/\D/g, "");
   if (!d) return "";
-  return d.startsWith("55") ? d : `55${d}`;
+  return d.length <= 11 ? `55${d}` : d;
 }
 
 export const whatsappManual: CanalMensagens = {

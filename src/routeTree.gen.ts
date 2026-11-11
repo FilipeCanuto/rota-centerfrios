@@ -18,6 +18,7 @@ import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
+import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,6 +64,12 @@ const AuthenticatedMaisRoute = AuthenticatedMaisRouteImport.update({
   path: '/mais',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfiguracoesFeriadosRoute =
+  AuthenticatedConfiguracoesFeriadosRouteImport.update({
+    id: '/configuracoes/feriados',
+    path: '/configuracoes/feriados',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
+  '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/conversas'
     | '/inicio'
     | '/mais'
+    | '/configuracoes/feriados'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/conversas'
     | '/inicio'
     | '/mais'
+    | '/configuracoes/feriados'
   id:
     | '__root__'
     | '/'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conversas'
     | '/_authenticated/inicio'
     | '/_authenticated/mais'
+    | '/_authenticated/configuracoes/feriados'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMaisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes/feriados': {
+      id: '/_authenticated/configuracoes/feriados'
+      path: '/configuracoes/feriados'
+      fullPath: '/configuracoes/feriados'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesFeriadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -211,6 +231,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
+  AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -219,6 +240,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
+  AuthenticatedConfiguracoesFeriadosRoute:
+    AuthenticatedConfiguracoesFeriadosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

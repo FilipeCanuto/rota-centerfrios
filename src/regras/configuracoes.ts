@@ -1,4 +1,4 @@
-/** Limites das regras. Os valores reais vêm da tabela configuracoes_regras. */
+/** Limites das regras. Os valores reais vêm da tabela configuracoes_regras, por empresa. */
 export interface ConfiguracaoRegras {
   recompra_minimo_compras: number;
   recompra_fator_atencao: number;
@@ -9,6 +9,7 @@ export interface ConfiguracaoRegras {
   plano_do_dia_max: number;
 }
 
+/** Reserva usada só quando a empresa não tem a chave cadastrada. */
 export const REGRAS_PADRAO: ConfiguracaoRegras = {
   recompra_minimo_compras: 3,
   recompra_fator_atencao: 1.5,
@@ -21,6 +22,17 @@ export const REGRAS_PADRAO: ConfiguracaoRegras = {
 
 export function montarConfiguracao(linhas: { chave: string; valor: number }[]): ConfiguracaoRegras {
   const c = { ...REGRAS_PADRAO };
-  for (const l of linhas) if (l.chave in c) (c as Record<string, number>)[l.chave] = Number(l.valor);
+  for (const l of linhas)
+    if (l.chave in c) (c as Record<string, number>)[l.chave] = Number(l.valor);
   return c;
+}
+
+/** Uma configuração por empresa: as regras de uma empresa nunca vazam para a outra. */
+export function configuracaoPorEmpresa(
+  linhas: { empresa_id: string; chave: string; valor: number }[],
+  empresas: string[],
+): Map<string, ConfiguracaoRegras> {
+  return new Map(
+    empresas.map((e) => [e, montarConfiguracao(linhas.filter((l) => l.empresa_id === e))]),
+  );
 }

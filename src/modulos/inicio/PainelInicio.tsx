@@ -11,7 +11,7 @@ import { formatarDataLonga, formatarMoeda, formatarPercentual } from "@/design-s
 import { integracoes } from "@/integracoes";
 import { RegistrarContato, type ClienteContato } from "@/modulos/contato/RegistrarContato";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
-import type { MotivoTipo, Painel } from "./calcular";
+import { formatarISO, hojeEmMaceio, type MotivoTipo, type Painel } from "@/regras";
 import { usePainel } from "./dados";
 
 const TOM: Record<MotivoTipo, { tom: TomStatus; rotulo: string }> = {
@@ -37,7 +37,7 @@ export function PainelInicio() {
   const usuario = sessao?.usuario;
   const { data: p, isLoading, error } = usePainel(usuario?.id, ativas);
   const [contato, setContato] = useState<ClienteContato | null>(null);
-  const hoje = new Date();
+  const hoje = hojeEmMaceio();
 
   if (!carregandoSessao && !usuario)
     return <p role="alert">Seu cadastro ainda não está vinculado a um vendedor. Fale com o administrador.</p>;
@@ -45,7 +45,7 @@ export function PainelInicio() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-sm capitalize text-muted-foreground"><time dateTime={hoje.toISOString().slice(0, 10)}>{formatarDataLonga(hoje)}</time></p>
+        <p className="text-sm capitalize text-muted-foreground"><time dateTime={formatarISO(hoje)}>{formatarDataLonga(hoje)}</time></p>
         <h1 className="text-2xl font-extrabold sm:text-3xl">Olá, {usuario?.nome ?? "…"}</h1>
       </div>
 

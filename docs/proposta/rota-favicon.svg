@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="t">
+  <title id="t">Rota CENTERFRIOS</title>
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2A66B8"/>
+      <stop offset="1" stop-color="#0E2F6B"/>
+    </linearGradient>
+    <linearGradient id="rota" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="250" y2="0">
+      <stop offset="0" stop-color="#F7F8FB" stop-opacity="0"/>
+      <stop offset="1" stop-color="#F7F8FB"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" rx="180" fill="url(#fundo)"/>
+  <!-- a rota: vem de longe, passa sob o pinguim e chega à meta -->
+  <path d="M96 642 L622 642" stroke="url(#rota)" stroke-width="24" stroke-linecap="round"/>
+  <!-- pinguim da marca, redesenhado em vetor -->
+  <g transform="translate(64 109) scale(.74)">
+    <path fill="#0A1730" d="M352 128 C362 98 396 84 432 86 C482 90 532 102 572 103 C592 104 600 118 588 127 C562 140 528 142 512 160 C496 176 494 198 506 214 C540 256 566 300 566 360 C566 420 520 560 486 668 C492 684 508 692 512 702 C514 712 510 718 500 718 L218 718 C204 718 202 702 212 690 C232 666 246 650 246 620 C242 520 236 400 258 330 C268 300 290 270 306 240 C326 200 344 160 352 128 Z"/>
+    <path fill="#F7F8FB" d="M496 216 C530 260 552 300 552 352 C552 420 500 560 468 662 C464 670 456 672 446 670 C400 664 350 650 328 630 C304 606 298 560 308 530 C318 500 340 476 360 466 C366 492 360 540 352 580 C350 594 360 598 372 588 C410 556 440 500 430 420 C452 396 458 350 448 300 C444 262 460 232 496 216 Z"/>
+  </g>
+  <!-- ponto atingido: o único ouro -->
+  <circle cx="664" cy="642" r="32" fill="#E8B43A"/>
+</svg>
