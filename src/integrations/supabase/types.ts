@@ -950,36 +950,51 @@ export type Database = {
         Row: {
           cliente_id: string | null
           concluida: boolean
+          concluida_em: string | null
           created_at: string
           data: string
           demo: boolean
           empresa_id: string
+          hora: string | null
           id: string
+          motivo_alerta: string | null
+          observacao: string | null
           origem: Database["public"]["Enums"]["origem_dado"]
+          tipo: string
           titulo: string
           vendedor_id: string | null
         }
         Insert: {
           cliente_id?: string | null
           concluida?: boolean
+          concluida_em?: string | null
           created_at?: string
           data: string
           demo?: boolean
           empresa_id: string
+          hora?: string | null
           id?: string
+          motivo_alerta?: string | null
+          observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          tipo?: string
           titulo: string
           vendedor_id?: string | null
         }
         Update: {
           cliente_id?: string | null
           concluida?: boolean
+          concluida_em?: string | null
           created_at?: string
           data?: string
           demo?: boolean
           empresa_id?: string
+          hora?: string | null
           id?: string
+          motivo_alerta?: string | null
+          observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          tipo?: string
           titulo?: string
           vendedor_id?: string | null
         }
@@ -1254,6 +1269,7 @@ export type Database = {
         Args: { _cliente_id: string; _hoje?: string }
         Returns: Json
       }
+      gerar_tarefas_dos_alertas: { Args: { _itens: Json }; Returns: number }
       has_role:
         | {
             Args: {
