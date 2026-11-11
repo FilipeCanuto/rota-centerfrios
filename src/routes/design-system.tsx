@@ -48,6 +48,22 @@ const TOKENS = [
   ["Perigo", "bg-perigo"],
 ] as const;
 
+/** Nome do token semântico (camada 2) de cada cor mostrada. */
+const SEMANTICO: Record<string, string> = {
+  Fundo: "--cor-fundo",
+  Superfície: "--cor-superficie",
+  Texto: "--cor-texto",
+  "Texto secundário": "--cor-texto-secundario",
+  Primária: "--cor-primaria",
+  "Primária suave": "--cor-primaria-suave",
+  Ouro: "--cor-destaque",
+  "Borda de campo": "--cor-campo",
+  Divisória: "--cor-divisoria",
+  Sucesso: "--cor-sucesso",
+  Atenção: "--cor-atencao",
+  Perigo: "--cor-perigo",
+};
+
 function Painel({ escuro }: { escuro: boolean }) {
   return (
     <section
@@ -61,6 +77,11 @@ function Painel({ escuro }: { escuro: boolean }) {
 
         <div>
           <h3 className="mb-3 font-bold">Cores</h3>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Três camadas: primitivos (<code>--polar-azul-700</code>), semânticos (
+            <code>--cor-primaria</code>) e componentes (<code>--botao-primario-fundo</code>,{" "}
+            <code>--cartao-borda</code>). As telas usam só os semânticos, pelas classes do Tailwind.
+          </p>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {TOKENS.map(([nome, classe]) => (
               <li key={nome} className="flex items-center gap-3">
@@ -70,7 +91,9 @@ function Painel({ escuro }: { escuro: boolean }) {
                 />
                 <span className="text-sm">
                   <strong className="block">{nome}</strong>
-                  <code className="text-muted-foreground">{classe.replace("bg-", "--")}</code>
+                  <code className="text-muted-foreground">
+                    {SEMANTICO[nome] ?? classe.replace("bg-", "--")}
+                  </code>
                 </span>
               </li>
             ))}
