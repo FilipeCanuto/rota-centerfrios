@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileText, FileUp, Palette, Trash2 } from "lucide-react";
+import { CalendarOff, FileText, FileUp, Link2, Palette, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -63,6 +63,11 @@ function Mais() {
           <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
             <Link to="/orcamentos">
               <FileText aria-hidden="true" /> Orçamentos
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/links">
+              <Link2 aria-hidden="true" /> Links e arquivos
             </Link>
           </Button>
         </div>

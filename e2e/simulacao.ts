@@ -192,6 +192,20 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,
     "rpc/gerar_tarefas_dos_alertas": 0,
+    links: [
+      {
+        id: "l1",
+        empresa_id: null,
+        titulo: "Catálogo de freezers",
+        descricao: "PDF atualizado",
+        url: "https://exemplo.com/catalogo",
+        arquivo_path: null,
+        mensagem_whatsapp: "Segue o catálogo",
+        publico: "cliente",
+        ordem: 0,
+        ativo: true,
+      },
+    ],
     orcamentos: [
       {
         id: "o9",

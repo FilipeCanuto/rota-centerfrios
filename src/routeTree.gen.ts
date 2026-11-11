@@ -17,6 +17,7 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
+import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/links'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
@@ -63,6 +64,11 @@ const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   path: '/inicio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLinksRoute = AuthenticatedLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMaisRoute = AuthenticatedMaisRouteImport.update({
   id: '/mais',
   path: '/mais',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/links': typeof AuthenticatedLinksRoute
   '/mais': typeof AuthenticatedMaisRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/links': typeof AuthenticatedLinksRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/conversas'
     | '/inicio'
+    | '/links'
     | '/mais'
     | '/orcamentos'
     | '/clientes/$id'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/conversas'
     | '/inicio'
+    | '/links'
     | '/mais'
     | '/orcamentos'
     | '/clientes/$id'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda'
     | '/_authenticated/conversas'
     | '/_authenticated/inicio'
+    | '/_authenticated/links'
     | '/_authenticated/mais'
     | '/_authenticated/orcamentos'
     | '/_authenticated/clientes/$id'
@@ -259,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInicioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/links': {
+      id: '/_authenticated/links'
+      path: '/links'
+      fullPath: '/links'
+      preLoaderRoute: typeof AuthenticatedLinksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mais': {
       id: '/_authenticated/mais'
       path: '/mais'
@@ -308,6 +327,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedLinksRoute: typeof AuthenticatedLinksRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
@@ -320,6 +340,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedLinksRoute: AuthenticatedLinksRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,

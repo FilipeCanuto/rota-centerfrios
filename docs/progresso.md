@@ -21,7 +21,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda PR) |
 | 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
 | 8 | Orçamentos | `fase1/restante` | Concluída (aguarda PR) |
-| 9 | Central de links e arquivos | — | Depende da mensagem 13 |
+| 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
 | 10 | Gamificação | — | Depende da mensagem 14 |
 | 11 | Copiloto e mascote | — | Depende da mensagem 15 |
 | 12 | Gestão | — | Depende da mensagem 15 |
@@ -70,6 +70,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **Sem confirmação antes de gravar:** a importação é refeita reimportando o arquivo corrigido; a prévia mostra as primeiras linhas convertidas.
 
 - **Orçamentos:** o vendedor só altera `ultimo_followup`, `proximo_followup` e `observacao` (permissão por coluna); ganho e perdido vêm da importação do Shop9. "Parado" na tela usa o último retorno ou a data do orçamento; o Início também considera o último contato com o cliente, então os números podem divergir por contatos registrados fora do orçamento.
+
+- **Links e arquivos:** diretoria e administrador criam e editam; todos consultam. Arquivo abre e copia por link assinado de 7 dias; "Enviar pelo WhatsApp" abre o WhatsApp sem destinatário, com a mensagem pronta e o link. Apagar link pede confirmação do navegador.
 
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
