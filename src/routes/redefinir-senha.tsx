@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/design-system/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { ehLinkDeRecuperacao } from "@/regras";
 
 export const Route = createFileRoute("/redefinir-senha")({
   ssr: false,
@@ -34,9 +35,9 @@ function RedefinirSenha() {
   useEffect(() => {
     // Só um link de recuperação abre esta tela. Uma sessão comum (aparelho já logado)
     // não permite trocar a senha sem saber a atual.
-    const veioDoLink = /type=recovery|[?&]code=/.test(
-      window.location.search + window.location.hash,
-    );
+    const veioDoLink =
+      ehLinkDeRecuperacao(window.location.search, window.location.hash) ||
+      /[?&]code=/.test(window.location.search);
     if (!veioDoLink) {
       setTemSessao(false);
       return;
@@ -45,6 +46,13 @@ function RedefinirSenha() {
       if (e === "PASSWORD_RECOVERY") {
         setTemSessao(true);
         setEmail(s?.user.email ?? "");
+      }
+    });
+    // Se o evento de recuperação passou antes de este efeito assinar, a sessão já aberta pelo link vale.
+    void supabase.auth.getSession().then(({ data: d }) => {
+      if (d.session) {
+        setTemSessao(true);
+        setEmail(d.session.user.email ?? "");
       }
     });
     const limite = setTimeout(() => setTemSessao((v) => v ?? false), 8000);

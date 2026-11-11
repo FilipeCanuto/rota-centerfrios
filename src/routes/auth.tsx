@@ -8,6 +8,7 @@ import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { cadastroDeContaExistente, causaDoLogin, linkExpirado, MENSAGEM_LOGIN } from "@/regras";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -65,6 +66,7 @@ function Entrar() {
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [podeReenviar, setPodeReenviar] = useState(false);
   const titulo = useRef<HTMLHeadingElement>(null);
   const trocar = (m: Modo) => {
     setModo(m);
@@ -72,6 +74,7 @@ function Entrar() {
     requestAnimationFrame(() => titulo.current?.focus());
     setErro(null);
     setAviso(null);
+    setPodeReenviar(false);
   };
 
   useEffect(() => {
@@ -80,7 +83,12 @@ function Entrar() {
       window.location.search + "&" + window.location.hash.slice(1),
     );
     const falha = params.get("error_description");
-    if (falha) setErro(mensagemPrimeiroAcesso(falha));
+    if (falha)
+      setErro(
+        linkExpirado(params.toString())
+          ? "O link expirou ou já foi usado. Peça um novo em “Esqueci minha senha”."
+          : mensagemPrimeiroAcesso(falha),
+      );
   }, []);
 
   useEffect(() => {
@@ -100,7 +108,11 @@ function Entrar() {
     setEnviando(true);
     if (modo === "entrar") {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) setErro("E-mail ou senha incorretos, ou e-mail ainda não confirmado.");
+      if (error) {
+        const causa = causaDoLogin(error);
+        setErro(MENSAGEM_LOGIN[causa]);
+        setPodeReenviar(causa === "nao_confirmado");
+      }
     } else if (modo === "recuperar") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/redefinir-senha`,
@@ -108,15 +120,33 @@ function Entrar() {
       if (error) setErro("Não foi possível enviar o link agora. Tente de novo em alguns minutos.");
       else setAviso("Se esse e-mail tiver acesso, enviamos um link para criar uma nova senha.");
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
         options: { emailRedirectTo: window.location.origin, data: { full_name: nome } },
       });
       if (error) setErro(mensagemPrimeiroAcesso(error.message));
+      else if (cadastroDeContaExistente(data.user))
+        setErro(
+          "Este e-mail já tem cadastro (por exemplo, pelo Google). Use “Esqueci minha senha” para criar uma senha.",
+        );
       else setAviso("Senha criada. Confirme pelo link enviado ao seu e-mail para entrar.");
     }
     setEnviando(false);
+  }
+
+  async function reenviar() {
+    setErro(null);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) setErro("Não foi possível reenviar agora. Tente de novo em alguns minutos.");
+    else {
+      setPodeReenviar(false);
+      setAviso("Enviamos um novo e-mail de confirmação. Confira também a caixa de spam.");
+    }
   }
 
   async function google() {
@@ -212,6 +242,11 @@ function Entrar() {
               <p id={`${id}-erro`} role="alert" className="text-sm font-semibold text-perigo">
                 {erro}
               </p>
+            )}
+            {podeReenviar && (
+              <Button type="button" variant="outline" className="min-h-11" onClick={reenviar}>
+                Reenviar e-mail de confirmação
+              </Button>
             )}
             {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
             <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">

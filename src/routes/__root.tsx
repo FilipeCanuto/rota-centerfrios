@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  redirect,
   useRouter,
   HeadContent,
   Scripts,
@@ -14,6 +15,7 @@ import { ProvedorAnunciador } from "@/design-system/Anunciador";
 import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
 import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
+import { ehLinkDeRecuperacao } from "@/regras";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -79,6 +81,13 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // O link de recuperação pode cair em qualquer página (se o endereço certo não estiver na lista
+  // de URLs permitidas, o Supabase usa a página inicial): leva para a tela de nova senha com o token.
+  beforeLoad: ({ location }) => {
+    if (typeof window === "undefined" || location.pathname === "/redefinir-senha") return;
+    if (ehLinkDeRecuperacao(window.location.search, window.location.hash))
+      throw redirect({ to: "/redefinir-senha", hash: window.location.hash.slice(1) });
+  },
   head: () => ({
     // Replace these placeholders with the app's name and description when first building the app.
     // Each content route, / included, must still set its own head(). Never add og:image or
