@@ -140,15 +140,6 @@ function Vendedor({
           k="Cobertura do mês"
           v={`${pct(r.cobertura)}${metaCob > 0 ? ` (meta ${metaCob}%)` : ""}`}
         />
-        {r.cobertura !== null && metaCob > 0 && (
-          <div className="col-span-2">
-            <SeloStatus tom={r.cobertura * 100 >= metaCob ? "sucesso" : "atencao"}>
-              {r.cobertura * 100 >= metaCob
-                ? "Meta de cobertura batida"
-                : "Abaixo da meta de cobertura"}
-            </SeloStatus>
-          </div>
-        )}
         <Dado k="Orçamentos parados" v={String(r.orcamentosParados)} />
         <Dado
           k={`Sem compra há ${g.cfg.cliente_sem_compra_dias}+ dias`}
@@ -157,6 +148,15 @@ function Vendedor({
         <Dado k="Clientes esquecidos" v={String(l.esquecidos)} />
         <Dado k="Orçamentos abertos" v={String(l.orcamentos_abertos.length)} />
       </dl>
+      {r.cobertura !== null && metaCob > 0 && (
+        <div>
+          <SeloStatus tom={r.cobertura * 100 >= metaCob ? "sucesso" : "atencao"}>
+            {r.cobertura * 100 >= metaCob
+              ? "Meta de cobertura batida"
+              : "Abaixo da meta de cobertura"}
+          </SeloStatus>
+        </div>
+      )}
     </li>
   );
 }
