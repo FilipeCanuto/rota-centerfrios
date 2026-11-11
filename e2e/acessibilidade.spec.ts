@@ -6,6 +6,7 @@ import { simularBackend } from "./simulacao";
 const ROTAS = [
   { url: "/auth", titulo: "Entrar na Rota", logado: false },
   { url: "/design-system", titulo: "Design system Polar", logado: false },
+  { url: "/redefinir-senha", titulo: "Crie uma nova senha", logado: false },
   { url: "/inicio", titulo: "Olá, Clara", logado: true },
   { url: "/conversas", titulo: "Conversas", logado: true },
   { url: "/clientes", titulo: "Clientes", logado: true },
