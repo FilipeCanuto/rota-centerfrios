@@ -504,40 +504,52 @@ export type Database = {
       }
       links: {
         Row: {
+          arquivo_path: string | null
+          ativo: boolean
           created_at: string
           demo: boolean
           descricao: string | null
-          empresa_id: string
+          empresa_id: string | null
           icone: string | null
           id: string
+          mensagem_whatsapp: string | null
+          ordem: number
           origem: Database["public"]["Enums"]["origem_dado"]
           publico: string
           titulo: string
-          url: string
+          url: string | null
         }
         Insert: {
+          arquivo_path?: string | null
+          ativo?: boolean
           created_at?: string
           demo?: boolean
           descricao?: string | null
-          empresa_id: string
+          empresa_id?: string | null
           icone?: string | null
           id?: string
+          mensagem_whatsapp?: string | null
+          ordem?: number
           origem?: Database["public"]["Enums"]["origem_dado"]
           publico?: string
           titulo: string
-          url: string
+          url?: string | null
         }
         Update: {
+          arquivo_path?: string | null
+          ativo?: boolean
           created_at?: string
           demo?: boolean
           descricao?: string | null
-          empresa_id?: string
+          empresa_id?: string | null
           icone?: string | null
           id?: string
+          mensagem_whatsapp?: string | null
+          ordem?: number
           origem?: Database["public"]["Enums"]["origem_dado"]
           publico?: string
           titulo?: string
-          url?: string
+          url?: string | null
         }
         Relationships: [
           {
