@@ -17,7 +17,8 @@ export const Route = createFileRoute("/_authenticated/conversas")({
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-extrabold sm:text-3xl">Conversas</h1>
       <EstadoVazio icone={MessageCircle} titulo="Suas conversas vão aparecer aqui">
-        Quando o WhatsApp e o Instagram forem conectados, você verá aqui as conversas com seus clientes, com o histórico de cada um e respostas rápidas.
+        Quando o WhatsApp e o Instagram forem conectados, você verá aqui as conversas com seus
+        clientes, com o histórico de cada um e respostas rápidas.
       </EstadoVazio>
     </div>
   ),

@@ -15,7 +15,9 @@ const tons: Record<TomStatus, { classe: string; Icone: typeof Info }> = {
 export function SeloStatus({ tom, children }: { tom: TomStatus; children: ReactNode }) {
   const { classe, Icone } = tons[tom];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-sm font-semibold ${classe}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-sm font-semibold ${classe}`}
+    >
       <Icone className="size-4 shrink-0" aria-hidden="true" />
       {children}
     </span>

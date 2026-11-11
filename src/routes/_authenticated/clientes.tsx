@@ -17,7 +17,8 @@ export const Route = createFileRoute("/_authenticated/clientes")({
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-extrabold sm:text-3xl">Clientes</h1>
       <EstadoVazio icone={Users} titulo="Sua carteira completa vai aparecer aqui">
-        Aqui você vai encontrar todos os clientes da sua carteira, com filtros por segmento, status de recompra, última compra e histórico de contatos.
+        Aqui você vai encontrar todos os clientes da sua carteira, com filtros por segmento, status
+        de recompra, última compra e histórico de contatos.
       </EstadoVazio>
     </div>
   ),
