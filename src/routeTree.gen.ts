@@ -18,6 +18,7 @@ import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
+import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
 import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
@@ -67,6 +68,11 @@ const AuthenticatedMaisRoute = AuthenticatedMaisRouteImport.update({
   path: '/mais',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
+  id: '/orcamentos',
+  path: '/orcamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedClientesIndexRoute =
   AuthenticatedClientesIndexRouteImport.update({
     id: '/clientes/',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/conversas': typeof AuthenticatedConversasRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/mais': typeof AuthenticatedMaisRoute
+  '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
+  '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/conversas'
     | '/inicio'
     | '/mais'
+    | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/conversas'
     | '/inicio'
     | '/mais'
+    | '/orcamentos'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conversas'
     | '/_authenticated/inicio'
     | '/_authenticated/mais'
+    | '/_authenticated/orcamentos'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
     | '/_authenticated/configuracoes/importacao'
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMaisRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/orcamentos': {
+      id: '/_authenticated/orcamentos'
+      path: '/orcamentos'
+      fullPath: '/orcamentos'
+      preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clientes/': {
       id: '/_authenticated/clientes/'
       path: '/clientes'
@@ -290,6 +309,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConversasRoute: typeof AuthenticatedConversasRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
+  AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
   AuthenticatedConfiguracoesImportacaoRoute: typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -301,6 +321,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConversasRoute: AuthenticatedConversasRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
+  AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedConfiguracoesFeriadosRoute:
     AuthenticatedConfiguracoesFeriadosRoute,

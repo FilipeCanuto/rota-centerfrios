@@ -20,7 +20,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
 | 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda PR) |
 | 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
-| 8 | Orçamentos | — | Depende da mensagem 10 |
+| 8 | Orçamentos | `fase1/restante` | Concluída (aguarda PR) |
 | 9 | Central de links e arquivos | — | Depende da mensagem 13 |
 | 10 | Gamificação | — | Depende da mensagem 14 |
 | 11 | Copiloto e mascote | — | Depende da mensagem 15 |
@@ -68,6 +68,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Importação de vendas:** se uma linha de uma nota tem erro, a nota inteira fica de fora (gravar só parte dos itens deixaria a venda errada). Se um lote de 5.000 falhar, os anteriores já foram gravados; reimportar não duplica.
 - **Sem confirmação antes de gravar:** a importação é refeita reimportando o arquivo corrigido; a prévia mostra as primeiras linhas convertidas.
+
+- **Orçamentos:** o vendedor só altera `ultimo_followup`, `proximo_followup` e `observacao` (permissão por coluna); ganho e perdido vêm da importação do Shop9. "Parado" na tela usa o último retorno ou a data do orçamento; o Início também considera o último contato com o cliente, então os números podem divergir por contatos registrados fora do orçamento.
 
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).

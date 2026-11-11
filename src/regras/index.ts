@@ -3,6 +3,7 @@ export * from "./configuracoes";
 export * from "./metas";
 export * from "./carteira";
 export * from "./painel";
+export * from "./orcamentos";
 export * from "./saude";
 export * from "./planilha";
 export * from "./importacao";

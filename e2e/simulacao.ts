@@ -192,6 +192,20 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,
     "rpc/gerar_tarefas_dos_alertas": 0,
+    orcamentos: [
+      {
+        id: "o9",
+        empresa_id: EMPRESA_CF,
+        cliente_id: CLIENTES_LISTA[0]!.id,
+        status: "aberto",
+        data: diasAtras(9),
+        valor: 9000,
+        ultimo_followup: diasAtras(8),
+        proximo_followup: diasAtras(1),
+        observacao: "Aguardando aprovação do sócio",
+        clientes: { nome: CLIENTES_LISTA[0]!.nome },
+      },
+    ],
     tarefas_agenda: [
       {
         id: "t1",
