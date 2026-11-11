@@ -86,7 +86,8 @@ export function TelaOrcamentos() {
       ) : (
         <>
           <p className="text-muted-foreground" aria-live="polite">
-            {lista.length} {lista.length === 1 ? "orçamento" : "orçamentos"} somando{" "}
+            {lista.length} {lista.length === 1 ? "orçamento" : "orçamentos"} somando
+            {lista.length === 200 ? " pelo menos " : " "}
             <span className="numeros font-semibold text-foreground">{formatarMoeda(total)}</span>
             {aba === "aberto" && parados > 0 && ` · ${parados} parado${parados > 1 ? "s" : ""}`}
             {lista.length === 200 && " · mostrando os 200 mais recentes"}

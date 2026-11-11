@@ -58,7 +58,12 @@ export function Copiloto({ usuario, contexto }: { usuario: Usuario; contexto: Co
           aria-expanded={!minimizado}
           aria-label={minimizado ? "Mostrar o copiloto" : "Minimizar o copiloto"}
           disabled={atualizar.isPending}
-          onClick={() => atualizar.mutate({ copiloto_minimizado: !minimizado })}
+          onClick={() =>
+            atualizar.mutate(
+              { copiloto_minimizado: !minimizado },
+              { onError: () => toast.error("Não foi possível salvar. Tente de novo.") },
+            )
+          }
         >
           {minimizado ? <ChevronDown aria-hidden="true" /> : <ChevronUp aria-hidden="true" />}
         </Button>

@@ -6,6 +6,13 @@ import { SeloStatus } from "@/design-system/SeloStatus";
 import { whatsappManual } from "@/integracoes/manual";
 import { linkAssinado, type Link } from "./dados";
 
+/** Abre a aba já no clique (o navegador bloquearia depois da espera) e a isola da página. */
+function abrirAba() {
+  const janela = window.open("", "_blank");
+  if (janela) janela.opener = null;
+  return janela;
+}
+
 export function ItemLink({
   link,
   empresa,
@@ -21,7 +28,10 @@ export function ItemLink({
 
   /** Endereço a enviar: o link, ou o link temporário (7 dias) do arquivo. */
   async function endereco() {
-    return link.arquivo_path ? linkAssinado(link.arquivo_path) : (link.url ?? "");
+    const alvo = link.arquivo_path ? await linkAssinado(link.arquivo_path) : (link.url ?? "");
+    // Só http(s): a coluna do banco aceita qualquer texto, e "javascript:" não pode chegar ao navegador.
+    if (!/^https?:\/\//i.test(alvo)) throw new Error("Endereço inválido");
+    return alvo;
   }
 
   async function copiar() {
@@ -36,7 +46,7 @@ export function ItemLink({
 
   async function whatsapp() {
     // Abre a janela já no clique; o navegador bloquearia depois da espera.
-    const janela = window.open("", "_blank", "noopener");
+    const janela = abrirAba();
     try {
       const texto = [link.mensagem_whatsapp, await endereco()].filter(Boolean).join("\n");
       const alvo = whatsappManual.abrirConversa("", texto);
@@ -49,7 +59,7 @@ export function ItemLink({
   }
 
   async function abrir() {
-    const janela = window.open("", "_blank", "noopener");
+    const janela = abrirAba();
     try {
       const alvo = await endereco();
       if (janela) janela.location.href = alvo;
