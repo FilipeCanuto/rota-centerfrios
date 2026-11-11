@@ -66,6 +66,71 @@ export const PAINEL = {
   ],
 };
 
+export const CLIENTE_ID = PAINEL.clientes[0]!.id;
+const CLIENTES_LISTA = PAINEL.clientes.map((c, i) => ({
+  id: c.id,
+  nome: c.nome,
+  cidade: c.cidade,
+  segmento: c.segmento,
+  etiquetas: i === 0 ? ["Rede", "Inauguração"] : [],
+  data_ultima_compra: c.data_ultima_compra,
+  vendedor_id: USUARIO_ID,
+  empresa_id: c.empresa_id,
+}));
+const FICHA = {
+  cliente: {
+    ...CLIENTES_LISTA[0],
+    telefone: "5582999990000",
+    email: null,
+    documento: null,
+    codigo_shop9: "1001",
+  },
+  compras: [
+    {
+      id: "v1",
+      data: diasAtras(50),
+      valor: 3200,
+      codigo_shop9: "NF1",
+      itens: [{ produto: "Freezer horizontal 500 L", quantidade: 1, valor_total: 3200 }],
+    },
+    { id: "v2", data: diasAtras(60), valor: 900, codigo_shop9: "NF2", itens: [] },
+  ],
+  total_12m: 4100,
+  qtd_12m: 2,
+  ticket_medio_12m: 2050,
+  itens_mais_comprados: [{ produto: "Freezer horizontal 500 L", quantidade: 1, valor_total: 3200 }],
+  orcamentos: [
+    {
+      id: "o9",
+      status: "aberto",
+      data: diasAtras(9),
+      valor: 9000,
+      ultimo_followup: diasAtras(8),
+      proximo_followup: null,
+      observacao: "Aguardando aprovação do sócio",
+    },
+  ],
+  interacoes: [
+    {
+      id: "i1",
+      tipo: "visita",
+      cliente_respondeu: true,
+      resultado: "Pediu orçamento",
+      data: `${diasAtras(9)}T13:00:00Z`,
+      dia_local: diasAtras(9),
+    },
+  ],
+  notas: [
+    {
+      id: "n1",
+      texto: "Prefere entrega pela manhã.",
+      autor_id: USUARIO_ID,
+      autor_nome: "Clara",
+      created_at: new Date().toISOString(),
+    },
+  ],
+};
+
 const FERIADOS = [
   {
     id: "f1",
@@ -123,7 +188,8 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     configuracoes_regras: [],
     feriados: FERIADOS,
     "rpc/painel_vendedor": PAINEL,
-    clientes: [],
+    clientes: CLIENTES_LISTA,
+    "rpc/ficha_cliente": FICHA,
     ...extras,
   };
 
@@ -136,6 +202,14 @@ export async function simularBackend(page: Page, extras: Record<string, unknown>
     const objeto = route.request().headers()["accept"]?.includes("vnd.pgrst.object");
     if (objeto && Array.isArray(corpo)) corpo = corpo[0] ?? null;
     if (!objeto && caminho === "usuarios") corpo = [corpo];
-    return json(route, corpo);
+    const cabecalhos = Array.isArray(corpo)
+      ? { "Content-Range": `0-${Math.max(0, corpo.length - 1)}/${corpo.length}` }
+      : {};
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: cabecalhos,
+      body: JSON.stringify(corpo),
+    });
   });
 }
