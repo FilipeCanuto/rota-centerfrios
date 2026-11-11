@@ -7,6 +7,11 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Rodar `select public.carregar_feriados_nacionais();`, que carrega os 20 feriados nacionais de 2026 e 2027 e devolve quantos inseriu.
 - [ ] Conferir que CENTERFRIOS e 381 Distribuidora existem e estão com `demo = false`.
 
+## 1b. Dados do Shop9 (Mais → Importar planilhas do Shop9, diretoria)
+- [ ] Exportar do Shop9 e salvar como CSV: clientes (com o e-mail do vendedor), vendas faturadas (uma linha por item, se possível) e orçamentos.
+- [ ] Importar nesta ordem: clientes → vendas → orçamentos. Corrigir na planilha as linhas do relatório de erros e importar de novo (reimportar não duplica).
+- [ ] Conferir na tela Início de cada vendedor: faturado do mês e cobertura.
+
 ## 2. Calendário (Configurações → Feriados e dias sem expediente)
 - [ ] Cadastrar os feriados estaduais de Alagoas, pela lista oficial da contabilidade.
 - [ ] Cadastrar os feriados municipais (Maceió e demais cidades com loja), pela lista da contabilidade.
@@ -31,6 +36,8 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Supervisor: vê a equipe; consegue remanejar só cliente com 90 dias ou mais sem compra, e a troca aparece na auditoria.
 - [ ] Diretoria: vê as duas empresas; edita metas, regras e feriados.
 - [ ] Administrador: gerencia usuários e links; não vê carteira, vendas nem metas.
+- [ ] Agenda: abrir a Agenda num dia com plano do dia cria um retorno por cliente; abrir de novo no dia seguinte, sem concluir, **não** cria outro retorno para o mesmo cliente.
+- [ ] Agenda: "Agendar" no plano do dia e na ficha abre a nova tarefa com o cliente; salvar e editar funcionam com o banco real.
 
 ## 6. Publicação
 - [ ] Juntar ao `main` os PRs aprovados da revisão e publicar pelo Lovable.

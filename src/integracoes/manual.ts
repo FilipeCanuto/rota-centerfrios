@@ -1,4 +1,13 @@
-import type { CanalMensagens, Copiloto, FonteInstagram, FonteVendas, Voz } from "./tipos";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
+import type {
+  CanalMensagens,
+  Copiloto,
+  FonteInstagram,
+  FonteShop9,
+  ResultadoImportacao,
+  Voz,
+} from "./tipos";
 
 /** Telefone só com dígitos e com DDI 55 quando faltar. Pelo tamanho: 10–11 dígitos é nacional (DDD + número). */
 export function normalizarTelefone(t: string): string {
@@ -15,10 +24,40 @@ export const whatsappManual: CanalMensagens = {
   },
 };
 
-export const vendasPorPlanilha: FonteVendas = {
-  nome: "Importação de planilha",
-  async importarVendas() {
-    return { importadas: 0, erros: ["Importação de planilha ainda não disponível nesta etapa."] };
+const LOTE = 5000; // limite por chamada das funções importar_* no banco
+
+/** Planilha exportada do Shop9: grava pelas funções do banco (só diretoria), em lotes. */
+export const shop9PorPlanilha: FonteShop9 = {
+  nome: "Planilha do Shop9",
+  async importar(tipo, empresaId, arquivo, linhas) {
+    const total: ResultadoImportacao = {
+      importacao_id: "",
+      inseridas: 0,
+      atualizadas: 0,
+      ignoradas: 0,
+      erros: [],
+    };
+    for (let i = 0; i < linhas.length; i += LOTE) {
+      const { data, error } = await supabase.rpc(`importar_${tipo}`, {
+        _empresa_id: empresaId,
+        _arquivo: arquivo,
+        _linhas: linhas.slice(i, i + LOTE) as Json,
+      });
+      if (error) {
+        total.falha =
+          i === 0
+            ? error.message
+            : `${error.message} (as primeiras ${i} linhas já foram gravadas; reimportar o arquivo não duplica).`;
+        return total;
+      }
+      const r = data as unknown as ResultadoImportacao;
+      total.importacao_id ||= r.importacao_id;
+      total.inseridas += r.inseridas;
+      total.atualizadas += r.atualizadas;
+      total.ignoradas += r.ignoradas;
+      total.erros.push(...r.erros);
+    }
+    return total;
   },
 };
 

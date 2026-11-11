@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { simularBackend } from "./simulacao";
+import { CLIENTE_ID, simularBackend } from "./simulacao";
 
 /** Todas as telas, verificadas com axe (WCAG 2.2 AA) em cada projeto (celular/desktop × claro/escuro). */
 const ROTAS = [
@@ -11,8 +11,10 @@ const ROTAS = [
   { url: "/inicio", titulo: "Olá, Clara", logado: true },
   { url: "/conversas", titulo: "Conversas", logado: true },
   { url: "/clientes", titulo: "Clientes", logado: true },
+  { url: `/clientes/${CLIENTE_ID}`, titulo: "Cliente Teste 1", logado: true },
   { url: "/agenda", titulo: "Agenda", logado: true },
   { url: "/mais", titulo: "Mais", logado: true },
+  { url: "/configuracoes/importacao", titulo: "Importar planilhas do Shop9", logado: true },
   { url: "/configuracoes/feriados", titulo: "Feriados e dias sem expediente", logado: true },
 ];
 
@@ -72,6 +74,8 @@ for (const rota of ROTAS) {
 }
 
 test("componentes abertos passam no axe: busca, notificações, menu e tabela", async ({ page }) => {
+  // Sem animação de entrada: o axe mediria o contraste no meio do esmaecimento.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await simularBackend(page);
   await page.goto("/inicio");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

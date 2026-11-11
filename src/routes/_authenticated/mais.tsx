@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, Palette, Trash2 } from "lucide-react";
+import { CalendarOff, FileUp, Palette, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -79,6 +79,15 @@ function Mais() {
           <Button asChild variant="outline" className="h-auto whitespace-normal text-left">
             <Link to="/configuracoes/feriados">
               <CalendarOff aria-hidden="true" /> Feriados e dias sem expediente
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="ml-0 mt-2 h-auto whitespace-normal text-left sm:ml-2 sm:mt-0"
+          >
+            <Link to="/configuracoes/importacao">
+              <FileUp aria-hidden="true" /> Importar planilhas do Shop9
             </Link>
           </Button>
         </section>

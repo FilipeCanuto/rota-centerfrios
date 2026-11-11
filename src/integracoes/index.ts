@@ -1,7 +1,7 @@
 import {
   copilotoPorRegras,
   instagramManual,
-  vendasPorPlanilha,
+  shop9PorPlanilha,
   vozDoAparelho,
   whatsappManual,
 } from "./manual";
@@ -11,7 +11,7 @@ export { normalizarTelefone } from "./manual";
 /** Ponto único de troca: substitua aqui pelas implementações reais quando houver integração. */
 export const integracoes = {
   mensagens: whatsappManual,
-  vendas: vendasPorPlanilha,
+  shop9: shop9PorPlanilha,
   copiloto: copilotoPorRegras,
   instagram: instagramManual,
   voz: vozDoAparelho,

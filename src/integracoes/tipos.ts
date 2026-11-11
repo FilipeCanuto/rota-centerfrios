@@ -2,14 +2,27 @@
  * Contratos das integrações futuras (ERP, WhatsApp, Instagram, IA, voz).
  * As telas dependem só destas interfaces; cada uma tem hoje uma implementação "manual".
  */
-export interface LinhaImportada {
-  [coluna: string]: string | number | null;
+export type TipoImportacaoShop9 = "clientes" | "vendas" | "orcamentos";
+
+export interface ResultadoImportacao {
+  importacao_id: string;
+  inseridas: number;
+  atualizadas: number;
+  ignoradas: number;
+  erros: { linha: number; campo: string; mensagem: string }[];
+  /** Preenchido se um lote falhou: os lotes anteriores já foram gravados. */
+  falha?: string;
 }
 
-export interface FonteVendas {
+export interface FonteShop9 {
   nome: string;
-  /** Importa vendas faturadas (planilha hoje, ERP depois). */
-  importarVendas(linhas: LinhaImportada[]): Promise<{ importadas: number; erros: string[] }>;
+  /** Grava linhas já validadas (planilha hoje; o módulo Integrações do Shop9 depois). */
+  importar(
+    tipo: TipoImportacaoShop9,
+    empresaId: string,
+    arquivo: string,
+    linhas: Record<string, unknown>[],
+  ): Promise<ResultadoImportacao>;
 }
 
 export interface CanalMensagens {
