@@ -40,3 +40,6 @@ As 7 mensagens foram enviadas pelo Claude Code direto ao projeto no Lovable. Os 
 3. **Arquivos `tests/__pycache__/*.pyc` versionados** pelo Lovable. Correção: `__pycache__/` no `.gitignore` e tirar do repositório.
 4. **Metas de demonstração** iguais nas duas empresas (R$ 120.000 cada). Na visão "ambas" a meta soma R$ 240.000. Só afeta a demonstração.
 5. **Regra nova sem uso no app:** as telas ainda leem vendas linha a linha e não usam `painel_vendedor`, `cobertura_vendedor` nem a tabela `feriados`. Isso é a Etapa C (passo 2).
+
+## Fase 1 (mensagens 10 a 15)
+Cole na ordem: 10 clientes e notas · 11 importação Shop9 · 12 agenda · 13 links e arquivos · 14 gamificação · 15 gestão, copiloto, notificações e demonstração. Cada uma termina com "Como conferir".
