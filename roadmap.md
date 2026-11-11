@@ -1,4 +1,6 @@
 # Restrição de acesso por convite
+- [ ] Restringir atualização administrativa e auditar alterações em migração nova; testar como administrador e vendedor, limpar temporários e caches Python.
+- [ ] Ignorar __pycache__/ e *.pyc: .gitignore gerenciado pela plataforma, alteração bloqueada; depende de edição pelo usuário.
 - [x] Reclassificar empresas reais e criar limpeza/recriação demo e carga idempotente de feriados em migrações novas; correção de aliases em 0010 sem editar 0009.
 - [x] Verificar preservação de dados reais, contas, casos demo, permissões e auditoria; oito testes passaram, demonstração recriada nas contas atuais.
 - [x] Criar painel_vendedor e cobertura_vendedor em migração nova; manter tipos regenerados.
