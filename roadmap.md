@@ -1,6 +1,8 @@
 # Restrição de acesso por convite
-- [ ] Otimizar índices e chamadas constantes nas políticas em migração nova, preservando src/.
-- [ ] Garantir carga idempotente de feriados e verificar planos e quatro perfis; limpar testes.
+- [x] Otimizar índices e chamadas constantes nas políticas em migração nova, preservando src/.
+- [x] Repetir quatro perfis e conferir 20 feriados; limpar todos os testes.
+- [ ] Carga de feriados na migração: ferramenta permite DDL e backfill estrutural, não carga inicial independente.
+- [ ] EXPLAIN autenticado: API não disponibiliza planos (HTTP 406).
 - [x] Criar feriados em migração nova, carregar as 20 datas nacionais e regenerar tipos.
 - [x] Conferir 19 dias úteis em novembro/2026, RLS e auditoria; apagar dados temporários (7 testes passaram).
 - [x] Aplicar remanejamento protegido, auditoria automática e supervisor por empresa em migração nova.
