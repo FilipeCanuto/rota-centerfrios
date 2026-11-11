@@ -7,6 +7,11 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Rodar `select public.carregar_feriados_nacionais();`, que carrega os 20 feriados nacionais de 2026 e 2027 e devolve quantos inseriu.
 - [ ] Conferir que CENTERFRIOS e 381 Distribuidora existem e estão com `demo = false`.
 
+## 1b. Dados do Shop9 (Mais → Importar planilhas do Shop9, diretoria)
+- [ ] Exportar do Shop9 e salvar como CSV: clientes (com o e-mail do vendedor), vendas faturadas (uma linha por item, se possível) e orçamentos.
+- [ ] Importar nesta ordem: clientes → vendas → orçamentos. Corrigir na planilha as linhas do relatório de erros e importar de novo (reimportar não duplica).
+- [ ] Conferir na tela Início de cada vendedor: faturado do mês e cobertura.
+
 ## 2. Calendário (Configurações → Feriados e dias sem expediente)
 - [ ] Cadastrar os feriados estaduais de Alagoas, pela lista oficial da contabilidade.
 - [ ] Cadastrar os feriados municipais (Maceió e demais cidades com loja), pela lista da contabilidade.

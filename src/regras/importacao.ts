@@ -194,7 +194,9 @@ export function montarLinhas(
 
   dados.forEach((l, i) => {
     const n = primeiraLinha + i;
-    const erro = (campo: string, mensagem: string) => erros.push({ linha: n, campo, mensagem });
+    const erro = (campo: string, mensagem: string): void => {
+      erros.push({ linha: n, campo, mensagem });
+    };
     const faltando = CAMPOS[tipo].find((c) => c.obrigatorio && !valor(l, c.chave));
     if (faltando) return erro(faltando.chave, `${faltando.rotulo} vazio.`);
     const codigo = valor(l, "codigo_shop9");
@@ -266,11 +268,11 @@ export function montarLinhas(
     const existente = vistos.get(codigo);
     if (existente) {
       if (
-        existente.cliente_codigo !== valor(l, "cliente_codigo") ||
-        existente.data_faturamento !== data
+        existente["cliente_codigo"] !== valor(l, "cliente_codigo") ||
+        existente["data_faturamento"] !== data
       )
         return erro("codigo_shop9", `Nota ${codigo} aparece com outro cliente ou outra data.`);
-      if (item) (existente.itens as unknown[]).push(item);
+      if (item) (existente["itens"] as unknown[]).push(item);
       return;
     }
     if (valorNota === null && !item) return erro("valor", "Informe o valor da nota ou os itens.");
@@ -288,8 +290,8 @@ export function montarLinhas(
 
   if (tipo === "vendas")
     for (const v of linhas) {
-      const itens = v.itens as { valor_total: number }[];
-      if (v.valor === null) v.valor = itens.reduce((s, i) => s + i.valor_total, 0);
+      const itens = v["itens"] as { valor_total: number }[];
+      if (v["valor"] === null) v["valor"] = itens.reduce((s, i) => s + i.valor_total, 0);
     }
   return { linhas, erros };
 }

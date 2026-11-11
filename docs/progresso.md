@@ -18,7 +18,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
 | 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
 | 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
-| 6 | Importação do Shop9 | — | Depende da mensagem 11 |
+| 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda envio) |
 | 7 | Agenda | — | Depende da mensagem 12 |
 | 8 | Orçamentos | — | Depende da mensagem 10 |
 | 9 | Central de links e arquivos | — | Depende da mensagem 13 |
@@ -60,6 +60,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). *Aprovado pela diretoria em 11/11/2026.*
 - **Remanejamento:** supervisor e diretoria; a diretoria tem acesso total (aprovado em 11/11/2026).
+
+- **Importação só de CSV:** o Excel salva como CSV (Arquivo → Salvar como → CSV). Ler .xlsx exigiria uma biblioteca pesada; fica para quando o Shop9 for integrado direto.
 
 ## Pendências abertas
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).

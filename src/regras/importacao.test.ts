@@ -101,7 +101,7 @@ describe("montar linhas", () => {
       data_faturamento: "2026-11-09",
       valor: 3050,
     });
-    expect((r.linhas[0]!.itens as unknown[]).length).toBe(2);
+    expect((r.linhas[0]!["itens"] as unknown[]).length).toBe(2);
     expect(r.erros.map((e) => e.linha)).toEqual([4, 5]);
   });
   it("vendas: sem valor e sem itens é erro", () => {
@@ -130,7 +130,7 @@ describe("montar linhas", () => {
       ],
       mapa,
     );
-    expect(r.linhas.map((l) => l.status)).toEqual(["ganho"]);
+    expect(r.linhas.map((l) => l["status"])).toEqual(["ganho"]);
     expect(r.erros.map((e) => e.campo)).toEqual(["valor", "status"]);
   });
 });
