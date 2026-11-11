@@ -7,7 +7,8 @@
 <style>
   /* Página estática sem o CSS do app: cores do Polar escritas aqui (tema claro e escuro). */
   :root { color-scheme: light dark; --fundo: #F7F8FB; --texto: #0B1F44; --apoio: #5B6577; --primaria: #1B4FA0; --sobre: #FFFFFF; }
-  @media (prefers-color-scheme: dark) { :root { --fundo: #0A1730; --texto: #E9EDF5; --apoio: #A9B4C8; --primaria: #7FA8F0; --sobre: #0A1730; } }
+  :root.escuro { --fundo: #0A1730; --texto: #E9EDF5; --apoio: #A9B4C8; --primaria: #7FA8F0; --sobre: #0A1730; }
+  @media (prefers-color-scheme: dark) { :root:not(.claro) { --fundo: #0A1730; --texto: #E9EDF5; --apoio: #A9B4C8; --primaria: #7FA8F0; --sobre: #0A1730; } }
   body { margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 1rem; background: var(--fundo); color: var(--texto); font: 1rem/1.55 Inter, system-ui, sans-serif; }
   main { max-width: 28rem; text-align: center; }
   h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
@@ -15,6 +16,10 @@
   button { min-height: 2.75rem; padding: 0 1.25rem; border: 0; border-radius: 8px; background: var(--primaria); color: var(--sobre); font: inherit; font-weight: 600; cursor: pointer; }
   button:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
 </style>
+<script>
+  // Mesmo tema escolhido no app (salvo neste aparelho).
+  try { var t = localStorage.getItem("rota-tema"); if (t === "escuro" || t === "claro") document.documentElement.classList.add(t); } catch (e) {}
+</script>
 </head>
 <body>
 <main>
