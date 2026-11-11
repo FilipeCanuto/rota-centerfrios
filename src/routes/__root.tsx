@@ -149,6 +149,12 @@ function RootComponent() {
     return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(() => {
+    // Página "sem conexão" quando o app instalado abre sem internet (só no app publicado).
+    if (import.meta.env.PROD && "serviceWorker" in navigator)
+      navigator.serviceWorker.register("/sw.js");
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ProvedorTema aoMudar={salvarTemaDoUsuario}>
