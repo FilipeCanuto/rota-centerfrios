@@ -43,6 +43,13 @@
       "when": 1794365609535,
       "tag": "0005_remanejamento_auditoria",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794366134521,
+      "tag": "0006_feriados",
+      "breakpoints": true
     }
   ]
 }

@@ -248,6 +248,47 @@ export type Database = {
           },
         ]
       }
+      feriados: {
+        Row: {
+          abrangencia: string
+          created_at: string
+          data: string
+          empresa_id: string | null
+          id: string
+          localidade: string | null
+          nome: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+        }
+        Insert: {
+          abrangencia: string
+          created_at?: string
+          data: string
+          empresa_id?: string | null
+          id?: string
+          localidade?: string | null
+          nome: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+        }
+        Update: {
+          abrangencia?: string
+          created_at?: string
+          data?: string
+          empresa_id?: string | null
+          id?: string
+          localidade?: string | null
+          nome?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feriados_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interacoes: {
         Row: {
           cliente_id: string
