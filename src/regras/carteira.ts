@@ -1,5 +1,5 @@
 import type { ConfiguracaoRegras } from "./configuracoes";
-import { diasEntre, diasUteisDesde, paraData, type Feriados } from "./datas";
+import { diasEntre, diasUteisDesde, formatarISO, paraData, type Feriados } from "./datas";
 
 export type TipoInteracao = "whatsapp" | "ligacao" | "visita" | "outro";
 
@@ -53,6 +53,15 @@ export function intervaloMedioCompras(datas: string[], minimo: number): number |
   if (unicas.length < minimo || unicas.length < 2) return null;
   const total = diasEntre(paraData(unicas[0]!), paraData(unicas[unicas.length - 1]!));
   return total / (unicas.length - 1);
+}
+
+/** Data prevista da próxima compra: última compra + intervalo médio (arredondado). Sem histórico suficiente, nulo. */
+export function dataPrevistaRecompra(datas: string[], cfg: ConfiguracaoRegras): string | null {
+  const intervalo = intervaloMedioCompras(datas, cfg.recompra_minimo_compras);
+  if (intervalo === null || intervalo <= 0) return null;
+  const d = paraData([...datas].sort().at(-1)!.slice(0, 10));
+  d.setDate(d.getDate() + Math.round(intervalo));
+  return formatarISO(d);
 }
 
 export function statusRecompra(
