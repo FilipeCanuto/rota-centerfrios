@@ -721,6 +721,60 @@ export type Database = {
           },
         ]
       }
+      notificacoes: {
+        Row: {
+          chave: string | null
+          corpo: string | null
+          created_at: string
+          empresa_id: string | null
+          id: string
+          lida_em: string | null
+          link: string | null
+          tipo: string
+          titulo: string
+          usuario_id: string
+        }
+        Insert: {
+          chave?: string | null
+          corpo?: string | null
+          created_at?: string
+          empresa_id?: string | null
+          id?: string
+          lida_em?: string | null
+          link?: string | null
+          tipo: string
+          titulo: string
+          usuario_id: string
+        }
+        Update: {
+          chave?: string | null
+          corpo?: string | null
+          created_at?: string
+          empresa_id?: string | null
+          id?: string
+          lida_em?: string | null
+          link?: string | null
+          tipo?: string
+          titulo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orcamentos: {
         Row: {
           cliente_id: string
@@ -949,6 +1003,44 @@ export type Database = {
             foreignKeyName: "posts_instagram_vendedor_id_fkey"
             columns: ["vendedor_id"]
             isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preferencias_notificacao: {
+        Row: {
+          created_at: string
+          expediente_fim: string
+          expediente_inicio: string
+          sabado_fim: string | null
+          sabado_inicio: string | null
+          tipos_desligados: string[]
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          expediente_fim?: string
+          expediente_inicio?: string
+          sabado_fim?: string | null
+          sabado_inicio?: string | null
+          tipos_desligados?: string[]
+          usuario_id?: string
+        }
+        Update: {
+          created_at?: string
+          expediente_fim?: string
+          expediente_inicio?: string
+          sabado_fim?: string | null
+          sabado_inicio?: string | null
+          tipos_desligados?: string[]
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencias_notificacao_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: true
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
@@ -1220,6 +1312,7 @@ export type Database = {
         Row: {
           apelido_copiloto: string
           auth_user_id: string | null
+          copiloto_minimizado: boolean
           created_at: string
           demo: boolean
           email: string | null
@@ -1229,11 +1322,13 @@ export type Database = {
           nome: string
           origem: Database["public"]["Enums"]["origem_dado"]
           perfil: Database["public"]["Enums"]["app_role"]
+          pinguim_versao: string
           tema: string
         }
         Insert: {
           apelido_copiloto?: string
           auth_user_id?: string | null
+          copiloto_minimizado?: boolean
           created_at?: string
           demo?: boolean
           email?: string | null
@@ -1243,11 +1338,13 @@ export type Database = {
           nome: string
           origem?: Database["public"]["Enums"]["origem_dado"]
           perfil?: Database["public"]["Enums"]["app_role"]
+          pinguim_versao?: string
           tema?: string
         }
         Update: {
           apelido_copiloto?: string
           auth_user_id?: string | null
+          copiloto_minimizado?: boolean
           created_at?: string
           demo?: boolean
           email?: string | null
@@ -1257,6 +1354,7 @@ export type Database = {
           nome?: string
           origem?: Database["public"]["Enums"]["origem_dado"]
           perfil?: Database["public"]["Enums"]["app_role"]
+          pinguim_versao?: string
           tema?: string
         }
         Relationships: [
@@ -1347,6 +1445,7 @@ export type Database = {
         Returns: {
           apelido_copiloto: string
           auth_user_id: string | null
+          copiloto_minimizado: boolean
           created_at: string
           demo: boolean
           email: string | null
@@ -1356,6 +1455,7 @@ export type Database = {
           nome: string
           origem: Database["public"]["Enums"]["origem_dado"]
           perfil: Database["public"]["Enums"]["app_role"]
+          pinguim_versao: string
           tema: string
         }
         SetofOptions: {
@@ -1466,6 +1566,10 @@ export type Database = {
         Returns: Json
       }
       meu_usuario_id: { Args: never; Returns: string }
+      painel_gestao: {
+        Args: { _empresa_id: string; _hoje?: string }
+        Returns: Json
+      }
       painel_vendedor: {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
         Returns: Json
@@ -1481,6 +1585,7 @@ export type Database = {
           vendedor_id: string
         }[]
       }
+      registrar_notificacoes: { Args: { _itens: Json }; Returns: number }
       remanejar_cliente: {
         Args: {
           _cliente_id: string
