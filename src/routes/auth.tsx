@@ -136,7 +136,7 @@ function Entrar() {
             {TITULOS[modo]}
           </h1>
           <p className="text-muted-foreground">
-            Plataforma comercial CENTERFRIOS e 381 Distribuidora
+            Plataforma Comercial CENTERFRIOS e 381 Distribuidora
           </p>
         </div>
         <div className="cartao p-6">
