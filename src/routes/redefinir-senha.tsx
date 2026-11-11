@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { ehLinkDeRecuperacao } from "@/regras";
@@ -84,6 +85,7 @@ function RedefinirSenha() {
   return (
     <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-md">
+        <BotaoVoltar className="-ml-3 mb-4" />
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
           <h1 className="text-2xl font-extrabold">Crie uma nova senha</h1>

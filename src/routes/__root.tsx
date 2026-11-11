@@ -15,6 +15,7 @@ import { ProvedorAnunciador } from "@/design-system/Anunciador";
 import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
 import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { ehLinkDeRecuperacao } from "@/regras";
 
 import appCss from "../styles.css?url";
@@ -23,6 +24,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="fixed left-2 top-2">
+        <BotaoVoltar />
+      </div>
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
 import { lovable } from "@/integrations/lovable/index";
@@ -160,6 +161,9 @@ function Entrar() {
   return (
     <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-md">
+        {modo !== "entrar" && (
+          <BotaoVoltar aoVoltar={() => trocar("entrar")} className="-ml-3 mb-4" />
+        )}
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
           <h1 ref={titulo} tabIndex={-1} className="text-2xl font-extrabold outline-none">
@@ -297,11 +301,7 @@ function Entrar() {
                 Já fui convidado: criar minha senha
               </Button>
             </>
-          ) : (
-            <Button variant="link" className="px-1" onClick={() => trocar("entrar")}>
-              Voltar para entrar
-            </Button>
-          )}
+          ) : null}
         </div>
         <div className="mt-6 flex justify-center text-foreground">
           <Pinguim className="size-10" />
