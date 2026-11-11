@@ -168,7 +168,7 @@ Cada número do painel precisa de uma definição única, escrita antes do códi
 - Limites iniciais dos alertas **aprovados**.
 - Piloto da Fase 1 com **Clara e Humberto**.
 - Só números corporativos de WhatsApp, com política interna assinada pela equipe. Instagram dos vendedores também em conta corporativa, com conexão obrigatória.
-- Em aberto: horário comercial de referência para o tempo de resposta.
+- Horário comercial de referência (decisão de 11/11/2026): segunda a sexta das 8h às 18h e sábado das 8h às 12h. Vale para o tempo de resposta e para o silêncio das notificações, que ficam em silêncio fora desse horário, aos domingos e nos feriados. Cada pessoa pode ajustar o próprio horário de notificações.
 
 ## Experiência do usuário
 

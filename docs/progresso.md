@@ -33,12 +33,12 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | A colar |
 | 15 | Gestão, copiloto, notificações e demonstração completa | A colar |
 
-## Decisões tomadas nesta fase (a confirmar pela diretoria quando marcado)
-- **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *A confirmar.*
-- **Pesos iniciais da gamificação:** vendas 30, cobertura 20, reativação 20, orçamentos 10, Instagram 5. Seguem a ordem do plano, mas os números são editáveis e estão *a confirmar*.
-- **Pontuação por indicador:** ganha o peso quando bate a meta do dia daquele indicador. Reativação e Instagram contam por ocorrência. *A confirmar.*
+## Decisões tomadas nesta fase
+- **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *Aprovado.*
+- **Pesos iniciais da gamificação:** vendas 30, cobertura 20, reativação 20, orçamentos 10, Instagram 5. Seguem a ordem do plano, mas os números são editáveis e estão *aprovados como iniciais*, editáveis pela diretoria.
+- **Pontuação por indicador:** ganha o peso quando bate a meta do dia daquele indicador. Reativação e Instagram contam por ocorrência. *Aprovado.*
 - **Hashtag da campanha:** começa vazia. A diretoria cadastra; até lá só `@centerfriosoficial` vale.
-- **Silêncio das notificações:** padrão das 19h às 7h e nos fins de semana, ajustável por usuário. O horário comercial de referência continua em aberto no plano. *A confirmar.*
+- **Horário comercial e silêncio das notificações (aprovado):** segunda a sexta das 8h às 18h e sábado das 8h às 12h; silêncio fora disso, aos domingos e feriados, ajustável por pessoa.
 - **Selo "Resposta relâmpago":** fica para a Fase 2 (depende do WhatsApp).
 
 ## Pendências abertas
