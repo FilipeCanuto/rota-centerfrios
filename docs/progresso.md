@@ -6,6 +6,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - Passo 2 (regras de negócio) no `main` (PR #1). Etapa 1 no `main` (PR #2).
 - Mensagens 10, 11 e 12 aplicadas pelo Lovable (migrações 0013, 0014, 0015) e conferidas; 13 em andamento; 14 e 15 a enviar.
 
+- Etapas 8 a 13 concluídas no ramo `fase1/restante` (um único PR). Relatório: [relatorio-fase-1.md](relatorio-fase-1.md).
+
 ## Como conferir localmente
 - `bun install`, depois `bun x vitest run` (regras), `bun x tsc --noEmit`, `bun x eslint .`.
 - `bun x playwright test` (axe + teclado em celular/desktop, claro/escuro). Usa o Chrome instalado (`channel: "chrome"`) e um backend simulado em `e2e/simulacao.ts`: nenhuma credencial real nem rede. Em CI sem Chrome, trocar para o Chromium do Playwright.
