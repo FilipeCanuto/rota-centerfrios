@@ -78,6 +78,13 @@
       "when": 1794367131389,
       "tag": "0010_corrigir_aliases_carga_demo",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794367482907,
+      "tag": "0011_proteger_atualizacao_administrativa_usuario",
+      "breakpoints": true
     }
   ]
 }
