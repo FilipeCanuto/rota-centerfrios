@@ -735,21 +735,38 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          created_at: string
+          empresa_id: string | null
           id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          created_at?: string
+          empresa_id?: string | null
           id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          created_at?: string
+          empresa_id?: string | null
           id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuario_empresas: {
         Row: {
@@ -910,14 +927,47 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      apagar_dados_demo: { Args: never; Returns: undefined }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
+      admin_atualizar_usuario: {
+        Args: { _dados: Json; _usuario_id: string }
+        Returns: {
+          apelido_copiloto: string
+          auth_user_id: string | null
+          created_at: string
+          demo: boolean
+          email: string | null
+          empresa_id: string | null
+          equipe_id: string | null
+          id: string
+          nome: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          perfil: Database["public"]["Enums"]["app_role"]
+          tema: string
         }
-        Returns: boolean
+        SetofOptions: {
+          from: "*"
+          to: "usuarios"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
+      apagar_dados_demo: { Args: never; Returns: undefined }
+      eh_admin: { Args: never; Returns: boolean }
+      has_role:
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              _empresa_id: string
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
       meu_usuario_id: { Args: never; Returns: string }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
       tem_empresa: { Args: { _empresa_id: string }; Returns: boolean }
