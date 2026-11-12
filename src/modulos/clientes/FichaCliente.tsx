@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { DETALHE_EXPANSAO } from "@/design-system/movimento";
 import { SeloStatus, type TomStatus } from "@/design-system/SeloStatus";
 import { formatarMoeda } from "@/design-system/formatar";
 import { integracoes } from "@/integracoes";
@@ -77,7 +78,7 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
         <p role="status" className="sr-only">
           Carregando ficha do cliente…
         </p>
-        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" style={DETALHE_EXPANSAO} />
         <Skeleton className="h-40 rounded-xl" />
       </div>
     );
@@ -118,7 +119,7 @@ export function FichaCliente({ clienteId }: { clienteId: string }) {
   return (
     <div className="flex flex-col gap-5">
       {voltar}
-      <header className="cartao flex flex-col gap-3 p-5">
+      <header className="cartao flex flex-col gap-3 p-5" style={DETALHE_EXPANSAO}>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-extrabold sm:text-3xl">{c.nome}</h1>
           <SeloStatus tom={saude.tom}>{saude.rotulo}</SeloStatus>

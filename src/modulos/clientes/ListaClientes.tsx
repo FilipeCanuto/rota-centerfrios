@@ -15,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { abrirExpansao, expansao } from "@/design-system/movimento";
 import { SeloStatus } from "@/design-system/SeloStatus";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import { clienteSemCompra, hojeEmMaceio, paraData, REGRAS_PADRAO } from "@/regras";
@@ -164,13 +165,14 @@ export function ListaClientes() {
           </EstadoVazio>
         ) : (
           <>
-            <ul className="cartao divide-y">
+            <ul className="cartao cascata divide-y">
               {lista.data.clientes.map((c) => (
-                <li key={c.id}>
+                <li key={c.id} {...expansao(c.id)}>
                   <Link
                     to="/clientes/$id"
                     params={{ id: c.id }}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 transicao hover:bg-accent"
+                    onClick={abrirExpansao(c.id)}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 linha-interativa"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold">{c.nome}</span>

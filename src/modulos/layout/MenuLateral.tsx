@@ -36,7 +36,7 @@ export function MenuLateral() {
                         asChild
                         isActive={ativo}
                         tooltip={d.titulo}
-                        className="min-h-11 text-[0.9375rem]"
+                        className="pressionar min-h-11 text-[0.9375rem]"
                       >
                         <Link to={d.url} aria-current={ativo ? "page" : undefined}>
                           <d.icone aria-hidden="true" />

@@ -2,6 +2,7 @@ import { Award, Trophy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Contador, transicaoDeVisao } from "@/design-system/movimento";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { SeloStatus } from "@/design-system/SeloStatus";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
@@ -59,7 +60,8 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
           ) : !meus.data ? null : (
             <>
               <p className="numeros text-4xl font-extrabold">
-                {meus.data.totalMes} <span className="text-lg font-semibold">pontos</span>
+                <Contador valor={meus.data.totalMes} />{" "}
+                <span className="text-lg font-semibold">pontos</span>
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
                 {Object.entries(INDICADORES).map(([k, rotulo]) => (
@@ -80,7 +82,7 @@ function SecaoEmpresa({ empresaId, nome }: { empresaId: string; nome?: string | 
               ) : (
                 <ul className="flex flex-col gap-2">
                   {meus.data.selos.map((s) => (
-                    <li key={s.id} className="flex flex-wrap items-center gap-2">
+                    <li key={s.id} className="pulsar flex flex-wrap items-center gap-2">
                       <SeloStatus tom="conquista">{s.nome}</SeloStatus>
                       <span className="text-sm text-muted-foreground">
                         {dia.format(new Date(`${s.conquistado_em.slice(0, 10)}T12:00:00`))}
@@ -121,7 +123,7 @@ function Ranking({ empresaId, hoje }: { empresaId: string; hoje: string }) {
               variant={semana === o.v ? "default" : "outline"}
               aria-pressed={semana === o.v}
               className="min-h-11"
-              onClick={() => setSemana(o.v)}
+              onClick={() => transicaoDeVisao(() => setSemana(o.v))}
             >
               {o.r}
             </Button>
@@ -139,7 +141,7 @@ function Ranking({ empresaId, hoje }: { empresaId: string; hoje: string }) {
       ) : q.data.length === 0 ? (
         <p className="text-muted-foreground">Ainda não há pontos neste período.</p>
       ) : (
-        <ol className="divide-y">
+        <ol className="cascata divide-y">
           {q.data.map((l) => (
             <li key={l.vendedor_id} className="flex items-center gap-3 py-2">
               <span className="numeros w-8 font-bold">{l.posicao}º</span>

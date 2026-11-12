@@ -163,7 +163,7 @@ export function CalendarioMes({
                   aria-current={iso === hoje ? "date" : undefined}
                   onClick={() => aoSelecionar(iso)}
                   className={[
-                    "flex min-h-14 w-full flex-col items-center gap-1 rounded-md p-1 text-sm sm:min-h-20",
+                    "pressionar flex min-h-14 w-full flex-col items-center gap-1 rounded-md p-1 text-sm sm:min-h-20",
                     iso.slice(0, 7) === mes ? "" : "text-muted-foreground",
                     feriado ? "bg-muted" : "",
                     iso === hoje ? "bg-primary-suave font-bold" : "",

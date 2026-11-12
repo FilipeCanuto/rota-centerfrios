@@ -25,6 +25,16 @@ const ROTAS = [
 
 /** Roda o axe na página como está agora e falha listando o que encontrou. */
 async function semViolacoes(page: Page, { modal = false } = {}) {
+  // Espera as entradas (cascata, contadores) terminarem: o axe mede contraste com a opacidade final.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => null)),
+    ),
+  );
+  await expect(page.locator(".opacity-0")).toHaveCount(0);
   const axe = new AxeBuilder({ page });
   // Com modal aberto, o Radix esconde o fundo (aria-hidden) e prende o foco no diálogo:
   // o fundo não é alcançável, então "aria-hidden-focus" seria um falso positivo.

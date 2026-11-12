@@ -77,7 +77,7 @@ export function GraficoAnel({ valor, rotulo, resumo, tabela, tamanho = "grande" 
               strokeWidth="13"
               strokeLinecap={p > 0 && p < 1 ? "round" : "butt"}
               strokeDasharray={`${p * CIRCUNFERENCIA} ${CIRCUNFERENCIA}`}
-              className={`transicao ${atingido ? "stroke-ouro" : "stroke-primary"}`}
+              className={`anel-entrar ${atingido ? "stroke-ouro" : "stroke-primary"}`}
             />
           </svg>
           <div className="absolute inset-0 grid place-items-center">

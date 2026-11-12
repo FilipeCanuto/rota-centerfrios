@@ -67,7 +67,7 @@ export function NotasCliente({ ficha, meuId }: { ficha: Ficha; meuId: string }) 
           Nenhuma nota ainda. Anote o que ajuda no próximo atendimento.
         </p>
       ) : (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {ficha.notas.map((n) => {
             const podeApagar =
               n.autor_id === meuId && Date.now() - new Date(n.created_at).getTime() < DIA;

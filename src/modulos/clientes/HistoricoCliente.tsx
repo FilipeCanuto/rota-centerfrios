@@ -84,7 +84,7 @@ export function Compras({ ficha }: { ficha: Ficha }) {
       {ficha.compras.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma compra faturada ainda.</p>
       ) : (
-        <ol className="divide-y">
+        <ol className="cascata divide-y">
           {ficha.compras.map((c) => (
             <li key={c.id} className="py-3">
               <p className="flex flex-wrap justify-between gap-2">
@@ -110,7 +110,7 @@ export function OrcamentosCliente({ ficha }: { ficha: Ficha }) {
       {ficha.orcamentos.length === 0 ? (
         <p className="text-muted-foreground">Nenhum orçamento para este cliente.</p>
       ) : (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {ficha.orcamentos.map((o) => (
             <li key={o.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3">
               <SeloStatus tom={STATUS[o.status]!.tom}>{STATUS[o.status]!.rotulo}</SeloStatus>
@@ -138,7 +138,7 @@ export function InteracoesCliente({ ficha }: { ficha: Ficha }) {
       {ficha.interacoes.length === 0 ? (
         <p className="text-muted-foreground">Nenhum contato registrado ainda.</p>
       ) : (
-        <ol className="divide-y">
+        <ol className="cascata divide-y">
           {ficha.interacoes.map((i) => (
             <li key={i.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-3">
               <span className="font-semibold">{TIPOS[i.tipo] ?? i.tipo}</span>

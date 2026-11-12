@@ -33,7 +33,7 @@ export function Historico() {
       ) : h.data.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma importação ainda.</p>
       ) : (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {h.data.map((i) => (
             <li key={i.id} className="flex flex-wrap gap-x-3 py-2 text-sm">
               <time dateTime={i.created_at} className="numeros">

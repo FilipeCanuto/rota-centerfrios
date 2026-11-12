@@ -3,6 +3,7 @@ import { SeloStatus } from "@/design-system/SeloStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { Contador } from "@/design-system/movimento";
 import { formatarMoeda } from "@/design-system/formatar";
 import { Progresso } from "@/design-system/Progresso";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
@@ -73,13 +74,19 @@ function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: strin
       <div className="cartao p-5">
         <Titulo className="mb-2 text-lg font-bold">Total da equipe</Titulo>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
-          <Dado k="Meta do mês" v={formatarMoeda(total.meta)} />
-          <Dado k="Faturado no mês" v={formatarMoeda(total.faturado)} />
+          <Dado k="Meta do mês" v={<Contador valor={total.meta} formatar={formatarMoeda} />} />
+          <Dado
+            k="Faturado no mês"
+            v={<Contador valor={total.faturado} formatar={formatarMoeda} />}
+          />
           <Dado k="Atingimento" v={pct(total.atingimento)} />
-          <Dado k="Faturado hoje" v={formatarMoeda(total.faturadoHoje)} />
+          <Dado
+            k="Faturado hoje"
+            v={<Contador valor={total.faturadoHoje} formatar={formatarMoeda} />}
+          />
         </dl>
       </div>
-      <ul className="grid gap-4 lg:grid-cols-2">
+      <ul className="cascata grid gap-4 lg:grid-cols-2">
         {g.linhas.map((l) => (
           <Vendedor key={l.vendedor_id} l={l} g={g} hoje={hoje} Titulo={Titulo} />
         ))}
@@ -88,7 +95,7 @@ function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: strin
   );
 }
 
-function Dado({ k, v }: { k: string; v: string }) {
+function Dado({ k, v }: { k: string; v: React.ReactNode }) {
   return (
     <div>
       <dt className="text-sm text-muted-foreground">{k}</dt>
@@ -111,7 +118,7 @@ function Vendedor({
   const r = resumirVendedor(l, hoje, g.cfg, g.feriados);
   const metaCob = l.meta?.meta_cobertura ?? 0;
   return (
-    <li className="cartao flex flex-col gap-3 p-5">
+    <li className="cartao cartao-interativo flex flex-col gap-3 p-5">
       <div>
         <Titulo className="text-lg font-bold">{l.nome}</Titulo>
         {l.equipe && <p className="text-sm text-muted-foreground">{l.equipe}</p>}
