@@ -29,7 +29,8 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
   - **Site URL** = o endereço publicado do app (sem barra no fim).
   - **Redirect URLs** (lista de permitidos) com o endereço publicado e também `/redefinir-senha` e o endereço da prévia do Lovable, cada um com `/**` no fim (ex.: `https://<endereço>/**`). Sem isso, o Supabase manda o link de e-mail para a página inicial.
   - **Email** → em *Sign In / Providers*, `Confirm email` ligado (decisão do convite) e *Allow new users to sign up* ligado: o cadastro continua restrito pelo gatilho do banco (só e-mail pré-cadastrado).
-- [ ] Contas que entraram só pelo Google (Filipe, Willames): usar “Esqueci minha senha” uma vez para criar a senha.
+- [ ] Contas que entraram só pelo Google (Filipe, Willames): usar “Primeiro acesso ou esqueci a senha” uma vez para criar a senha.
+- [ ] Authentication → Email Templates: modelos **Magic Link** e **Confirm signup** ativos (em português, se possível). Para o piloto, configurar SMTP próprio (o envio padrão tem limite baixo por hora).
 - [ ] Testar "Esqueci minha senha" com uma conta real: o e-mail chega, o link abre a tela "Crie uma nova senha" e a senha nova funciona.
 - [ ] Testar "Primeiro acesso" de um vendedor convidado: cria a senha, confirma pelo e-mail e entra.
 

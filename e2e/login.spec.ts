@@ -1,5 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { simularBackend } from "./simulacao";
+
+const json = (status: number, corpo: unknown) => ({
+  status,
+  contentType: "application/json",
+  body: JSON.stringify(corpo),
+});
+const rotaToken = /supabase\.co\/auth\/v1\/token/;
+const rotaOtp = /supabase\.co\/auth\/v1\/otp/;
+
+async function pedirLink(page: Page, email: string) {
+  await page.goto("/auth");
+  await page.getByRole("button", { name: "Primeiro acesso ou esqueci a senha" }).click();
+  await page.getByLabel("E-mail da empresa").fill(email);
+  await page.getByRole("button", { name: "Enviar link" }).click();
+}
 
 test("mostrar senha alterna o tipo do campo e informa o estado", async ({ page }) => {
   await page.goto("/auth");
@@ -13,104 +28,114 @@ test("mostrar senha alterna o tipo do campo e informa o estado", async ({ page }
   );
 });
 
-test("esqueci minha senha envia o link e mostra o aviso", async ({ page }) => {
-  await page.route(/supabase\.co\/auth\/v1\/recover/, (r) =>
-    r.fulfill({ status: 200, body: "{}" }),
-  );
+test("campos vazios e e-mail de fora da empresa são avisados antes de enviar", async ({ page }) => {
+  let chamou = false;
+  await page.route(rotaToken, (r) => {
+    chamou = true;
+    return r.fulfill(json(400, {}));
+  });
   await page.goto("/auth");
-  await page.getByRole("button", { name: "Esqueci minha senha" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Esqueci minha senha" })).toBeVisible();
-  await expect(page.getByLabel("Senha", { exact: true })).toHaveCount(0);
-  await page.getByLabel("E-mail").fill("vendedor@centerfrios.com");
-  await page.getByRole("button", { name: "Enviar link" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "enviamos um link" })).toBeVisible();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveText("Digite o seu e-mail da empresa.");
+  await expect(page.getByLabel("E-mail da empresa")).toBeFocused();
+  await page.getByLabel("E-mail da empresa").fill("clara@gmail.com");
+  await page.getByLabel("Senha", { exact: true }).fill("x");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("@centerfrios.com ou @grupo381.com.br");
+  expect(chamou).toBe(false);
 });
 
-test("primeiro acesso recusado mostra a explicação do convite", async ({ page }) => {
-  await page.route(/supabase\.co\/auth\/v1\/signup/, (r) =>
-    r.fulfill({
-      status: 500,
-      contentType: "application/json",
-      body: JSON.stringify({
-        code: "P0001",
-        message: "Seu acesso ainda não foi liberado. Peça o convite ao administrador.",
+test("link de acesso: envia e mostra o aviso com o e-mail normalizado", async ({ page }) => {
+  let corpo = "";
+  await page.route(rotaOtp, (r) => {
+    corpo = r.request().postData() ?? "";
+    return r.fulfill(json(200, {}));
+  });
+  await pedirLink(page, "  Clara@CenterFrios.com ");
+  await expect(page.getByRole("status").filter({ hasText: "Enviamos um link" })).toContainText(
+    "clara@centerfrios.com",
+  );
+  expect(corpo).toContain('"email":"clara@centerfrios.com"');
+  expect(corpo).toContain('"create_user":true');
+});
+
+test("link de acesso para quem não foi convidado explica o convite", async ({ page }) => {
+  await page.route(rotaOtp, (r) =>
+    r.fulfill(json(500, { code: "unexpected_failure", message: "Database error saving new user" })),
+  );
+  await pedirLink(page, "novo@centerfrios.com");
+  await expect(page.getByRole("alert")).toContainText("ainda não foi liberado");
+});
+
+test("trocar de modo leva o foco para o novo título", async ({ page }) => {
+  await page.goto("/auth");
+  await page.getByRole("button", { name: "Primeiro acesso ou esqueci a senha" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Receber link de acesso" }),
+  ).toBeFocused();
+});
+
+test("senha errada e e-mail não confirmado têm mensagens diferentes", async ({ page }) => {
+  await page.route(rotaToken, (r) =>
+    r.fulfill(json(400, { code: "invalid_credentials", message: "Invalid login credentials" })),
+  );
+  await page.goto("/auth");
+  await page.getByLabel("E-mail da empresa").fill("vendedor@centerfrios.com");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-errada");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("E-mail ou senha incorretos");
+  await page.unroute(rotaToken);
+  await page.route(rotaToken, (r) =>
+    r.fulfill(json(400, { code: "email_not_confirmed", message: "Email not confirmed" })),
+  );
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("não foi confirmado");
+});
+
+test("login certo mostra o check e o Bem-vindo antes do Início", async ({ page }) => {
+  await page.route(/supabase\.co\/rest\/v1\//, (r) => r.fulfill(json(200, { nome: "Clara Lima" })));
+  await page.route(rotaToken, (r) =>
+    r.fulfill(
+      json(200, {
+        access_token: "a",
+        token_type: "bearer",
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        refresh_token: "r",
+        user: {
+          id: "u1",
+          email: "clara@centerfrios.com",
+          aud: "authenticated",
+          app_metadata: {},
+          user_metadata: {},
+        },
       }),
-    }),
+    ),
   );
   await page.goto("/auth");
-  await page.getByRole("button", { name: /criar minha senha/i }).click();
-  await page.getByLabel("Nome").fill("Teste");
-  await page.getByLabel("E-mail").fill("novo@centerfrios.com");
-  await page.getByLabel("Crie sua senha").fill("senha-segura-1");
-  await page.getByRole("button", { name: "Criar minha senha" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Peça o convite" })).toBeVisible();
+  await page.getByLabel("E-mail da empresa").fill("clara@centerfrios.com");
+  await page.getByLabel("Senha", { exact: true }).fill("senha-certa");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Login confirmado" })).toBeAttached();
+  await expect(page.getByText("Bem-vindo, Clara!")).toBeVisible();
 });
 
-test("nova senha sem link de recuperação mostra que o link expirou", async ({ page }) => {
+test("tela Crie sua senha sem link mostra que o link expirou", async ({ page }) => {
   await page.goto("/redefinir-senha");
   await expect(page.getByRole("alert").filter({ hasText: "expirou" })).toBeVisible();
   await expect(page.getByLabel("Nova senha")).toHaveCount(0);
 });
 
-test("trocar de modo leva o foco para o novo título", async ({ page }) => {
-  await page.goto("/auth");
-  await page.getByRole("button", { name: "Esqueci minha senha" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Esqueci minha senha" })).toBeFocused();
-});
-
-const rotaToken = /supabase\.co\/auth\/v1\/token/;
-
-test("senha errada e e-mail não confirmado têm mensagens diferentes", async ({ page }) => {
-  await page.route(rotaToken, (r) =>
-    r.fulfill({
-      status: 400,
-      contentType: "application/json",
-      body: JSON.stringify({ code: "invalid_credentials", message: "Invalid login credentials" }),
-    }),
-  );
-  await page.goto("/auth");
-  await page.getByLabel("E-mail").fill("vendedor@centerfrios.com");
-  await page.getByLabel("Senha", { exact: true }).fill("senha-errada");
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Esqueci minha senha" })).toBeVisible();
-  await page.unroute(rotaToken);
-  await page.route(rotaToken, (r) =>
-    r.fulfill({
-      status: 400,
-      contentType: "application/json",
-      body: JSON.stringify({ code: "email_not_confirmed", message: "Email not confirmed" }),
-    }),
-  );
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "não foi confirmado" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Reenviar e-mail de confirmação" })).toBeVisible();
-});
-
-test("primeiro acesso com e-mail que já tem conta orienta a criar senha pelo link", async ({
-  page,
-}) => {
-  await page.route(/supabase\.co\/auth\/v1\/signup/, (r) =>
-    r.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ id: "x", email: "a@centerfrios.com", identities: [] }),
-    }),
-  );
-  await page.goto("/auth");
-  await page.getByRole("button", { name: /criar minha senha/i }).click();
-  await page.getByLabel("Nome").fill("Teste");
-  await page.getByLabel("E-mail").fill("a@centerfrios.com");
-  await page.getByLabel("Crie sua senha").fill("senha-segura-1");
-  await page.getByRole("button", { name: "Criar minha senha" }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "já tem cadastro" })).toBeVisible();
-});
-
-test("link de recuperação que cai em outra página vai para a tela de nova senha", async ({
-  page,
-}) => {
-  await page.goto("/#access_token=abc&refresh_token=def&type=recovery");
+test("link do e-mail que cai em outra página vai para Crie sua senha", async ({ page }) => {
+  await page.goto("/#access_token=abc&refresh_token=def&type=magiclink");
   await expect(page).toHaveURL(/\/redefinir-senha/);
-  await expect(page.getByRole("heading", { level: 1, name: "Crie uma nova senha" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Crie sua senha" })).toBeVisible();
+});
+
+test("link vencido que cai na página inicial mostra o aviso no login", async ({ page }) => {
+  await page.goto("/#error=access_denied&error_code=otp_expired&error_description=expired");
+  await expect(page).toHaveURL(/\/auth/);
+  await expect(page.getByRole("alert")).toContainText("expirou");
 });
 
 test("Voltar: não aparece no Início; em /configuracoes/feriados sem histórico leva a Mais", async ({
