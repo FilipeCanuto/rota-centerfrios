@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 0 320 480" role="img" aria-label="Pinguim CENTERFRIOS de braços cruzados"><title>Pinguim CENTERFRIOS de braços cruzados</title><path d="M104 318 L102 424 Q102 434 112 434 L152 434 Q158 434 158 426 L160 330Z" fill="#C8AE7D"/>
+<path d="M216 318 L218 424 Q218 434 208 434 L168 434 Q162 434 162 426 L160 330Z" fill="#C8AE7D"/>
+<path d="M150 336 L152 432 M170 336 L168 432" stroke="#A88F60" stroke-width="3" fill="none"/>
+<path d="M102 416 L158 416 L158 434 L102 434Z M162 416 L218 416 L218 434 L162 434Z" fill="#A88F60" opacity=".55"/>
+<path d="M94 452 Q92 432 112 430 L152 430 Q162 432 162 446 L162 456 Q162 462 154 462 L100 462 Q94 462 94 452Z" fill="#EFE7D4"/>
+<path d="M226 452 Q228 432 208 430 L168 430 Q158 432 158 446 L158 456 Q158 462 166 462 L220 462 Q226 462 226 452Z" fill="#EFE7D4"/>
+<path d="M94 454 L162 454 L162 462 L100 462 Q94 462 94 454Z M226 454 L158 454 L158 462 L220 462 Q226 462 226 454Z" fill="#D6CAAE"/><ellipse cx="160" cy="208" rx="82" ry="26" fill="#111216"/>
+<path d="M84 212 C56 232 54 296 64 334 L256 334 C266 296 264 232 236 212 Q160 190 84 212Z" fill="#1C1D22"/>
+<path d="M92 222 C76 244 72 290 76 318" fill="none" stroke="#2A2C33" stroke-width="6" stroke-linecap="round"/>
+<rect x="64" y="316" width="192" height="20" rx="8" fill="#111216"/>
+<path d="M114 274 Q160 264 206 274 L214 316 L106 316Z" fill="#2A2C33"/>
+<path d="M146 212 L144 254 M174 212 L176 254" stroke="#C9CCD3" stroke-width="3" stroke-linecap="round"/>
+<circle cx="144" cy="256" r="3" fill="#C9CCD3"/><circle cx="176" cy="256" r="3" fill="#C9CCD3"/><g class="cabeca">
+<path d="M160 14 C214 14 248 56 248 112 C248 170 212 204 160 204 C108 204 72 170 72 112 C72 56 106 14 160 14Z" fill="#16171B" stroke="currentColor" stroke-opacity=".35" stroke-width="4"/>
+<path d="M118 34 C132 24 152 20 168 22" fill="none" stroke="#2E3038" stroke-width="8" stroke-linecap="round"/>
+<path d="M160 90 C150 64 104 60 97 98 C91 134 110 180 160 196 C210 180 229 134 223 98 C216 60 170 64 160 90Z" fill="#F7F3EA"/>
+<path d="M104 140 C112 172 134 188 160 196 C186 188 208 172 216 140 C200 170 180 182 160 186 C140 182 120 170 104 140Z" fill="#E6DFD0"/>
+<ellipse cx="116" cy="140" rx="10" ry="6" fill="#F4A6A0" opacity=".45"/>
+<ellipse cx="204" cy="140" rx="10" ry="6" fill="#F4A6A0" opacity=".45"/>
+<ellipse cx="134" cy="108" rx="17" ry="15.200000000000001" fill="#fff" stroke="#16171B" stroke-width="2.5"/>
+<circle cx="136" cy="110" r="10.925" fill="#4F8FCB"/>
+<circle cx="136" cy="110" r="5.5" fill="#0E1520"/>
+<circle cx="140" cy="105" r="3.5" fill="#fff"/><ellipse cx="186" cy="108" rx="17" ry="15.200000000000001" fill="#fff" stroke="#16171B" stroke-width="2.5"/>
+<circle cx="184" cy="110" r="10.925" fill="#4F8FCB"/>
+<circle cx="184" cy="110" r="5.5" fill="#0E1520"/>
+<circle cx="188" cy="105" r="3.5" fill="#fff"/><path d="M118 100 Q134 96 150 104 L150 92 L118 90Z M202 100 Q186 96 170 104 L170 92 L202 90Z" fill="#16171B"/><path d="M120 82 Q136 84 150 92 M200 82 Q184 84 170 92" fill="none" stroke="#16171B" stroke-width="5" stroke-linecap="round"/>
+<g transform="translate(160 136) scale(1.28) translate(-160 -136)"><path d="M124 132 Q160 114 196 132 Q180 146 160 148 Q140 146 124 132Z" fill="#F2A33A"/>
+<path d="M126 140 Q160 160 194 134 Q160 150 128 138Z" fill="#D9832A"/>
+<path d="M126 140 Q160 160 194 134" fill="none" stroke="#D9832A" stroke-width="2" stroke-linecap="round"/></g>
+</g><path d="M96 226 C84 252 110 274 214 262" fill="none" stroke="#08080A" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M96 226 C84 252 110 274 214 262" fill="none" stroke="#1C1D22" stroke-width="33" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M96 226 C84 252 110 274 214 262" fill="none" stroke="#2A2C33" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(-5 -5)" opacity=".8"/><path d="M224 226 C236 252 210 278 106 268" fill="none" stroke="#08080A" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M224 226 C236 252 210 278 106 268" fill="none" stroke="#1C1D22" stroke-width="33" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M224 226 C236 252 210 278 106 268" fill="none" stroke="#2A2C33" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(-5 -5)" opacity=".8"/><g transform="translate(214 262) rotate(0)" fill="#111114"><rect x="-14" y="-13" width="28" height="26" rx="12"/></g><g transform="translate(106 268) rotate(0)" fill="#111114"><rect x="-14" y="-13" width="28" height="26" rx="12"/></g></svg>

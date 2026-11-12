@@ -87,6 +87,8 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Ajustes 1 (`fix/ajustes-1`):** login com mensagens por causa (senha errada, e-mail não confirmado com reenvio, limite de tentativas), aviso quando o e-mail do primeiro acesso já tem conta, link de recuperação reconhecido em qualquer página, /design-system só em desenvolvimento, botão Voltar único e Agenda em calendário (mês, semana, dia, lista). Relatório em [relatorio-ajustes-1.md](relatorio-ajustes-1.md).
 
+- **Login e mascote (`fix/login-mascote`):** login com senha ou link de acesso por e-mail (um só caminho para primeiro acesso, senha esquecida e contas Google), tela "Crie sua senha", check e boas-vindas animados, mascote vetorizado em `public/mascote` e no componente `Pinguim`. Relatório em [relatorio-login-mascote.md](relatorio-login-mascote.md).
+
 ## Pendências abertas
 - **Notificações — pendentes:** tela de preferências (tipos desligados, horário de expediente por pessoa) e o silêncio fora do expediente, aos domingos e feriados (horário padrão aprovado: seg–sex 8h–18h, sábado 8h–12h). A tabela `preferencias_notificacao` já existe no banco; falta a tela e a regra de exibição.
 - Refinamento visual do Pinguim e animações (revisão geral).

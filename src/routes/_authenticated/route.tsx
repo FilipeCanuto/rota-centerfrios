@@ -6,7 +6,7 @@ import { Estrutura } from "@/modulos/layout/Estrutura";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    levarLinkDeRecuperacao();
+    levarLinkDeRecuperacao("/_authenticated");
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/auth" });
   },

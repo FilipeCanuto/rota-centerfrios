@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,14 +7,23 @@ import { Label } from "@/components/ui/label";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
+import { TransicaoEntrada } from "@/design-system/TransicaoEntrada";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
-import { cadastroDeContaExistente, causaDoLogin, linkExpirado, MENSAGEM_LOGIN } from "@/regras";
+import {
+  causaDoLink,
+  causaDoLogin,
+  linkExpirado,
+  MENSAGEM_LINK,
+  MENSAGEM_LOGIN,
+  normalizarEmail,
+  validarAcesso,
+} from "@/regras";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  beforeLoad: () => levarLinkDeRecuperacao(),
+  beforeLoad: () => levarLinkDeRecuperacao("/auth"),
   head: () => ({
     meta: [
       { title: "Entrar — Rota CENTERFRIOS" },
@@ -34,28 +43,18 @@ export const Route = createFileRoute("/auth")({
   component: Entrar,
 });
 
-type Modo = "entrar" | "primeiro" | "recuperar";
-const TITULOS: Record<Modo, string> = {
-  entrar: "Entrar na Rota",
-  primeiro: "Primeiro acesso",
-  recuperar: "Esqueci minha senha",
-};
-const BOTOES: Record<Modo, string> = {
-  entrar: "Entrar",
-  primeiro: "Criar minha senha",
-  recuperar: "Enviar link",
-};
+/** Dois caminhos: senha, ou um link por e-mail (primeiro acesso, senha esquecida ou conta do Google). */
+type Modo = "entrar" | "link";
+const atraso = (ms: number) => ({ "--atraso": `${ms}ms` }) as React.CSSProperties;
 
-/** O banco recusa quem não é da empresa ou não foi convidado; mostra a explicação dele. */
-function mensagemPrimeiroAcesso(msg: string): string {
-  if (msg.includes("Acesso restrito"))
-    return "Acesso restrito a e-mails da CENTERFRIOS e da 381 Distribuidora.";
-  if (msg.includes("ainda não foi liberado"))
-    return "Seu acesso ainda não foi liberado. Peça o convite ao administrador.";
-  if (/password/i.test(msg)) return "A senha precisa ter pelo menos 6 caracteres.";
-  if (/database error/i.test(msg))
-    return "Não foi possível liberar o acesso. Use o e-mail da empresa e peça o convite ao administrador.";
-  return "Não foi possível criar a senha. Confira o e-mail ou peça ajuda ao administrador.";
+/** Nome do cadastro para o "Bem-vindo"; sem ele, o nome da conta do Google. */
+async function nomeDoUsuario(authId: string, reserva: unknown): Promise<string | null> {
+  const { data } = await supabase
+    .from("usuarios")
+    .select("nome")
+    .eq("auth_user_id", authId)
+    .maybeSingle();
+  return data?.nome ?? (typeof reserva === "string" ? reserva : null);
 }
 
 function Entrar() {
@@ -65,91 +64,99 @@ function Entrar() {
   const [verSenha, setVerSenha] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [nome, setNome] = useState("");
-  const [erro, setErro] = useState<string | null>(null);
+  const [erro, setErro] = useState<{ campo: "email" | "senha" | null; texto: string } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
-  const [podeReenviar, setPodeReenviar] = useState(false);
+  const [sugerirLink, setSugerirLink] = useState(false);
+  // Depois do login: check animado e boas-vindas antes do Início.
+  const [entrando, setEntrando] = useState<{ nome: string | null } | null>(null);
   const titulo = useRef<HTMLHeadingElement>(null);
+  const campoEmail = useRef<HTMLInputElement>(null);
+  const campoSenha = useRef<HTMLInputElement>(null);
+
   const trocar = (m: Modo) => {
     setModo(m);
     // O botão clicado some ao trocar de modo: o foco vai para o novo título.
     requestAnimationFrame(() => titulo.current?.focus());
     setErro(null);
     setAviso(null);
-    setPodeReenviar(false);
+    setSugerirLink(false);
   };
 
   useEffect(() => {
-    // O login com Google recusado (domínio ou convite) volta com o erro na URL.
+    // Login recusado (domínio ou convite) ou link vencido voltam com o erro no endereço.
     const params = new URLSearchParams(
       window.location.search + "&" + window.location.hash.slice(1),
     );
     const falha = params.get("error_description");
-    if (falha)
-      setErro(
-        linkExpirado(params.toString())
-          ? "O link expirou ou já foi usado. Peça um novo em “Esqueci minha senha”."
-          : mensagemPrimeiroAcesso(falha),
-      );
+    if (!falha) return;
+    setErro({
+      campo: null,
+      texto: linkExpirado(params.toString())
+        ? "O link expirou ou já foi usado. Peça um novo em “Receber link de acesso”."
+        : /restrito/i.test(falha)
+          ? "Acesso restrito a e-mails da CENTERFRIOS e da 381 Distribuidora."
+          : MENSAGEM_LINK.sem_convite,
+    });
   }, []);
 
   useEffect(() => {
+    // Já tem sessão neste aparelho: vai direto, sem animação.
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/inicio", replace: true });
     });
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "SIGNED_IN" && s) navigate({ to: "/inicio", replace: true });
+      if (e !== "SIGNED_IN" || !s) return;
+      setEntrando({ nome: null });
+      void nomeDoUsuario(s.user.id, s.user.user_metadata?.["full_name"]).then((nome) =>
+        setEntrando((v) => (v ? { nome } : v)),
+      );
     });
     return () => data.subscription.unsubscribe();
   }, [navigate]);
+
+  function falhar(campo: "email" | "senha" | null, texto: string) {
+    setErro({ campo, texto });
+    if (campo === "email") campoEmail.current?.focus();
+    if (campo === "senha") campoSenha.current?.focus();
+  }
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
     setAviso(null);
+    setSugerirLink(false);
+    const problema = validarAcesso(email, modo === "entrar" ? senha : null);
+    if (problema) return falhar(problema.campo, problema.mensagem);
+    const endereco = normalizarEmail(email);
     setEnviando(true);
     if (modo === "entrar") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+      const { error } = await supabase.auth.signInWithPassword({
+        email: endereco,
+        password: senha,
+      });
       if (error) {
         const causa = causaDoLogin(error);
-        setErro(MENSAGEM_LOGIN[causa]);
-        setPodeReenviar(causa === "nao_confirmado");
+        falhar(causa === "credenciais" ? "senha" : null, MENSAGEM_LOGIN[causa]);
+        setSugerirLink(causa === "credenciais" || causa === "nao_confirmado");
       }
-    } else if (modo === "recuperar") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/redefinir-senha`,
-      });
-      if (error) setErro("Não foi possível enviar o link agora. Tente de novo em alguns minutos.");
-      else setAviso("Se esse e-mail tiver acesso, enviamos um link para criar uma nova senha.");
     } else {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: senha,
-        options: { emailRedirectTo: window.location.origin, data: { full_name: nome } },
+      // O mesmo link serve para o primeiro acesso (o banco confere o convite), para quem esqueceu
+      // a senha e para quem só entrava com o Google. Ao abrir, a pessoa já entra e cria a senha.
+      const { error } = await supabase.auth.signInWithOtp({
+        email: endereco,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/redefinir-senha`,
+        },
       });
-      if (error) setErro(mensagemPrimeiroAcesso(error.message));
-      else if (cadastroDeContaExistente(data.user))
-        setErro(
-          "Este e-mail já tem cadastro (por exemplo, pelo Google). Use “Esqueci minha senha” para criar uma senha.",
+      if (error) falhar(null, MENSAGEM_LINK[causaDoLink(error)]);
+      else
+        setAviso(
+          `Enviamos um link para ${endereco}. Abra o e-mail neste aparelho e toque no link para entrar. Confira também o spam.`,
         );
-      else setAviso("Senha criada. Confirme pelo link enviado ao seu e-mail para entrar.");
     }
     setEnviando(false);
-  }
-
-  async function reenviar() {
-    setErro(null);
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    if (error) setErro("Não foi possível reenviar agora. Tente de novo em alguns minutos.");
-    else {
-      setPodeReenviar(false);
-      setAviso("Enviamos um novo e-mail de confirmação. Confira também a caixa de spam.");
-    }
   }
 
   async function google() {
@@ -157,73 +164,98 @@ function Entrar() {
     const r = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (r.error) setErro("Não foi possível entrar com o Google.");
+    if (r.error) falhar(null, "Não foi possível entrar com o Google. Tente de novo.");
   }
 
+  if (entrando)
+    return (
+      <TransicaoEntrada
+        nome={entrando.nome}
+        aoTerminar={() => void navigate({ to: "/inicio", replace: true })}
+      />
+    );
+
+  const descricao = (campo: "email" | "senha") =>
+    erro && (erro.campo === campo || erro.campo === null) ? `${id}-erro` : undefined;
+
   return (
-    <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
+    <main
+      id="conteudo"
+      className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-10"
+    >
+      {/* Fundo em movimento lento: só decoração. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+        <div className="aurora absolute -left-24 -top-24 size-96 rounded-full bg-primary/15 blur-3xl" />
+        <div
+          className="aurora absolute -bottom-32 -right-20 size-[28rem] rounded-full bg-ouro/20 blur-3xl"
+          style={{ animationDelay: "-11s" }}
+        />
+      </div>
       <div className="w-full max-w-md">
         {modo !== "entrar" && (
-          <BotaoVoltar aoVoltar={() => trocar("entrar")} className="-ml-3 mb-4" />
+          <BotaoVoltar aoVoltar={() => trocar("entrar")} className="subir -ml-3 mb-4" />
         )}
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <Logo className="h-14" />
-          <h1 ref={titulo} tabIndex={-1} className="text-2xl font-extrabold outline-none">
-            {TITULOS[modo]}
+          <div className="subir" style={atraso(0)}>
+            <Logo className="h-14" />
+          </div>
+          <h1
+            ref={titulo}
+            tabIndex={-1}
+            className="subir text-2xl font-extrabold outline-none"
+            style={atraso(80)}
+            key={modo}
+          >
+            {modo === "entrar" ? "Entrar na Rota" : "Receber link de acesso"}
           </h1>
-          <p className="text-muted-foreground">
-            Plataforma Comercial CENTERFRIOS e 381 Distribuidora
+          <p className="subir text-muted-foreground" style={atraso(140)} key={`${modo}-p`}>
+            {modo === "entrar"
+              ? "Plataforma Comercial CENTERFRIOS e 381 Distribuidora"
+              : "Primeiro acesso, esqueceu a senha ou sempre entrou com o Google? Enviamos um link para você entrar e criar sua senha."}
           </p>
         </div>
-        <div className="cartao p-6">
+        <div className="cartao subir p-6 shadow-lg" style={atraso(200)}>
           <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
-            {modo === "primeiro" && (
-              <div className="grid gap-1.5">
-                <Label htmlFor={`${id}-nome`}>Nome</Label>
-                <Input
-                  id={`${id}-nome`}
-                  className="min-h-11"
-                  autoComplete="name"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
-                />
-              </div>
-            )}
             <div className="grid gap-1.5">
-              <Label htmlFor={`${id}-email`}>E-mail</Label>
+              <Label htmlFor={`${id}-email`}>E-mail da empresa</Label>
               <Input
+                ref={campoEmail}
                 id={`${id}-email`}
                 type="email"
+                inputMode="email"
                 className="min-h-11"
-                autoComplete="email"
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                placeholder="nome@centerfrios.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                aria-describedby={erro ? `${id}-erro` : undefined}
+                aria-invalid={erro?.campo === "email"}
+                aria-describedby={descricao("email")}
               />
             </div>
-            {modo !== "recuperar" && (
+            {modo === "entrar" && (
               <div className="grid gap-1.5">
-                <Label htmlFor={`${id}-senha`}>
-                  {modo === "primeiro" ? "Crie sua senha" : "Senha"}
-                </Label>
+                <Label htmlFor={`${id}-senha`}>Senha</Label>
                 <div className="flex gap-2">
                   <Input
+                    ref={campoSenha}
                     id={`${id}-senha`}
                     type={verSenha ? "text" : "password"}
                     className="min-h-11"
-                    autoComplete={modo === "entrar" ? "current-password" : "new-password"}
+                    autoComplete="current-password"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     required
-                    minLength={6}
-                    aria-describedby={erro ? `${id}-erro` : undefined}
+                    aria-invalid={erro?.campo === "senha"}
+                    aria-describedby={descricao("senha")}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    className="size-11 shrink-0"
                     aria-pressed={verSenha}
                     aria-controls={`${id}-senha`}
                     aria-label="Mostrar senha"
@@ -232,44 +264,45 @@ function Entrar() {
                     {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
                   </Button>
                 </div>
-                {modo === "entrar" && (
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="self-start px-0"
-                    onClick={() => trocar("recuperar")}
-                  >
-                    Esqueci minha senha
-                  </Button>
-                )}
               </div>
             )}
             {erro && (
               <p id={`${id}-erro`} role="alert" className="text-sm font-semibold text-perigo">
-                {erro}
+                {erro.texto}
               </p>
-            )}
-            {podeReenviar && (
-              <Button type="button" variant="outline" className="min-h-11" onClick={reenviar}>
-                Reenviar e-mail de confirmação
-              </Button>
             )}
             {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
             <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">
               {aviso}
             </p>
-            <Button type="submit" size="lg" disabled={enviando}>
-              {enviando ? "Aguarde…" : BOTOES[modo]}
+            <Button type="submit" size="lg" className="min-h-11 transicao" disabled={enviando}>
+              {enviando ? "Aguarde…" : modo === "entrar" ? "Entrar" : "Enviar link"}
             </Button>
+            {modo === "entrar" && (
+              <Button
+                type="button"
+                variant={sugerirLink ? "secondary" : "link"}
+                className="min-h-11 self-center"
+                onClick={() => trocar("link")}
+              >
+                <Mail aria-hidden="true" /> Primeiro acesso ou esqueci a senha
+              </Button>
+            )}
           </form>
-          {modo !== "recuperar" && (
+          {modo === "entrar" && (
             <>
               <div className="my-5 flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="h-px flex-1 bg-border" />
                 ou
                 <span className="h-px flex-1 bg-border" />
               </div>
-              <Button type="button" variant="outline" size="lg" className="w-full" onClick={google}>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="min-h-11 w-full"
+                onClick={google}
+              >
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[18px]">
                   <path
                     fill="#4285F4"
@@ -293,20 +326,11 @@ function Entrar() {
             </>
           )}
         </div>
-        <div className="mt-6 text-center text-sm">
-          {modo === "entrar" ? (
-            <>
-              <p>
-                Primeiro acesso? Peça seu convite ao administrador e entre com o e-mail da empresa.
-              </p>
-              <Button variant="link" className="px-1" onClick={() => trocar("primeiro")}>
-                Já fui convidado: criar minha senha
-              </Button>
-            </>
-          ) : null}
-        </div>
-        <div className="mt-6 flex justify-center text-foreground">
-          <Pinguim className="size-10" />
+        <p className="subir mt-6 text-center text-sm text-muted-foreground" style={atraso(320)}>
+          Ainda não tem acesso? Peça ao administrador para cadastrar o seu e-mail da empresa.
+        </p>
+        <div className="subir mt-6 flex justify-center" style={atraso(400)}>
+          <Pinguim className="flutuar size-16" expressao={modo === "entrar" ? "feliz" : "atento"} />
         </div>
       </div>
     </main>

@@ -278,3 +278,84 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- Movimento do login e da entrada (todos param com prefers-reduced-motion acima) ---- */
+@utility subir {
+  animation: subir 640ms var(--ease-polar) both;
+  animation-delay: var(--atraso, 0ms);
+}
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@utility flutuar {
+  animation: flutuar 5.5s ease-in-out infinite;
+}
+@keyframes flutuar {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+@utility aurora {
+  animation: aurora 22s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  from {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, 5%, 0) scale(1.15);
+  }
+}
+@utility desvanecer {
+  animation: desvanecer 260ms ease-out both;
+}
+@keyframes desvanecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@utility check-circulo {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: tracar 520ms cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+@utility check-marca {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: tracar 300ms cubic-bezier(0.65, 0, 0.45, 1) 420ms forwards;
+}
+@keyframes tracar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@utility pulsar {
+  animation: pulsar 700ms var(--ease-polar) 380ms both;
+}
+@keyframes pulsar {
+  0% {
+    transform: scale(0.86);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

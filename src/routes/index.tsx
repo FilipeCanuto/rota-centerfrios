@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   beforeLoad: async () => {
-    levarLinkDeRecuperacao();
+    levarLinkDeRecuperacao("/");
     const { data } = await supabase.auth.getUser();
     throw redirect({ to: data.user ? "/inicio" : "/auth" });
   },
