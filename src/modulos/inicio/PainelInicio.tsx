@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { Contador } from "@/design-system/movimento";
 import { GraficoAnel } from "@/design-system/GraficoAnel";
 import { Copiloto } from "@/modulos/copiloto/Copiloto";
 import { Progresso } from "@/design-system/Progresso";
@@ -99,7 +100,7 @@ export function PainelInicio() {
     );
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="cascata flex flex-col gap-5">
       <div>
         <p className="text-sm capitalize text-muted-foreground">
           <time dateTime={formatarISO(hoje)}>{formatarDataLonga(hoje)}</time>
@@ -182,15 +183,19 @@ function MetaMes({ p }: { p: Painel }) {
         />
         <div className="flex flex-col gap-5">
           <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
-            {[
-              ["Faturado", formatarMoeda(p.faturadoMes)],
-              ["Falta", formatarMoeda(p.falta)],
-              ["Projeção", formatarMoeda(p.projecao)],
-              ["Meta do dia", formatarMoeda(p.metaDoDia)],
-            ].map(([k, v]) => (
+            {(
+              [
+                ["Faturado", p.faturadoMes],
+                ["Falta", p.falta],
+                ["Projeção", p.projecao],
+                ["Meta do dia", p.metaDoDia],
+              ] as const
+            ).map(([k, v]) => (
               <div key={k}>
                 <dt className="text-sm text-muted-foreground">{k}</dt>
-                <dd className="numeros font-display text-xl font-bold">{v}</dd>
+                <dd className="numeros font-display text-xl font-bold">
+                  <Contador valor={v} formatar={formatarMoeda} />
+                </dd>
               </div>
             ))}
           </dl>
@@ -253,7 +258,10 @@ function MetasDoDia({ p }: { p: Painel }) {
       <p className="mt-5 flex items-center gap-2 text-sm">
         <Sparkles className="size-4 text-primary" aria-hidden="true" />
         <span>
-          <strong className="numeros">{p.pontosHoje}</strong> pontos ganhos hoje
+          <strong className="numeros">
+            <Contador valor={p.pontosHoje} />
+          </strong>{" "}
+          pontos ganhos hoje
         </span>
       </p>
     </Secao>
@@ -266,7 +274,7 @@ function PlanoDoDia({ p, aoRegistrar }: { p: Painel; aoRegistrar: (c: ClienteCon
       {p.plano.length === 0 ? (
         <p className="text-muted-foreground">Nenhum cliente pendente hoje. Bom trabalho!</p>
       ) : (
-        <ol className="divide-y">
+        <ol className="cascata divide-y">
           {p.plano.map((item, i) => (
             <li
               key={item.cliente.id}
@@ -325,9 +333,9 @@ function Alertas({ p }: { p: Painel }) {
       {p.alertas.length === 0 ? (
         <p className="text-muted-foreground">Sem alertas hoje.</p>
       ) : (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="cascata grid gap-3 md:grid-cols-2">
           {p.alertas.slice(0, 12).map((a) => (
-            <li key={a.id} className="flex flex-col gap-1.5 rounded-lg border p-3">
+            <li key={a.id} className="linha-interativa flex flex-col gap-1.5 rounded-lg border p-3">
               <SeloStatus tom={TOM[a.tipo].tom}>{TOM[a.tipo].rotulo}</SeloStatus>
               <p className="font-semibold">{a.titulo}</p>
               <p className="text-sm text-muted-foreground">{a.detalhe}</p>

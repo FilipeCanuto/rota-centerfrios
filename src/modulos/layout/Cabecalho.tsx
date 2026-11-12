@@ -61,7 +61,7 @@ export function Cabecalho() {
         />
         <Link
           to="/inicio"
-          className="min-w-0 shrink rounded-md md:hidden"
+          className="pressionar min-w-0 shrink rounded-md md:hidden"
           aria-label="Rota CENTERFRIOS — Início"
         >
           <Logo className="h-7" />
@@ -93,7 +93,7 @@ export function Cabecalho() {
             <Link
               to="/inicio"
               hash="cobertura"
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border px-2.5 text-sm font-semibold sm:px-3"
+              className="pressionar inline-flex min-h-11 items-center gap-1.5 rounded-full border px-2.5 text-sm font-semibold sm:px-3"
               aria-label={`Cobertura da carteira: ${formatarPercentual(cobertura)}`}
             >
               <Users className="size-4 text-primary" aria-hidden="true" />
@@ -125,7 +125,7 @@ export function Cabecalho() {
               {naoLidas.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhuma notificação não lida.</p>
               ) : (
-                <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
+                <ul className="cascata max-h-80 space-y-2 overflow-y-auto text-sm">
                   {naoLidas.slice(0, 8).map((a) => (
                     <li key={a.id} className="border-b pb-2 last:border-0">
                       {a.titulo}

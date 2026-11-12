@@ -45,7 +45,7 @@ export function InstagramPosts({ empresaId }: { empresaId: string }) {
       ) : lista.length === 0 ? (
         <p className="text-muted-foreground">Nenhum post enviado ainda.</p>
       ) : (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {lista.map((p) => (
             <ItemPost key={p.id} post={p} meu={p.vendedor_id === eu} />
           ))}

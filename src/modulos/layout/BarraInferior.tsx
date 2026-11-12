@@ -16,7 +16,7 @@ export function BarraInferior() {
               <Link
                 to={d.url}
                 aria-current={ativo ? "page" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-semibold transicao ${ativo ? "text-primary" : "text-muted-foreground"}`}
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-semibold pressionar linha-interativa ${ativo ? "text-primary" : "text-muted-foreground"}`}
               >
                 <d.icone className="size-5" aria-hidden="true" strokeWidth={ativo ? 2.4 : 1.8} />
                 {d.titulo}

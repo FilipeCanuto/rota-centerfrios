@@ -159,7 +159,7 @@ export function TelaFeriados() {
             anterior escolhendo {ano - 1} acima.
           </EstadoVazio>
         ) : (
-          <ul className="divide-y">
+          <ul className="cascata divide-y">
             {lista.map((f) => (
               <li
                 key={f.id}

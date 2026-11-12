@@ -11,7 +11,7 @@ export function Progresso({ valor, rotulo }: { valor: number; rotulo: string }) 
       className="h-2 w-full overflow-hidden rounded-full bg-trilha"
     >
       <div
-        className={`h-full rounded-full transicao ${atingido ? "bg-ouro ring-2 ring-foreground ring-inset" : "bg-primary"}`}
+        className={`h-full rounded-full barra-entrar ${atingido ? "bg-ouro ring-2 ring-foreground ring-inset" : "bg-primary"}`}
         style={{ width: `${p * 100}%` }}
       />
     </div>

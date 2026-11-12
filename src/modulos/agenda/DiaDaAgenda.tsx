@@ -46,7 +46,7 @@ export function DiaDaAgenda({
       </div>
       {vazio && <p className="py-3 text-muted-foreground">Nada marcado para este dia.</p>}
       {extras.length > 0 && (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {extras.map((e) => (
             <li key={e.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-3">
               <IconeEvento tipo={e.tipo} className="size-5" />
@@ -66,7 +66,7 @@ export function DiaDaAgenda({
         </ul>
       )}
       {tarefas.length > 0 && (
-        <ul className="divide-y">
+        <ul className="cascata divide-y">
           {tarefas.map((t) => (
             <ItemTarefa
               key={t.id}

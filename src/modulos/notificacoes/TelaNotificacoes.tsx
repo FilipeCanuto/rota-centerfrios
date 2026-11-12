@@ -54,9 +54,9 @@ export function TelaNotificacoes() {
           <p>Os avisos sobre clientes, orçamentos e metas aparecem nesta lista.</p>
         </EstadoVazio>
       ) : (
-        <ul className="cartao divide-y">
+        <ul className="cartao cascata divide-y">
           {q.data.map((n) => (
-            <li key={n.id} className="flex flex-col gap-1 p-4">
+            <li key={n.id} className="linha-interativa flex flex-col gap-1 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <SeloStatus tom={n.lida_em ? "info" : "atencao"}>
                   {n.lida_em ? "Lida" : "Não lida"}

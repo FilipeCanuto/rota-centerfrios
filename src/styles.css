@@ -350,6 +350,70 @@
   & > :nth-child(n + 8) {
     animation-delay: calc(var(--passo-cascata) * 7);
   }
+  /* Lista longa: só os primeiros (os visíveis) animam. */
+  & > :nth-child(n + 13) {
+    animation: none;
+  }
+}
+/* Linha, item de menu ou atalho clicável: realce (num ::after, só opacidade) no hover e no foco; encolhe ao toque. */
+@utility linha-interativa {
+  position: relative;
+  transition: transform var(--duracao-rapida) var(--ease-polar);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: color-mix(in oklab, var(--primary) 9%, transparent);
+    box-shadow: inset 3px 0 0 var(--primary);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duracao-media) var(--ease-polar);
+  }
+  @media (hover: hover) {
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+  &:focus-visible::after,
+  &:has(:focus-visible)::after {
+    opacity: 1;
+  }
+  &:active {
+    transform: scale(0.99);
+  }
+}
+/* Gráficos: o anel gira até o lugar e a barra cresce da esquerda (só transform e opacity). */
+@utility anel-entrar {
+  transform-origin: center;
+  animation: anel-entrar var(--duracao-lenta) var(--curva-enfase) both;
+}
+@keyframes anel-entrar {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg);
+  }
+}
+@utility barra-entrar {
+  transform-origin: left;
+  animation: barra-entrar var(--duracao-lenta) var(--curva-enfase) both;
+}
+@keyframes barra-entrar {
+  from {
+    transform: scaleX(0);
+  }
+}
+/* Menus, seletores, popovers e confirmações: mesma duração e curva do sistema. */
+[data-radix-popper-content-wrapper] > *,
+[role="alertdialog"] {
+  animation-duration: var(--duracao-media);
+  animation-timing-function: var(--ease-polar);
+}
+/* Aparelho fraco (movimento.tsx): sem escalonar, sem escala e com transições mais curtas. */
+:root[data-movimento="leve"] {
+  --duracao-lenta: 200ms;
+  --passo-cascata: 0ms;
+  --escala-hover: 1;
 }
 /* Skeleton: pulso só de opacidade. */
 @utility esqueleto {
@@ -390,6 +454,7 @@
     animation-duration: 0.01ms !important;
   }
   .cartao-interativo,
+  .linha-interativa,
   .pressionar {
     transform: none !important;
   }

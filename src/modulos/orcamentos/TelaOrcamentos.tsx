@@ -17,6 +17,7 @@ import {
 import { useAnunciar } from "@/design-system/Anunciador";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { abrirExpansao, Contador, expansao, transicaoDeVisao } from "@/design-system/movimento";
 import { formatarMoeda } from "@/design-system/formatar";
 import { SeloStatus } from "@/design-system/SeloStatus";
 import { useEmpresasAtivas } from "@/modulos/sessao/sessao";
@@ -62,7 +63,7 @@ export function TelaOrcamentos() {
             variant={aba === a.valor ? "default" : "outline"}
             aria-pressed={aba === a.valor}
             className="min-h-11"
-            onClick={() => setAba(a.valor)}
+            onClick={() => transicaoDeVisao(() => setAba(a.valor))}
           >
             {a.rotulo}
           </Button>
@@ -88,16 +89,25 @@ export function TelaOrcamentos() {
           <p className="text-muted-foreground" aria-live="polite">
             {lista.length} {lista.length === 1 ? "orçamento" : "orçamentos"} somando
             {lista.length === 200 ? " pelo menos " : " "}
-            <span className="numeros font-semibold text-foreground">{formatarMoeda(total)}</span>
+            <Contador
+              valor={total}
+              formatar={formatarMoeda}
+              className="numeros font-semibold text-foreground"
+            />
             {aba === "aberto" && parados > 0 && ` · ${parados} parado${parados > 1 ? "s" : ""}`}
             {lista.length === 200 && " · mostrando os 200 mais recentes"}
           </p>
-          <ul className="cartao divide-y">
+          <ul className="cartao cascata divide-y">
             {lista.map(({ o, parado, retornoAtrasado }) => (
-              <li key={o.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 p-4">
+              <li
+                key={o.id}
+                {...expansao(o.id)}
+                className="linha-interativa flex flex-wrap items-center gap-x-3 gap-y-2 p-4"
+              >
                 <Link
                   to="/clientes/$id"
                   params={{ id: o.cliente_id }}
+                  onClick={abrirExpansao(o.id)}
                   className="min-h-11 content-center font-semibold underline-offset-2 hover:underline"
                 >
                   {o.clientes?.nome ?? "Cliente"}

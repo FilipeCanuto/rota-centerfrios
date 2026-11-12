@@ -3,12 +3,14 @@
 Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada etapa.
 
 ## Situação em 11/11/2026
+
 - Passo 2 (regras de negócio) no `main` (PR #1). Etapa 1 no `main` (PR #2).
 - Mensagens 10, 11 e 12 aplicadas pelo Lovable (migrações 0013, 0014, 0015) e conferidas; 13 em andamento; 14 e 15 a enviar.
 
 - Etapas 8 a 13 concluídas no ramo `fase1/restante` (um único PR). Relatório: [relatorio-fase-1.md](relatorio-fase-1.md).
 
 ## Como conferir localmente
+
 - `bun install`, depois `bun x vitest run` (regras), `bun x tsc --noEmit`, `bun x eslint .`.
 - `bun x playwright test` (axe + teclado em celular/desktop, claro/escuro). Usa o Chrome instalado (`channel: "chrome"`) e um backend simulado em `e2e/simulacao.ts`: nenhuma credencial real nem rede. Em CI sem Chrome, trocar para o Chromium do Playwright.
 
@@ -43,14 +45,16 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 17 | Mascote (4 chaves `mascote_*` em `configuracoes_regras`) | **Texto pronto, ainda não enviado ao Lovable.** Sem a migração o app usa a reserva de `REGRAS_PADRAO` |
 
 ## Decisões tomadas nesta fase
-- **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *Aprovado.*
-- **Pesos iniciais da gamificação:** vendas 30, cobertura 20, reativação 20, orçamentos 10, Instagram 5. Seguem a ordem do plano, mas os números são editáveis e estão *aprovados como iniciais*, editáveis pela diretoria.
-- **Pontuação por indicador:** ganha o peso quando bate a meta do dia daquele indicador. Reativação e Instagram contam por ocorrência. *Aprovado.*
+
+- **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. _Aprovado._
+- **Pesos iniciais da gamificação:** vendas 30, cobertura 20, reativação 20, orçamentos 10, Instagram 5. Seguem a ordem do plano, mas os números são editáveis e estão _aprovados como iniciais_, editáveis pela diretoria.
+- **Pontuação por indicador:** ganha o peso quando bate a meta do dia daquele indicador. Reativação e Instagram contam por ocorrência. _Aprovado._
 - **Hashtag da campanha:** começa vazia. A diretoria cadastra; até lá só `@centerfriosoficial` vale.
 - **Horário comercial e silêncio das notificações (aprovado):** segunda a sexta das 8h às 18h e sábado das 8h às 12h; silêncio fora disso, aos domingos e feriados, ajustável por pessoa.
 - **Selo "Resposta relâmpago":** fica para a Fase 2 (depende do WhatsApp).
 
 ## Decisões técnicas
+
 - **Retorno automático sem repetir:** o índice do banco evita duplicar só no mesmo dia. A tela consulta antes e pula o cliente que já tem retorno automático aberto, de qualquer dia. Assim não foi preciso mudar o banco.
 - **Agendar leva só o id do cliente no endereço:** o nome é buscado na tela (não fica no histórico do navegador), e o endereço é limpo assim que o formulário abre.
 - **Virada do dia com a Agenda aberta:** as tarefas automáticas do novo dia só aparecem ao recarregar a página. Fica assim no piloto.
@@ -66,7 +70,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - **PWA sem guardar dados no aparelho:** o service worker só mostra a página "sem conexão"; nenhum dado da carteira fica no celular. Não roda na prévia do Lovable.
 - **Ícones do app:** continuam os atuais (sem versão maskable) até a marca nova, que espera a escolha do nome.
 
-- **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). *Aprovado pela diretoria em 11/11/2026.*
+- **Saúde do cliente:** em risco = sem compra há 90+ dias ou recompra urgente; atenção = recompra em atenção ou esquecido; saudável = o resto. Usa só limites aprovados; valor de compra ainda não entra (o plano não define faixas). _Aprovado pela diretoria em 11/11/2026._
 - **Remanejamento:** supervisor e diretoria; a diretoria tem acesso total (aprovado em 11/11/2026).
 
 - **Importação só de CSV:** o Excel salva como CSV (Arquivo → Salvar como → CSV). Ler .xlsx exigiria uma biblioteca pesada; fica para quando o Shop9 for integrado direto.
@@ -92,9 +96,11 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 - **Login e mascote (`fix/login-mascote`):** login com senha ou link de acesso por e-mail (um só caminho para primeiro acesso, senha esquecida e contas Google), tela "Crie sua senha", check e boas-vindas animados, mascote vetorizado em `public/mascote` e no componente `Pinguim`. Relatório em [relatorio-login-mascote.md](relatorio-login-mascote.md).
 - **Movimento e Links (`feat/movimento-links`):** tokens e padrões de movimento no Polar (pressionar, card interativo, cascata, transições de visão, contador), aplicados a botão, card, modal, sheet e skeleton; tela Links e arquivos em grade com detalhe que expande. Sem biblioteca nova. Relatório em [relatorio-movimento-links.md](relatorio-movimento-links.md).
+- **Movimento global (`feat/movimento-global`):** os mesmos tokens e padrões em todas as telas: cascata nas listas, realce de hover/foco/toque (`linha-interativa`), contadores em metas, vendas e pontos, anel e barras animando na entrada, expansão da linha do cliente para a ficha (e volta), transição nas abas e filtros, modo leve automático em aparelho fraco. Relatório em `docs/relatorio-movimento-global.md`.
 
 ## Pendências abertas
-- Medir INP e CLS em aparelho real depois do movimento novo; aplicar `cartao-interativo` e `cascata` às outras telas conforme forem revisadas.
+
+- Medir INP e CLS em aparelho real depois do movimento novo (a medição atual é de laboratório: `DESEMPENHO=1 bun x playwright test e2e/desempenho.spec.ts`).
 - **Notificações — pendentes:** tela de preferências (tipos desligados, horário de expediente por pessoa) e o silêncio fora do expediente, aos domingos e feriados (horário padrão aprovado: seg–sex 8h–18h, sábado 8h–12h). A tabela `preferencias_notificacao` já existe no banco; falta a tela e a regra de exibição.
 - Refinamento visual do Pinguim e animações (revisão geral).
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
