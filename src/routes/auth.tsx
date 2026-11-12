@@ -9,10 +9,12 @@ import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
 import { cadastroDeContaExistente, causaDoLogin, linkExpirado, MENSAGEM_LOGIN } from "@/regras";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  beforeLoad: () => levarLinkDeRecuperacao(),
   head: () => ({
     meta: [
       { title: "Entrar — Rota CENTERFRIOS" },

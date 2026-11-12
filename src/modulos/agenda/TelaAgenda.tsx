@@ -193,8 +193,13 @@ export function TelaAgenda({
   const tarefasPorDia = new Map<string, Tarefa[]>();
   for (const t of tarefas.data ?? [])
     tarefasPorDia.set(t.data, [...(tarefasPorDia.get(t.data) ?? []), t]);
+  // No dia de hoje, as atrasadas ainda abertas vêm antes, cada uma no seu dia.
+  const atrasadas =
+    modo === "dia" && base === hoje ? [...tarefasPorDia.keys()].filter((d) => d < hoje) : [];
   const dias =
-    modo === "semana" ? Array.from({ length: 7 }, (_, i) => somarDias(inicio, i)) : [base];
+    modo === "semana"
+      ? Array.from({ length: 7 }, (_, i) => somarDias(inicio, i))
+      : [...atrasadas, base];
 
   const cartaoDoDia = (dia: string, comTitulo: boolean) => (
     <DiaDaAgenda

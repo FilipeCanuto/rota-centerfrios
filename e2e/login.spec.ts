@@ -58,7 +58,7 @@ test("trocar de modo leva o foco para o novo título", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Esqueci minha senha" })).toBeFocused();
 });
 
-const rotaToken = /supabase.co/auth/v1/token/;
+const rotaToken = /supabase\.co\/auth\/v1\/token/;
 
 test("senha errada e e-mail não confirmado têm mensagens diferentes", async ({ page }) => {
   await page.route(rotaToken, (r) =>
@@ -89,7 +89,7 @@ test("senha errada e e-mail não confirmado têm mensagens diferentes", async ({
 test("primeiro acesso com e-mail que já tem conta orienta a criar senha pelo link", async ({
   page,
 }) => {
-  await page.route(/supabase.co/auth/v1/signup/, (r) =>
+  await page.route(/supabase\.co\/auth\/v1\/signup/, (r) =>
     r.fulfill({
       status: 200,
       contentType: "application/json",
@@ -109,7 +109,7 @@ test("link de recuperação que cai em outra página vai para a tela de nova sen
   page,
 }) => {
   await page.goto("/#access_token=abc&refresh_token=def&type=recovery");
-  await expect(page).toHaveURL(//redefinir-senha/);
+  await expect(page).toHaveURL(/\/redefinir-senha/);
   await expect(page.getByRole("heading", { level: 1, name: "Crie uma nova senha" })).toBeVisible();
 });
 
@@ -121,9 +121,8 @@ test("Voltar: não aparece no Início; em /configuracoes/feriados sem histórico
   await expect(page.getByRole("button", { name: "Voltar" })).toHaveCount(0);
   await page.goto("/configuracoes/feriados");
   await page.getByRole("button", { name: "Voltar" }).click();
-  await expect(page).toHaveURL(//mais$/);
+  await expect(page).toHaveURL(/\/mais$/);
   await page.getByRole("link", { name: "Orçamentos" }).click();
   await page.getByRole("button", { name: "Voltar" }).click();
-  await expect(page).toHaveURL(//mais$/);
+  await expect(page).toHaveURL(/\/mais$/);
 });
-

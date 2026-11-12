@@ -25,7 +25,11 @@ Tudo o que precisa acontecer antes de Clara e Humberto usarem a Rota com dados r
 - [ ] Conferir as contas fixas: Filipe Canuto (administrador + diretoria) e Willames Costa (administrador), nas duas empresas.
 
 ## 4. Login
-- [ ] No Lovable Cloud (Authentication → URL Configuration), incluir o endereço publicado e `/redefinir-senha` (ex.: `https://<endereço>/redefinir-senha`) nas URLs de redirecionamento permitidas. Sem isso, o link de "Esqueci minha senha" não abre a tela de nova senha.
+- [ ] No Lovable Cloud, abrir Users → Auth settings (Authentication) → **URL Configuration** e conferir:
+  - **Site URL** = o endereço publicado do app (sem barra no fim).
+  - **Redirect URLs** (lista de permitidos) com o endereço publicado e também `/redefinir-senha` e o endereço da prévia do Lovable, cada um com `/**` no fim (ex.: `https://<endereço>/**`). Sem isso, o Supabase manda o link de e-mail para a página inicial.
+  - **Email** → em *Sign In / Providers*, `Confirm email` ligado (decisão do convite) e *Allow new users to sign up* ligado: o cadastro continua restrito pelo gatilho do banco (só e-mail pré-cadastrado).
+- [ ] Contas que entraram só pelo Google (Filipe, Willames): usar “Esqueci minha senha” uma vez para criar a senha.
 - [ ] Testar "Esqueci minha senha" com uma conta real: o e-mail chega, o link abre a tela "Crie uma nova senha" e a senha nova funciona.
 - [ ] Testar "Primeiro acesso" de um vendedor convidado: cria a senha, confirma pelo e-mail e entra.
 
