@@ -57,7 +57,6 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --ease-polar: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /*
@@ -97,19 +96,58 @@
   --polar-vermelho-300: oklch(0.759 0.144 26.1); /* #FF8A80 */
   --radius: 12px;
   /* Movimento: durações, curvas, mola e distâncias. Só transform e opacity são animados. */
+  /* Padrão "Normal". Suave e Expressivo (data-intensidade, movimento.tsx) só trocam estes valores. */
+  --duracao-rapida: 140ms;
+  --duracao-media: 260ms;
+  --duracao-lenta: 480ms;
+  --duracao-grafico: 900ms; /* anel, barra de meta e contador */
+  --duracao: var(--duracao-media);
+  --ease-polar: cubic-bezier(0.22, 1, 0.36, 1);
+  --curva-saida: cubic-bezier(0.4, 0, 1, 1);
+  --curva-enfase: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Mola com um leve passar do ponto (~5%), para hover, soltar o toque e expansão. */
+  --mola: linear(0, 0.4 9%, 0.8 20%, 1.03 34%, 1.05 44%, 1.025 58%, 0.995 76%, 1);
+  --distancia-curta: 14px; /* entrada de cards e listas */
+  --distancia-media: 24px; /* entrada de tela */
+  --elevacao-hover: -4px;
+  --deslocamento-linha: 3px;
+  --escala-entrada: 0.97;
+  --escala-hover: 1.025;
+  --escala-pressionar: 0.95;
+  --passo-cascata: 60ms;
+  --realce-hover: 7%;
+}
+:root[data-intensidade="suave"] {
   --duracao-rapida: 120ms;
   --duracao-media: 200ms;
   --duracao-lenta: 360ms;
-  --duracao: var(--duracao-media);
-  --curva-saida: cubic-bezier(0.4, 0, 1, 1);
+  --duracao-grafico: 600ms;
+  --ease-polar: cubic-bezier(0.2, 0.7, 0.2, 1);
   --curva-enfase: cubic-bezier(0.2, 0.9, 0.1, 1);
-  /* Mola suave (um leve passar do ponto), para expansão e contadores. */
-  --mola: linear(0, 0.35 12%, 0.72 26%, 0.95 40%, 1.04 52%, 1.03 64%, 1.005 80%, 1);
-  --distancia-curta: 4px;
+  --mola: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --distancia-curta: 6px;
   --distancia-media: 12px;
+  --elevacao-hover: -2px;
+  --deslocamento-linha: 2px;
+  --escala-entrada: 0.99;
   --escala-hover: 1.012;
   --escala-pressionar: 0.97;
   --passo-cascata: 40ms;
+  --realce-hover: 5%;
+}
+:root[data-intensidade="expressivo"] {
+  --duracao-lenta: 560ms;
+  --duracao-grafico: 1200ms;
+  --mola: linear(0, 0.4 8%, 0.85 18%, 1.05 30%, 1.09 40%, 1.04 54%, 0.99 72%, 1);
+  --distancia-curta: 20px;
+  --distancia-media: 36px;
+  --elevacao-hover: -6px;
+  --deslocamento-linha: 5px;
+  --escala-entrada: 0.95;
+  --escala-hover: 1.035;
+  --escala-pressionar: 0.93;
+  --passo-cascata: 80ms;
+  --realce-hover: 10%;
 }
 
 :root,
@@ -268,12 +306,13 @@
   }
 }
 @utility entrada {
-  animation: entrada 220ms var(--ease-polar) both;
+  animation: entrada var(--duracao-lenta) var(--ease-polar) backwards;
 }
+/* "backwards" (não "both"): depois de terminar, o transform do hover/toque não é anulado pelo fill. */
 @keyframes entrada {
   from {
     opacity: 0;
-    transform: translateY(var(--distancia-curta));
+    transform: translateY(var(--distancia-curta)) scale(var(--escala-entrada));
   }
   to {
     opacity: 1;
@@ -285,33 +324,39 @@
 /* Toque: encolhe um pouco ao pressionar. */
 @utility pressionar {
   transition:
-    transform var(--duracao-rapida) var(--ease-polar),
+    transform var(--duracao-lenta) var(--mola),
     opacity var(--duracao-rapida) var(--ease-polar),
     color var(--duracao-media) var(--ease-polar),
     background-color var(--duracao-media) var(--ease-polar),
     border-color var(--duracao-media) var(--ease-polar);
+  /* Ao pressionar, vai rápido (sem mola); ao soltar, volta com a mola. */
   &:active:not(:disabled) {
     transform: scale(var(--escala-pressionar));
+    opacity: 0.9;
+    transition-duration:
+      70ms, 70ms, var(--duracao-media), var(--duracao-media), var(--duracao-media);
+    transition-timing-function: var(--ease-polar);
   }
 }
 /* Card clicável: sobe, ganha sombra e realce na borda. A sombra fica num ::after e só a opacidade anima. */
 @utility cartao-interativo {
   position: relative;
-  transition: transform var(--duracao-media) var(--ease-polar);
+  transition: transform var(--duracao-lenta) var(--mola);
   &::after {
     content: "";
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    border: 1px solid color-mix(in oklab, var(--primary) 55%, transparent);
-    box-shadow: 0 10px 28px -10px color-mix(in oklab, var(--cor-texto) 28%, transparent);
+    border: 1px solid color-mix(in oklab, var(--primary) 65%, transparent);
+    background: color-mix(in oklab, var(--primary) var(--realce-hover), transparent);
+    box-shadow: 0 18px 36px -12px color-mix(in oklab, var(--cor-texto) 38%, transparent);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--duracao-media) var(--ease-polar);
   }
   @media (hover: hover) {
     &:hover {
-      transform: translateY(calc(var(--distancia-curta) * -0.5)) scale(var(--escala-hover));
+      transform: translateY(var(--elevacao-hover)) scale(var(--escala-hover));
     }
     &:hover::after {
       opacity: 1;
@@ -321,13 +366,15 @@
     opacity: 1;
   }
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.98);
+    transition-duration: 70ms;
+    transition-timing-function: var(--ease-polar);
   }
 }
 /* Lista em cascata: cada filho direto entra um passo depois (até o 8º). */
 @utility cascata {
   & > * {
-    animation: entrada var(--duracao-lenta) var(--ease-polar) both;
+    animation: entrada var(--duracao-lenta) var(--ease-polar) backwards;
   }
   & > :nth-child(2) {
     animation-delay: calc(var(--passo-cascata) * 1);
@@ -358,19 +405,22 @@
 /* Linha, item de menu ou atalho clicável: realce (num ::after, só opacidade) no hover e no foco; encolhe ao toque. */
 @utility linha-interativa {
   position: relative;
-  transition: transform var(--duracao-rapida) var(--ease-polar);
+  transition: transform var(--duracao-media) var(--mola);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: color-mix(in oklab, var(--primary) 9%, transparent);
+    background: color-mix(in oklab, var(--primary) calc(var(--realce-hover) + 4%), transparent);
     box-shadow: inset 3px 0 0 var(--primary);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--duracao-media) var(--ease-polar);
   }
   @media (hover: hover) {
+    &:hover {
+      transform: translateX(var(--deslocamento-linha));
+    }
     &:hover::after {
       opacity: 1;
     }
@@ -380,23 +430,24 @@
     opacity: 1;
   }
   &:active {
-    transform: scale(0.99);
+    transform: scale(0.98);
+    transition-duration: 70ms;
   }
 }
 /* Gráficos: o anel gira até o lugar e a barra cresce da esquerda (só transform e opacity). */
 @utility anel-entrar {
   transform-origin: center;
-  animation: anel-entrar var(--duracao-lenta) var(--curva-enfase) both;
+  animation: anel-entrar var(--duracao-grafico) var(--curva-enfase) both;
 }
 @keyframes anel-entrar {
   from {
     opacity: 0;
-    transform: rotate(-90deg);
+    transform: rotate(-120deg) scale(0.85);
   }
 }
 @utility barra-entrar {
   transform-origin: left;
-  animation: barra-entrar var(--duracao-lenta) var(--curva-enfase) both;
+  animation: barra-entrar var(--duracao-grafico) var(--curva-enfase) 120ms both;
 }
 @keyframes barra-entrar {
   from {
@@ -409,11 +460,15 @@
   animation-duration: var(--duracao-media);
   animation-timing-function: var(--ease-polar);
 }
-/* Aparelho fraco (movimento.tsx): sem escalonar, sem escala e com transições mais curtas. */
+/* Aparelho realmente fraco (movimento.tsx): sem escalonar, sem escala e com transições mais curtas. */
 :root[data-movimento="leve"] {
-  --duracao-lenta: 200ms;
+  --duracao-lenta: 220ms;
+  --duracao-grafico: 300ms;
   --passo-cascata: 0ms;
   --escala-hover: 1;
+  --escala-entrada: 1;
+  --distancia-curta: 6px;
+  --distancia-media: 8px;
 }
 /* Skeleton: pulso só de opacidade. */
 @utility esqueleto {
@@ -429,29 +484,42 @@
   animation: var(--duracao-rapida) var(--curva-saida) both vt-sair;
 }
 ::view-transition-new(root) {
-  animation: var(--duracao-media) var(--ease-polar) both vt-entrar;
+  animation: var(--duracao-lenta) var(--curva-enfase) both vt-entrar;
 }
 ::view-transition-group(*) {
-  animation-duration: var(--duracao-lenta);
+  animation-duration: calc(var(--duracao-lenta) + 120ms);
   animation-timing-function: var(--curva-enfase);
 }
 @keyframes vt-sair {
   to {
     opacity: 0;
+    transform: translateY(calc(var(--distancia-curta) * -0.5));
   }
 }
 @keyframes vt-entrar {
   from {
     opacity: 0;
+    transform: translateY(var(--distancia-media));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Sem deslocamento nem escala: resta só um fade curto. */
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.01ms !important;
+  /* Sem deslocamento nem escala, qualquer que seja a intensidade: resta só um fade curto. */
+  :root,
+  :root[data-intensidade],
+  :root[data-movimento] {
+    --distancia-curta: 0px !important;
+    --distancia-media: 0px !important;
+    --elevacao-hover: 0px !important;
+    --deslocamento-linha: 0px !important;
+    --escala-entrada: 1 !important;
+    --escala-hover: 1 !important;
+    --escala-pressionar: 1 !important;
+    --passo-cascata: 0ms !important;
+    --duracao-rapida: 100ms !important;
+    --duracao-media: 150ms !important;
+    --duracao-lenta: 150ms !important;
+    --duracao-grafico: 150ms !important;
   }
   .cartao-interativo,
   .linha-interativa,
@@ -466,6 +534,20 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Exceção: só o fade de entrada e a troca de tela, curtos. */
+  .entrada,
+  .cascata > *,
+  .subir,
+  .desvanecer {
+    animation-duration: 150ms !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 150ms !important;
+  }
+  ::view-transition-group(*) {
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* ---- Movimento do login e da entrada (todos param com prefers-reduced-motion acima) ---- */
@@ -476,7 +558,7 @@
 @keyframes subir {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(var(--distancia-media));
     filter: blur(4px);
   }
   to {

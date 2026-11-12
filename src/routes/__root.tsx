@@ -11,6 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { ProvedorAnunciador } from "@/design-system/Anunciador";
+import { scriptMovimentoInicial } from "@/design-system/movimento";
 import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
 import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,7 +131,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: scriptTemaInicial }} />
+        <script dangerouslySetInnerHTML={{ __html: scriptTemaInicial + scriptMovimentoInicial }} />
         <HeadContent />
       </head>
       <body>

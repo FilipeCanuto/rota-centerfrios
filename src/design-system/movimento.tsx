@@ -1,4 +1,10 @@
-import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import { flushSync } from "react-dom";
 
 /**
@@ -19,13 +25,54 @@ export function transicaoDeVisao(atualizar: () => void) {
   document.startViewTransition(() => flushSync(atualizar));
 }
 
-/** Aparelho fraco (poucos núcleos ou pouca memória): o CSS encurta o movimento e o contador não conta. */
+/**
+ * Aparelho realmente fraco (até 2 núcleos ou até 1 GB de memória): o CSS encurta o movimento e o
+ * contador não conta. Antes o corte era 4 núcleos / 2 GB, que pegava notebooks e celulares comuns.
+ */
 const leve = () => {
   const n = navigator as Navigator & { deviceMemory?: number };
-  return n.hardwareConcurrency <= 4 || (n.deviceMemory ?? 8) <= 2;
+  return (n.hardwareConcurrency ?? 8) <= 2 || (n.deviceMemory ?? 8) <= 1;
 };
 if (typeof document !== "undefined" && leve())
   document.documentElement.setAttribute("data-movimento", "leve");
+
+/**
+ * Preferência "Intensidade do movimento" (por aparelho, em localStorage). O CSS lê
+ * `data-intensidade` na raiz; prefers-reduced-motion do sistema sempre vence (só fade curto).
+ */
+export type Intensidade = "suave" | "normal" | "expressivo";
+export const INTENSIDADES: { valor: Intensidade; rotulo: string }[] = [
+  { valor: "suave", rotulo: "Suave" },
+  { valor: "normal", rotulo: "Normal" },
+  { valor: "expressivo", rotulo: "Expressivo" },
+];
+const CHAVE_INTENSIDADE = "rota-movimento";
+const ouvintes = new Set<() => void>();
+const lerIntensidade = (): Intensidade => {
+  try {
+    const v = localStorage.getItem(CHAVE_INTENSIDADE);
+    return v === "suave" || v === "expressivo" ? v : "normal";
+  } catch {
+    return "normal";
+  }
+};
+export function definirIntensidade(i: Intensidade) {
+  try {
+    localStorage.setItem(CHAVE_INTENSIDADE, i);
+  } catch {
+    /* sem armazenamento: vale só nesta sessão */
+  }
+  document.documentElement.setAttribute("data-intensidade", i);
+  ouvintes.forEach((f) => f());
+}
+export const useIntensidade = () =>
+  useSyncExternalStore(
+    (f) => (ouvintes.add(f), () => ouvintes.delete(f)),
+    lerIntensidade,
+    () => "normal" as Intensidade,
+  );
+/** Script inline no <head>: aplica a preferência antes da hidratação (sem piscar). */
+export const scriptMovimentoInicial = `try{var m=localStorage.getItem('${CHAVE_INTENSIDADE}');if(m==='suave'||m==='expressivo')document.documentElement.setAttribute('data-intensidade',m)}catch(e){}`;
 
 /**
  * Card que expande para o detalhe em outra tela (e volta): o card recebe `{...expansao(id)}`, o
@@ -65,10 +112,15 @@ export function Contador({
     if (reduzido() || leve()) return setMostrado(valor);
     const de = mostrado;
     const inicio = performance.now();
+    // Mesma duração dos gráficos (token CSS), para número e barra chegarem juntos.
+    const total =
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--duracao-grafico"),
+      ) || 900;
     let quadro = 0;
     const passo = (agora: number) => {
-      const t = Math.min(1, (agora - inicio) / 360);
-      setMostrado(t < 1 ? Math.round(de + (valor - de) * (1 - (1 - t) ** 3)) : valor);
+      const t = Math.min(1, (agora - inicio) / total);
+      setMostrado(t < 1 ? Math.round(de + (valor - de) * (1 - (1 - t) ** 4)) : valor);
       if (t < 1) quadro = requestAnimationFrame(passo);
     };
     quadro = requestAnimationFrame(passo);
