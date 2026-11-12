@@ -15,6 +15,7 @@ import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
 import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
+import { MascoteSprite } from "@/design-system/MascoteSprite";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -170,6 +171,7 @@ function RootComponent() {
         }}
       >
         <ProvedorAnunciador>
+          <MascoteSprite />
           <Outlet />
           <Toaster position="top-center" />
         </ProvedorAnunciador>

@@ -548,3 +548,430 @@
     transform: scale(1);
   }
 }
+
+/* ---- Mascote: paleta própria (tokens), partes e estados. Arte em design-system/MascoteSprite ---- */
+:root {
+  --z-mascote: 40; /* acima da barra inferior (30), abaixo de modais e folhas (50) */
+  --mascote-pena: #17181d;
+  --mascote-pena-luz: #3a3d49;
+  --mascote-pena-sombra: #0c0d11;
+  --mascote-moletom: #1b1c22;
+  --mascote-moletom-luz: #33353f;
+  --mascote-capuz: #25262e;
+  --mascote-detalhe: #c9ccd3;
+  --mascote-contorno: transparent;
+  --mascote-realce: none;
+  --mascote-rosto: #f8f4ea;
+  --mascote-rosto-sombra: #e3dac8;
+  --mascote-iris: #2f6fb4;
+  --mascote-iris-luz: #6aa9e4;
+  --mascote-pupila: #0e1520;
+  --mascote-bico: #e8912c;
+  --mascote-bico-luz: #f9b955;
+  --mascote-bico-sombra: #c9721d;
+  --mascote-boca: #6b1e22;
+  --mascote-lingua: #e0655b;
+  --mascote-bochecha: #f29a94;
+  --mascote-brilho: #e8b43a;
+  --mascote-gota: #6aa9e4;
+  --mascote-chapeu: #ffffff;
+  --mascote-chapeu-traco: #d9d4c7;
+  --mascote-faixa-a: #b8322e;
+  --mascote-faixa-b: #2e8b57;
+  --mascote-sombra-chao: #0a1730;
+}
+.dark {
+  /* No escuro a pena clareia um pouco e a silhueta ganha uma luz de contorno de 1 px em qualquer
+     tamanho: #a9b4cc dá 8,5:1 contra o fundo e 7,6:1 contra os cartões (mínimo pedido: 3:1). */
+  --mascote-pena: #2b3040;
+  --mascote-pena-luz: #565d72;
+  --mascote-pena-sombra: #1b1f2a;
+  --mascote-moletom: #303545;
+  --mascote-moletom-luz: #4d546a;
+  --mascote-capuz: #3d4356;
+  --mascote-contorno: #6f7890;
+  --mascote-realce: drop-shadow(1px 0 0 #a9b4cc) drop-shadow(-1px 0 0 #a9b4cc)
+    drop-shadow(0 1px 0 #a9b4cc) drop-shadow(0 -1px 0 #a9b4cc);
+  --mascote-rosto: #f3eee2;
+  --mascote-rosto-sombra: #d6ccb8;
+  --mascote-brilho: #f2c14e;
+  --mascote-sombra-chao: transparent; /* sombra preta não aparece no escuro e ganharia contorno */
+}
+
+.mascote {
+  filter: var(--mascote-realce);
+  --m-boca: 0;
+  --m-sobr-y: 0px;
+  --m-sobr-rot: 0deg;
+  --m-olhar-x: 0px;
+  --m-olhar-y: 0px;
+  --m-asa-esq: 0deg;
+  --m-asa-dir: 0deg;
+}
+.m-sombra {
+  fill: var(--mascote-sombra-chao);
+  opacity: 0.16;
+}
+.m-contorno {
+  stroke: var(--mascote-contorno);
+  stroke-width: 1.5;
+}
+.m-capuz {
+  fill: var(--mascote-capuz);
+}
+.m-bolso {
+  fill: var(--mascote-pena-sombra);
+  opacity: 0.35;
+}
+.m-cordao {
+  fill: none;
+  stroke: var(--mascote-detalhe);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.m-bochecha {
+  fill: var(--mascote-bochecha);
+  opacity: 0.5;
+}
+.m-globo {
+  fill: #fff;
+  stroke: var(--mascote-pupila);
+  stroke-width: 1.5;
+}
+.m-pupila {
+  fill: var(--mascote-pupila);
+}
+.m-reflexo {
+  fill: #fff;
+}
+.m-olhar {
+  transform: translate(var(--m-olhar-x), var(--m-olhar-y));
+}
+.m-palpebra {
+  fill: var(--mascote-rosto);
+}
+.m-fechado,
+.m-sobrancelha {
+  fill: none;
+  stroke: var(--mascote-pupila);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.m-fechado {
+  stroke-width: 3;
+}
+.m-sobrancelha {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateY(var(--m-sobr-y)) rotate(var(--m-sobr-rot));
+}
+.m-sobr-esq {
+  transform: translateY(var(--m-sobr-y)) rotate(calc(var(--m-sobr-rot) * -1));
+}
+.m-boca {
+  fill: var(--mascote-boca);
+}
+.m-lingua {
+  fill: var(--mascote-lingua);
+}
+.m-boca-aberta {
+  opacity: var(--m-boca);
+}
+.m-boca-fechada {
+  fill: var(--mascote-bico-sombra);
+  opacity: calc(1 - var(--m-boca));
+}
+.m-bico-brilho {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+.m-asa-esq {
+  transform-origin: 50px 128px;
+  transform: rotate(var(--m-asa-esq));
+}
+.m-asa-dir {
+  transform-origin: 150px 128px;
+  transform: rotate(var(--m-asa-dir));
+}
+.m-extra {
+  opacity: 0;
+}
+.m-brilhos {
+  fill: var(--mascote-brilho);
+  opacity: var(--m-brilhos, 0);
+}
+.m-pensa {
+  fill: var(--mascote-detalhe);
+  stroke: var(--mascote-pupila);
+  stroke-width: 1.2;
+  opacity: var(--m-pensa, 0);
+}
+.m-gota {
+  fill: var(--mascote-gota);
+  opacity: var(--m-gota, 0);
+}
+.m-zzz,
+.m-exclama {
+  fill: none;
+  stroke: var(--mascote-iris);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.m-zzz {
+  opacity: var(--m-zzz, 0);
+}
+.m-exclama {
+  stroke: var(--mascote-faixa-a);
+  stroke-width: 5;
+  opacity: var(--m-exclama, 0);
+}
+.m-exclama circle {
+  fill: var(--mascote-faixa-a);
+  stroke: none;
+}
+.m-chapeu {
+  fill: var(--mascote-chapeu);
+  stroke: var(--mascote-chapeu-traco);
+  stroke-width: 3;
+}
+.m-chapeu-faixa-a {
+  fill: var(--mascote-faixa-a);
+}
+.m-chapeu-faixa-b {
+  fill: var(--mascote-faixa-b);
+}
+.m-piscar {
+  opacity: 0;
+}
+
+/* Estados: cada um só ajusta variáveis. Estado novo = um bloco aqui (docs/mascote.md). */
+.mascote[data-estado="feliz"] {
+  --m-boca: 1;
+  --m-sobr-y: -2px;
+}
+.mascote[data-estado="comemorando"] {
+  --m-boca: 1;
+  --m-sobr-y: -4px;
+  --m-brilhos: 1;
+  --m-asa-esq: 135deg;
+  --m-asa-dir: -135deg;
+}
+.mascote[data-estado="atento"] {
+  --m-sobr-y: -5px;
+  --m-olhar-y: -1px;
+}
+.mascote[data-estado="preocupado"] {
+  --m-sobr-rot: 14deg;
+  --m-sobr-y: -2px;
+  --m-gota: 1;
+}
+.mascote[data-estado="pensando"] {
+  --m-sobr-y: -3px;
+  --m-olhar-x: 3px;
+  --m-olhar-y: -4px;
+  --m-pensa: 1;
+}
+.mascote[data-estado="incentivo"] {
+  --m-boca: 1;
+  --m-sobr-y: -2px;
+  --m-asa-dir: -135deg;
+}
+.mascote[data-estado="descanso"] {
+  --m-zzz: 1;
+}
+.mascote[data-estado="descanso"] .m-piscar {
+  opacity: 1;
+}
+.mascote[data-estado="erro"] {
+  --m-sobr-rot: 18deg;
+  --m-olhar-y: 2px;
+  --m-exclama: 1;
+}
+
+/* Movimento: só transform e opacity, só com data-animado, parado com a aba oculta. */
+.mascote[data-animado] {
+  transform-origin: 50% 100%;
+  animation: m-respirar 4.5s ease-in-out infinite;
+}
+.mascote[data-animado]:not([data-estado="descanso"]) .m-piscar {
+  animation: m-piscar 5.2s steps(1) infinite;
+}
+.mascote[data-animado][data-estado="comemorando"] {
+  animation:
+    m-pular 900ms var(--curva-enfase) 2,
+    m-respirar 4.5s ease-in-out 1.8s infinite;
+}
+.mascote[data-animado][data-estado="erro"],
+.mascote[data-animado][data-estado="preocupado"] {
+  animation:
+    m-tremer 420ms var(--ease-polar) 1,
+    m-respirar 4.5s ease-in-out 420ms infinite;
+}
+.mascote[data-animado][data-estado="pensando"] {
+  animation: m-inclinar 2.4s ease-in-out infinite;
+}
+.mascote[data-animado][data-estado="descanso"] {
+  animation-duration: 7s;
+}
+html[data-aba-oculta] .mascote,
+html[data-aba-oculta] .m-piscar {
+  animation-play-state: paused !important;
+}
+@keyframes m-respirar {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-2px) scale(1.012, 0.988);
+  }
+}
+@keyframes m-piscar {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  96% {
+    opacity: 1;
+  }
+}
+@keyframes m-pular {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-12px) scale(0.97, 1.04);
+  }
+  70% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+}
+@keyframes m-tremer {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+  75% {
+    transform: translateX(3px) rotate(2deg);
+  }
+}
+@keyframes m-inclinar {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* ---- Mascote flutuante: canto fixo (sempre dentro da tela), acima da barra inferior ---- */
+.mascote-flutuante {
+  --mf-margem: 12px;
+  /* No celular, sobe a altura da barra de navegação inferior (min-h-14). */
+  --mf-base: calc(3.5rem + var(--mf-margem));
+  position: fixed;
+  z-index: var(--z-mascote);
+  display: flex;
+  flex-direction: column;
+  touch-action: none;
+}
+@media (min-width: 768px) {
+  .mascote-flutuante {
+    --mf-margem: 20px;
+    --mf-base: var(--mf-margem);
+  }
+}
+.mascote-flutuante[data-canto^="inferior"] {
+  bottom: calc(env(safe-area-inset-bottom) + var(--mf-base));
+}
+.mascote-flutuante[data-canto^="superior"] {
+  top: calc(env(safe-area-inset-top) + 4.5rem);
+  flex-direction: column-reverse;
+}
+.mascote-flutuante[data-canto$="direito"] {
+  right: calc(env(safe-area-inset-right) + var(--mf-margem));
+  align-items: flex-end;
+}
+.mascote-flutuante[data-canto$="esquerdo"] {
+  left: calc(env(safe-area-inset-left) + var(--mf-margem));
+  align-items: flex-start;
+}
+.mascote-botao,
+.mascote-bolinha {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 9999px;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.mascote-flutuante[data-arrastando] .mascote-botao {
+  cursor: grabbing;
+}
+.mascote-bolinha {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+.mascote-balao {
+  position: relative;
+  width: min(
+    18rem,
+    calc(100vw - 2 * var(--mf-margem) - env(safe-area-inset-left) - env(safe-area-inset-right))
+  );
+  margin-block: 0 10px;
+  padding: 12px 8px 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.14);
+  animation: entrada var(--duracao-media) var(--ease-polar) both;
+  transition:
+    opacity var(--duracao-media) var(--curva-saida),
+    transform var(--duracao-media) var(--curva-saida);
+}
+.mascote-balao[data-saindo] {
+  opacity: 0;
+  transform: translateY(4px);
+}
+[data-canto^="superior"] > .mascote-balao {
+  margin-block: 10px 0;
+}
+/* Seta apontando para o mascote: muda de lado e de borda conforme o canto. */
+.mascote-balao::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  rotate: 45deg;
+  background: inherit;
+  border: inherit;
+  border-top-color: transparent;
+  border-left-color: transparent;
+}
+[data-canto$="esquerdo"] > .mascote-balao::after {
+  right: auto;
+  left: 22px;
+}
+[data-canto^="superior"] > .mascote-balao::after {
+  bottom: auto;
+  top: -7px;
+  rotate: 225deg;
+}

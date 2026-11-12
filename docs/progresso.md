@@ -15,34 +15,34 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 - `bun x playwright test` (axe + teclado em celular/desktop, claro/escuro). Usa o Chrome instalado (`channel: "chrome"`) e um backend simulado em `e2e/simulacao.ts`: nenhuma credencial real nem rede. Em CI sem Chrome, trocar para o Chromium do Playwright.
 
 ## Etapas
-
-| #   | Etapa                            | Ramo / PR                            | Situação                              |
-| --- | -------------------------------- | ------------------------------------ | ------------------------------------- |
-| 1   | Arquitetura (passo 3)            | `fase1/arquitetura` / PR #2          | Concluída                             |
-| 2   | Polar e acessibilidade (passo 4) | `fase1/polar-acessibilidade` / PR #3 | Concluída                             |
-| 3   | Login (passo 5, parcial)         | `fase1/login` / PR #4                | Concluída                             |
-| 4   | PWA e acabamento (passos 6 e 7)  | `fase1/pwa-acabamento` / PR #5       | Concluída                             |
-| 5   | Clientes e ficha 360             | `fase1/clientes` / PR #6             | Concluída                             |
-| 6   | Importação do Shop9              | `fase1/importacao`                   | Concluída (aguarda PR)                |
-| 7   | Agenda                           | `fase1/agenda`                       | Concluída (aguarda PR)                |
-| 8   | Orçamentos                       | `fase1/restante`                     | Concluída (aguarda PR)                |
-| 9   | Central de links e arquivos      | `fase1/restante`                     | Concluída (aguarda PR)                |
-| 10  | Gamificação                      | `fase1/restante`                     | Concluída e revisada (aguarda PR)     |
-| 11  | Copiloto e mascote               | `fase1/restante`                     | Concluída, versão mínima (aguarda PR) |
-| 12  | Gestão                           | `fase1/restante`                     | Concluída e revisada (aguarda PR)     |
-| 13  | Notificações                     | `fase1/restante`                     | Concluída, versão mínima (aguarda PR) |
+| # | Etapa | Ramo / PR | Situação |
+| --- | --- | --- | --- |
+| 1 | Arquitetura (passo 3) | `fase1/arquitetura` / PR #2 | Concluída |
+| 2 | Polar e acessibilidade (passo 4) | `fase1/polar-acessibilidade` / PR #3 | Concluída |
+| 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
+| 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
+| 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
+| 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda PR) |
+| 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
+| 8 | Orçamentos | `fase1/restante` | Concluída (aguarda PR) |
+| 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
+| 10 | Gamificação | `fase1/restante` | Concluída e revisada (aguarda PR) |
+| 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
+| 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
+| 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
+| — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída (aguarda PR); contrato em `docs/mascote.md`. Falta comparar a arte com a imagem de referência |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
-
-| Nº  | Assunto                                                                                                                                                | Situação                                                                                                                                                                                                                                                                     |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 10  | Clientes (códigos Shop9, etiquetas, itens de venda, notas, `ficha_cliente`)                                                                            | Aplicada (0013)                                                                                                                                                                                                                                                              |
-| 11  | Importação Shop9 (`importacoes`, `importar_clientes/vendas/orcamentos`)                                                                                | Aplicada (0014)                                                                                                                                                                                                                                                              |
-| 12  | Agenda (tipo, hora, tarefas automáticas dos alertas)                                                                                                   | Aplicada (0015)                                                                                                                                                                                                                                                              |
-| 13  | Links e arquivos (empresa nula, arquivo, bucket `arquivos`)                                                                                            | Aplicada (0016)                                                                                                                                                                                                                                                              |
-| 14  | Gamificação (pesos, pontos por função, selos, ranking, Instagram)                                                                                      | Aplicada (0017)                                                                                                                                                                                                                                                              |
-| 15  | Gestão, copiloto, notificações e demonstração completa                                                                                                 | Aplicada (0018)                                                                                                                                                                                                                                                              |
-| 16  | Avisos, mídia do login e permissão "Pode publicar avisos" (`pode_publicar_avisos`, tabelas `avisos` e `midia_login`, buckets `avisos` e `midia-login`) | **Texto pronto, ainda não enviado ao Lovable.** Código em `src/modulos/avisos/dados.ts` e `src/modulos/configuracoes/midiaLogin.ts` só funciona depois da migração; telas e o interruptor na gestão de usuários (hoje não há tela de usuários) ficam para os próximos passos |
+| Nº | Assunto | Situação |
+| --- | --- | --- |
+| 10 | Clientes (códigos Shop9, etiquetas, itens de venda, notas, `ficha_cliente`) | Aplicada (0013) |
+| 11 | Importação Shop9 (`importacoes`, `importar_clientes/vendas/orcamentos`) | Aplicada (0014) |
+| 12 | Agenda (tipo, hora, tarefas automáticas dos alertas) | Aplicada (0015) |
+| 13 | Links e arquivos (empresa nula, arquivo, bucket `arquivos`) | Aplicada (0016) |
+| 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | Aplicada (0017) |
+| 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
+| 16 | Avisos, mídia do login e permissão "Pode publicar avisos" (`pode_publicar_avisos`, tabelas `avisos` e `midia_login`, buckets `avisos` e `midia-login`) | **Texto pronto, ainda não enviado ao Lovable.** Código em `src/modulos/avisos/dados.ts` e `src/modulos/configuracoes/midiaLogin.ts` só funciona depois da migração; telas e o interruptor na gestão de usuários (hoje não há tela de usuários) ficam para os próximos passos |
+| 17 | Mascote (4 chaves `mascote_*` em `configuracoes_regras`) | **Texto pronto, ainda não enviado ao Lovable.** Sem a migração o app usa a reserva de `REGRAS_PADRAO` |
 
 ## Decisões tomadas nesta fase
 

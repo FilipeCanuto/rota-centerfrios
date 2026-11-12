@@ -7,6 +7,16 @@ export interface ConfiguracaoRegras {
   cliente_sem_compra_dias: number;
   orcamento_parado_dias_uteis: number;
   plano_do_dia_max: number;
+  /** Mascote: intervalo mínimo entre balões não urgentes, em segundos. */
+  mascote_intervalo_baloes_s: number;
+  /** Mascote: tempo de balão por caractere (ms) e piso de permanência (s). */
+  mascote_ms_por_caractere: number;
+  mascote_permanencia_minima_s: number;
+  /** Mascote: a partir de qual atingimento da meta (0 a 1) ele incentiva a fechar o mês. */
+  mascote_incentivo_atingimento: number;
+  /** Expediente (hora cheia, fuso de Maceió): fora dele o mascote descansa e não fala. */
+  expediente_inicio_hora: number;
+  expediente_fim_hora: number;
 }
 
 /** Reserva usada só quando a empresa não tem a chave cadastrada. */
@@ -18,6 +28,12 @@ export const REGRAS_PADRAO: ConfiguracaoRegras = {
   cliente_sem_compra_dias: 90,
   orcamento_parado_dias_uteis: 2,
   plano_do_dia_max: 10,
+  mascote_intervalo_baloes_s: 20,
+  mascote_ms_por_caractere: 70,
+  mascote_permanencia_minima_s: 5,
+  mascote_incentivo_atingimento: 0.7,
+  expediente_inicio_hora: 8,
+  expediente_fim_hora: 18,
 };
 
 export function montarConfiguracao(linhas: { chave: string; valor: number }[]): ConfiguracaoRegras {
