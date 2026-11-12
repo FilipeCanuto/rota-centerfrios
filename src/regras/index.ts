@@ -12,3 +12,4 @@ export * from "./calendario";
 export * from "./saude";
 export * from "./planilha";
 export * from "./importacao";
+export * from "./midia";

@@ -26,5 +26,6 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 ## Cuidados
 - Pontos e selos só são gravados por funções do banco; o app nunca escreve em `pontos` ou `selos`.
 - O vendedor só altera colunas liberadas por permissão de coluna (ex.: orçamentos: `ultimo_followup`, `proximo_followup`, `observacao`).
+- Avisos e mídia do login: "Pode publicar avisos" (`usuarios.pode_publicar_avisos`, padrão desligada) só o administrador altera, pela função `admin_atualizar_usuario`; a checagem é do banco (`pode_publicar_avisos()`), a tela só esconde botões. Mídia do login é só do administrador. Arquivos: JPG, PNG, WebP, AVIF, GIF, MP4, WebM; 5 MB imagem/GIF e 25 MB vídeo (`src/regras/midia.ts`, repetido no servidor). Texto alternativo é obrigatório.
 - Dado de cliente não vai para endereço (URL), log nem serviço externo.
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).

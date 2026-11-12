@@ -48,6 +48,8 @@ Cada pessoa vê apenas o que precisa para agir: o vendedor vê a própria cartei
 | Representante externo (futuro) | Apenas os clientes atribuídos a ele | Registra visitas e oportunidades, com acesso restrito |
 | Assistente de IA | Conversas do número oficial que atende | Qualifica e entrega ao vendedor; nunca fecha preço nem prazo |
 
+**Permissão extra "Pode publicar avisos":** não é um perfil. É uma marca no cadastro do usuário (padrão desligada), que só o administrador liga ou desliga. Com ela, a pessoa publica artes no quadro de avisos e edita ou apaga só as próprias; o administrador sempre pode tudo. A mídia da tela de login é só do administrador. Vale no banco (RLS e armazenamento), não só na tela. Detalhes em `docs/lovable/16-avisos-e-midia-login.md`.
+
 Uma pessoa pode ter acesso às duas empresas (CENTERFRIOS e 381). Nesse caso, um seletor de empresa fica no topo da tela e todos os números se ajustam à empresa escolhida, com a opção de visão somada para a diretoria.
 
 ## Escopo funcional por módulo

@@ -38,6 +38,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 13 | Links e arquivos (empresa nula, arquivo, bucket `arquivos`) | Aplicada (0016) |
 | 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | Aplicada (0017) |
 | 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
+| 16 | Avisos, mídia do login e permissão "Pode publicar avisos" (`pode_publicar_avisos`, tabelas `avisos` e `midia_login`, buckets `avisos` e `midia-login`) | **Texto pronto, ainda não enviado ao Lovable.** Código em `src/modulos/avisos/dados.ts` e `src/modulos/configuracoes/midiaLogin.ts` só funciona depois da migração; telas e o interruptor na gestão de usuários (hoje não há tela de usuários) ficam para os próximos passos |
 
 ## Decisões tomadas nesta fase
 - **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *Aprovado.*
