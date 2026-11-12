@@ -11,6 +11,7 @@ Cole uma mensagem por vez no Lovable, **na ordem dos números**, e só passe par
 | 5 | `05-indices.md` | A4 |
 | 6 | `06-painel-agregado.md` | C8 |
 | 7 | `07-dados-demonstracao.md` | C9 |
+| 16 | `16-avisos-e-midia-login.md` | Avisos, mídia do login e permissão "Pode publicar avisos" |
 
 Antes de colar a mensagem 01, troque `<EMAIL_DO_ADMINISTRADOR>` pelo e-mail de quem será o administrador.
 
