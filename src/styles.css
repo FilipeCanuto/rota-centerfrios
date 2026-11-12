@@ -1057,3 +1057,55 @@ html[data-aba-oculta] .m-piscar {
   top: -7px;
   rotate: 225deg;
 }
+
+/* ---- Palco de mídia e malha de luz do login: só transform e opacity ---- */
+@utility palco-entrar {
+  animation: palco-entrar calc(var(--duracao-lenta) * 2.5) var(--ease-polar) both;
+}
+@utility palco-sair {
+  animation: palco-sair calc(var(--duracao-lenta) * 2.5) var(--ease-polar) both;
+}
+@keyframes palco-entrar {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes palco-sair {
+  to {
+    opacity: 0;
+  }
+}
+@utility ken-burns {
+  animation: ken-burns 16s ease-out both;
+}
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+@utility malha {
+  animation: malha 28s ease-in-out infinite alternate;
+}
+@keyframes malha {
+  from {
+    transform: translate3d(-8%, -5%, 0) scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: translate3d(8%, 6%, 0) scale(1.2);
+    opacity: 0.9;
+  }
+}
+/* Aba oculta: o login marca `data-pausado` e as animações infinitas param. */
+[data-pausado="true"] * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns,
+  .malha {
+    animation: none;
+  }
+}

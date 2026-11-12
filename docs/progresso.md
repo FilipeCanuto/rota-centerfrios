@@ -31,6 +31,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
 | 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
 | — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída (aguarda PR); contrato em `docs/mascote.md`. Falta comparar a arte com a imagem de referência |
+| — | Login em duas colunas (palco de mídia) e Configurações com abas (Mídia do login) | `feat/login-configuracoes` | Concluída (aguarda PR); relatório em [relatorio-login-configuracoes.md](relatorio-login-configuracoes.md). Próxima aba: Avisos (uma linha em `src/modulos/configuracoes/abas.tsx`) |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
 | Nº | Assunto | Situação |

@@ -3,25 +3,32 @@ import { expect, test, type Page } from "@playwright/test";
 import { CLIENTE_ID, simularBackend } from "./simulacao";
 
 /** Todas as telas, verificadas com axe (WCAG 2.2 AA) em cada projeto (celular/desktop × claro/escuro). */
-const ROTAS = [
-  { url: "/auth", titulo: "Entrar na Rota", logado: false },
-  { url: "/redefinir-senha", titulo: "Crie sua senha", logado: false },
-  { url: "/design-system", titulo: "Design system Polar", logado: false },
-  { url: "/pagina-que-nao-existe", titulo: "404", logado: false },
-  { url: "/inicio", titulo: "Olá, Clara", logado: true },
-  { url: "/conversas", titulo: "Conversas", logado: true },
-  { url: "/clientes", titulo: "Clientes", logado: true },
-  { url: `/clientes/${CLIENTE_ID}`, titulo: "Cliente Teste 1", logado: true },
-  { url: "/agenda", titulo: "Agenda", logado: true },
-  { url: "/orcamentos", titulo: "Orçamentos", logado: true },
-  { url: "/links", titulo: "Links e arquivos", logado: true },
-  { url: "/gamificacao", titulo: "Pontos e selos", logado: true },
-  { url: "/gestao", titulo: "Gestão", logado: true },
-  { url: "/notificacoes", titulo: "Notificações", logado: true },
-  { url: "/mais", titulo: "Mais", logado: true },
-  { url: "/configuracoes/importacao", titulo: "Importar planilhas do Shop9", logado: true },
-  { url: "/configuracoes/feriados", titulo: "Feriados e dias sem expediente", logado: true },
-];
+const ROTAS: { url: string; titulo: string; logado: boolean; extras?: Record<string, unknown> }[] =
+  [
+    { url: "/auth", titulo: "Entrar na Rota", logado: false },
+    { url: "/redefinir-senha", titulo: "Crie sua senha", logado: false },
+    { url: "/design-system", titulo: "Design system Polar", logado: false },
+    { url: "/pagina-que-nao-existe", titulo: "404", logado: false },
+    { url: "/inicio", titulo: "Olá, Clara", logado: true },
+    { url: "/conversas", titulo: "Conversas", logado: true },
+    { url: "/clientes", titulo: "Clientes", logado: true },
+    { url: `/clientes/${CLIENTE_ID}`, titulo: "Cliente Teste 1", logado: true },
+    { url: "/agenda", titulo: "Agenda", logado: true },
+    { url: "/orcamentos", titulo: "Orçamentos", logado: true },
+    { url: "/links", titulo: "Links e arquivos", logado: true },
+    { url: "/gamificacao", titulo: "Pontos e selos", logado: true },
+    { url: "/gestao", titulo: "Gestão", logado: true },
+    { url: "/notificacoes", titulo: "Notificações", logado: true },
+    { url: "/mais", titulo: "Mais", logado: true },
+    { url: "/configuracoes/importacao", titulo: "Importar planilhas do Shop9", logado: true },
+    {
+      url: "/configuracoes",
+      titulo: "Configurações",
+      logado: true,
+      extras: { user_roles: [{ role: "administrador" }], midia_login: [] },
+    },
+    { url: "/configuracoes/feriados", titulo: "Feriados e dias sem expediente", logado: true },
+  ];
 
 /** Roda o axe na página como está agora e falha listando o que encontrou. */
 async function semViolacoes(page: Page, { modal = false } = {}) {
@@ -70,7 +77,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const rota of ROTAS) {
   test(`${rota.url} passa no axe, tem um único h1 e cabe na tela`, async ({ page }, info) => {
-    if (rota.logado) await simularBackend(page);
+    if (rota.logado) await simularBackend(page, rota.extras);
     await page.goto(rota.url);
     await expect(page.getByRole("heading", { level: 1, name: rota.titulo })).toBeVisible();
     await expect(page.locator("h1")).toHaveCount(1);
