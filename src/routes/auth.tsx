@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
-import { Pinguim } from "@/design-system/Pinguim";
+import { Mascote } from "@/design-system/Mascote";
 import { TransicaoEntrada } from "@/design-system/TransicaoEntrada";
 import { supabase } from "@/integrations/supabase/client";
 import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
@@ -285,7 +285,11 @@ function Entrar() {
           Ainda não tem acesso? Peça ao administrador para cadastrar o seu e-mail da empresa.
         </p>
         <div className="subir mt-6 flex justify-center" style={atraso(400)}>
-          <Pinguim className="flutuar size-16" expressao={modo === "entrar" ? "feliz" : "atento"} />
+          <Mascote
+            className="flutuar"
+            tamanho={64}
+            estado={modo === "entrar" ? "feliz" : "atento"}
+          />
         </div>
       </div>
     </main>

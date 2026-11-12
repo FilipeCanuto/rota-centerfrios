@@ -9,7 +9,7 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - Rotas são geradas (`src/routeTree.gen.ts`): rodar `vite build` ou `vite dev` depois de criar uma rota. Não edite o arquivo gerado.
 
 ## Estrutura
-- `src/design-system`: tokens e componentes (SeloStatus, GraficoAnel, Pinguim…).
+- `src/design-system`: tokens e componentes (SeloStatus, GraficoAnel, Mascote…).
 - `src/modulos/<módulo>`: telas e hooks de dados (`dados.ts`). Um módulo por assunto: agenda, clientes, orcamentos, links, gamificacao, copiloto, gestao, notificacoes, configuracoes.
 - `src/regras`: regras puras (sem rede), testadas em `*.test.ts`. Toda conta de negócio nova vai aqui, com teste.
 - `src/integracoes`: interfaces e implementações "manual"; trocar uma integração não mexe nas telas.
@@ -28,4 +28,5 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - O vendedor só altera colunas liberadas por permissão de coluna (ex.: orçamentos: `ultimo_followup`, `proximo_followup`, `observacao`).
 - Avisos e mídia do login: "Pode publicar avisos" (`usuarios.pode_publicar_avisos`, padrão desligada) só o administrador altera, pela função `admin_atualizar_usuario`; a checagem é do banco (`pode_publicar_avisos()`), a tela só esconde botões. Mídia do login é só do administrador. Arquivos: JPG, PNG, WebP, AVIF, GIF, MP4, WebM; 5 MB imagem/GIF e 25 MB vídeo (`src/regras/midia.ts`, repetido no servidor). Texto alternativo é obrigatório.
 - Dado de cliente não vai para endereço (URL), log nem serviço externo.
+- Mascote: as telas só emitem eventos por `useMascote()` (`notificar`, `definirEstado`) e nunca importam o desenho. Contrato e como adicionar estado, mensagem e evento em [docs/mascote.md](docs/mascote.md).
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).
