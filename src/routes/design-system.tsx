@@ -6,9 +6,10 @@ import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { GraficoAnel } from "@/design-system/GraficoAnel";
 import { Logo } from "@/design-system/Logo";
-import { Pinguim } from "@/design-system/Pinguim";
+import { Mascote } from "@/design-system/Mascote";
 import { Progresso } from "@/design-system/Progresso";
 import { SeloStatus } from "@/design-system/SeloStatus";
+import { ESTADOS_MASCOTE, VERSOES_PINGUIM, type EstadoMascote } from "@/regras";
 import { Snowflake } from "lucide-react";
 
 export const Route = createFileRoute("/design-system")({
@@ -169,10 +170,36 @@ function Painel({ escuro }: { escuro: boolean }) {
         </div>
 
         <div className="cartao flex items-center gap-4 p-5">
-          <Pinguim className="size-14 shrink-0 text-foreground" />
+          <Mascote tamanho={64} />
           <p className="font-display text-lg font-semibold">
             Beto aqui: 3 clientes precisam de você hoje.
           </p>
+        </div>
+
+        <div data-testid="mascote-vitrine">
+          <h3 className="mb-3 font-bold">Mascote: estados e tamanhos</h3>
+          <ul className="flex flex-wrap items-end gap-4">
+            {(Object.keys(ESTADOS_MASCOTE) as EstadoMascote[]).map((e) => (
+              <li key={e} className="flex flex-col items-center gap-1 text-sm">
+                <Mascote estado={e} tamanho={120} />
+                {ESTADOS_MASCOTE[e].rotulo}
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-4 flex flex-wrap items-end gap-6">
+            {([40, 64, 120, 160] as const).map((t) => (
+              <li key={t} className="flex flex-col items-center gap-1 text-sm">
+                <Mascote estado="feliz" tamanho={t} />
+                {t} px
+              </li>
+            ))}
+            {VERSOES_PINGUIM.slice(1).map((o) => (
+              <li key={o.valor} className="flex flex-col items-center gap-1 text-sm">
+                <Mascote tamanho={64} versao={o.valor} />
+                {o.rotulo}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div>

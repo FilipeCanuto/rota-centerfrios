@@ -28,6 +28,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
 | 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
 | 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
+| — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída (aguarda PR); contrato em `docs/mascote.md`. Falta comparar a arte com a imagem de referência |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
 | Nº | Assunto | Situação |
@@ -39,6 +40,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | Aplicada (0017) |
 | 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
 | 16 | Avisos, mídia do login e permissão "Pode publicar avisos" (`pode_publicar_avisos`, tabelas `avisos` e `midia_login`, buckets `avisos` e `midia-login`) | **Texto pronto, ainda não enviado ao Lovable.** Código em `src/modulos/avisos/dados.ts` e `src/modulos/configuracoes/midiaLogin.ts` só funciona depois da migração; telas e o interruptor na gestão de usuários (hoje não há tela de usuários) ficam para os próximos passos |
+| 17 | Mascote (4 chaves `mascote_*` em `configuracoes_regras`) | **Texto pronto, ainda não enviado ao Lovable.** Sem a migração o app usa a reserva de `REGRAS_PADRAO` |
 
 ## Decisões tomadas nesta fase
 - **Quem importa as planilhas do Shop9:** só a diretoria. O administrador não vê dados comerciais (decisão C3), então não importa. *Aprovado.*

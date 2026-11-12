@@ -13,7 +13,10 @@ import { formatarDataLonga, formatarMoeda, formatarPercentual } from "@/design-s
 import { integracoes } from "@/integracoes";
 import { RegistrarContato, type ClienteContato } from "@/modulos/contato/RegistrarContato";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
-import { formatarISO, hojeEmMaceio, type MotivoTipo, type Painel } from "@/regras";
+import { formatarISO, hojeEmMaceio, REGRAS_PADRAO, type MotivoTipo, type Painel } from "@/regras";
+import { useRegrasDaEmpresa } from "@/modulos/clientes/dados";
+import { useMascote } from "@/modulos/mascote/MascoteProvider";
+import { mensagem, type ChaveMensagem } from "@/modulos/mascote/mensagens";
 import { useRegistrarAlertas } from "@/modulos/notificacoes/dados";
 import { usePainel } from "./dados";
 
@@ -63,6 +66,25 @@ export function PainelInicio() {
     registrar.mutate({ alertas: p.alertas, hoje: formatarISO(hojeEmMaceio()) });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando a lista de alertas muda
   }, [chaveAlertas]);
+  // O mascote reage ao dia: a tela só emite o evento; quando e como falar é com ele.
+  const mascote = useMascote();
+  const cfg = useRegrasDaEmpresa(ativas[0]).data ?? REGRAS_PADRAO;
+  useEffect(() => {
+    if (!p || !usuario) return;
+    const dia = formatarISO(hojeEmMaceio());
+    const apelido = usuario.apelido_copiloto;
+    const quantos = (tipo: string) => p.alertas.filter((a) => a.tipo === tipo).length;
+    const falar = (chave: ChaveMensagem, id: string, n: number) => {
+      if (n > 0) mascote.notificar(mensagem(chave, id, apelido, n));
+    };
+    falar("recompra_atrasada", `atraso:${dia}`, quantos("recompra_urgente"));
+    falar("orcamento_parado", `orcamentos-parados:${dia}`, quantos("orcamento_parado"));
+    falar("cliente_esquecido", `esquecidos:${dia}`, quantos("esquecido"));
+    if (p.atingimento >= 1) falar("meta_batida", `meta-batida:${dia.slice(0, 7)}`, 1);
+    else if (p.atingimento >= cfg.mascote_incentivo_atingimento)
+      falar("meta_perto", `meta-perto:${dia}`, Math.floor(p.atingimento * 100));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando os dados do dia mudam
+  }, [chaveAlertas, p?.atingimento, usuario?.apelido_copiloto]);
   const [contato, setContato] = useState<ClienteContato | null>(null);
   const hoje = hojeEmMaceio();
 

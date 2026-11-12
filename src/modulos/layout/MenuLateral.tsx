@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/design-system/Logo";
-import { Pinguim } from "@/design-system/Pinguim";
+import { Mascote } from "@/design-system/Mascote";
 import { DESTINOS } from "./navegacao";
 
 export function MenuLateral() {
@@ -21,7 +21,7 @@ export function MenuLateral() {
   return (
     <Sidebar collapsible="icon" className="hidden md:flex">
       <SidebarHeader className="h-16 justify-center px-3">
-        {recolhido ? <Pinguim className="size-8 text-foreground" /> : <Logo className="h-9" />}
+        {recolhido ? <Mascote tamanho={40} className="size-8" /> : <Logo className="h-9" />}
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

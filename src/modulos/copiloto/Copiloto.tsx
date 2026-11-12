@@ -12,7 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Pinguim } from "@/design-system/Pinguim";
+import { Mascote } from "@/design-system/Mascote";
 import { integracoes } from "@/integracoes";
 import type { Sessao } from "@/modulos/sessao/sessao";
 import { apelidoValido, expressaoDoCopiloto, VERSOES_PINGUIM, type VersaoPinguim } from "@/regras";
@@ -40,11 +40,9 @@ export function Copiloto({ usuario, contexto }: { usuario: Usuario; contexto: Co
   return (
     <section aria-label="Copiloto" className="cartao entrada flex flex-col gap-3 p-5">
       <div className="flex items-center gap-4">
-        <Pinguim
-          className={
-            minimizado ? "size-10 shrink-0 text-foreground" : "size-14 shrink-0 text-foreground"
-          }
-          expressao={expressao}
+        <Mascote
+          tamanho={minimizado ? 40 : 64}
+          estado={expressao}
           versao={usuario.pinguim_versao}
         />
         {minimizado ? (
@@ -145,7 +143,7 @@ function Personalizar({ usuario, aoFechar }: { usuario: Usuario; aoFechar: () =>
                 className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 font-normal has-[:checked]:border-primary"
               >
                 <RadioGroupItem id={`${id}-${o.valor}`} value={o.valor} />
-                <Pinguim className="size-8 text-foreground" versao={o.valor} />
+                <Mascote tamanho={40} className="size-8" versao={o.valor} />
                 {o.rotulo}
               </Label>
             ))}

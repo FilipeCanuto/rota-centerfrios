@@ -160,10 +160,20 @@ const json = (route: Route, body: unknown, status = 200) =>
   route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 
 /** Respostas da API REST por tabela ou função. Ajuste `extras` para cada teste. */
-export async function simularBackend(page: Page, extras: Record<string, unknown> = {}) {
+export async function simularBackend(
+  page: Page,
+  extras: Record<string, unknown> = {},
+  /** Balões do mascote: desligados por padrão, para não cobrir a tela nos testes das outras telas. */
+  { baloes = false } = {},
+) {
   await page.addInitScript(
-    ({ chave, sessao }) => localStorage.setItem(chave, JSON.stringify(sessao)),
+    ({ chave, sessao, mascote }) => {
+      localStorage.setItem(chave, JSON.stringify(sessao));
+      if (mascote && !localStorage.getItem(mascote))
+        localStorage.setItem(mascote, JSON.stringify({ baloesOcultos: true }));
+    },
     {
+      mascote: baloes ? null : `rota-mascote:${USUARIO_ID}`,
       chave: `sb-${PROJETO}-auth-token`,
       sessao: {
         access_token: "falso",

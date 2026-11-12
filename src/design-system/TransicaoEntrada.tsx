@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pinguim } from "./Pinguim";
+import { Mascote } from "./Mascote";
 
 /**
  * Depois do login: check animado e, em seguida, "Bem-vindo", antes de abrir o Início.
@@ -46,7 +46,7 @@ export function TransicaoEntrada({
         </svg>
       ) : (
         <div className="flex flex-col items-center gap-4 text-center" aria-hidden="true">
-          <Pinguim className="subir size-28" expressao="feliz" />
+          <Mascote className="subir" tamanho={120} estado="feliz" />
           <p
             className="subir font-display text-3xl font-extrabold"
             style={{ "--atraso": "80ms" } as React.CSSProperties}
