@@ -20,9 +20,10 @@ export interface MidiaLogin {
 }
 
 /** Leitura pública (a tela de login é aberta): a RLS devolve só as ativas a quem não é administrador. */
-export function useMidiaLogin() {
+export function useMidiaLogin(habilitada = true) {
   return useQuery({
     queryKey: ["midia-login"],
+    enabled: habilitada,
     queryFn: async () => {
       const { data, error } = await bd.from("midia_login").select("*").order("ordem");
       if (error) throw error;
@@ -92,5 +93,20 @@ export function useApagarMidiaLogin() {
       await supabase.storage.from(BUCKET).remove([m.arquivo_path]);
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["midia-login"] }),
+  });
+}
+
+/** Grava a nova ordem: o item da posição i recebe `ordem = i`. */
+export function useReordenarMidiaLogin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const rs = await Promise.all(
+        ids.map((id, i) => bd.from("midia_login").update({ ordem: i }).eq("id", id)),
+      );
+      const falha = rs.find((r: { error: unknown }) => r.error);
+      if (falha) throw falha.error;
+    },
+    onSettled: () => void qc.invalidateQueries({ queryKey: ["midia-login"] }),
   });
 }

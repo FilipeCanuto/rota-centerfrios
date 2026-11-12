@@ -1,5 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileText, FileUp, Link2, Trash2, Trophy, Users } from "lucide-react";
+import {
+  CalendarOff,
+  FileText,
+  FileUp,
+  Link2,
+  Settings,
+  Trash2,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -109,6 +118,21 @@ function Mais() {
           >
             <Link to="/configuracoes/importacao">
               <FileUp aria-hidden="true" /> Importar planilhas do Shop9
+            </Link>
+          </Button>
+        </section>
+      )}
+      {admin && (
+        <section aria-labelledby="admin" className="cartao p-5">
+          <h2 id="admin" className="mb-2 text-lg font-bold">
+            Administração
+          </h2>
+          <p className="mb-4 text-muted-foreground">
+            Mídia da tela de login e, em breve, avisos e outras opções.
+          </p>
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/configuracoes" search={{ aba: "midia-login" }}>
+              <Settings aria-hidden="true" /> Configurações
             </Link>
           </Button>
         </section>

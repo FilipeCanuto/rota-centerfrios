@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Mail } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Logo } from "@/design-system/Logo";
 import { Mascote } from "@/design-system/Mascote";
 import { TransicaoEntrada } from "@/design-system/TransicaoEntrada";
 import { supabase } from "@/integrations/supabase/client";
+import { MalhaLuz } from "@/modulos/login/MalhaLuz";
 import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
 import {
   causaDoLink,
@@ -41,6 +42,8 @@ export const Route = createFileRoute("/auth")({
   }),
   component: Entrar,
 });
+
+const PalcoLogin = lazy(() => import("@/modulos/login/PalcoLogin"));
 
 /** Dois caminhos: senha, ou um link por e-mail (primeiro acesso, senha esquecida ou conta do Google). */
 type Modo = "entrar" | "link";
@@ -172,124 +175,133 @@ function Entrar() {
   return (
     <main
       id="conteudo"
-      className="relative grid min-h-dvh place-items-center overflow-hidden px-4 py-10"
+      className="relative grid min-h-dvh grid-cols-[minmax(0,1fr)] overflow-hidden lg:grid-cols-[58fr_42fr]"
     >
-      {/* Fundo em movimento lento: só decoração. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="aurora absolute -left-24 -top-24 size-96 rounded-full bg-primary/15 blur-3xl" />
-        <div
-          className="aurora absolute -bottom-32 -right-20 size-[28rem] rounded-full bg-ouro/20 blur-3xl"
-          style={{ animationDelay: "-11s" }}
-        />
-      </div>
-      <div className="w-full max-w-md">
-        {modo !== "entrar" && (
-          <BotaoVoltar aoVoltar={() => trocar("entrar")} className="subir -ml-3 mb-4" />
-        )}
-        <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <div className="subir" style={atraso(0)}>
-            <Logo className="h-14" />
-          </div>
-          <h1
-            ref={titulo}
-            tabIndex={-1}
-            className="subir text-2xl font-extrabold outline-none"
-            style={atraso(80)}
-            key={modo}
-          >
-            {modo === "entrar" ? "Entrar na Rota" : "Receber link de acesso"}
-          </h1>
-          <p className="subir text-muted-foreground" style={atraso(140)} key={`${modo}-p`}>
-            {modo === "entrar"
-              ? "Plataforma Comercial CENTERFRIOS e 381 Distribuidora"
-              : "Primeiro acesso ou esqueceu a senha? Enviamos um link para você entrar e criar sua senha."}
-          </p>
-        </div>
-        <div className="cartao subir p-6 shadow-lg" style={atraso(200)}>
-          <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
-            <div className="grid gap-1.5">
-              <Label htmlFor={`${id}-email`}>E-mail da empresa</Label>
-              <Input
-                ref={campoEmail}
-                id={`${id}-email`}
-                type="email"
-                inputMode="email"
-                className="min-h-11"
-                autoComplete="username"
-                autoCapitalize="none"
-                spellCheck={false}
-                placeholder="nome@centerfrios.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                aria-invalid={erro?.campo === "email"}
-                aria-describedby={descricao("email")}
-              />
+      <div className="relative grid grid-cols-[minmax(0,1fr)] place-items-center px-4 py-8 lg:col-start-2 lg:row-start-1 lg:py-10">
+        <MalhaLuz />
+        <div className="w-full max-w-md">
+          {modo !== "entrar" && (
+            <BotaoVoltar aoVoltar={() => trocar("entrar")} className="subir -ml-3 mb-4" />
+          )}
+          <div className="mb-6 flex flex-col items-center gap-3 text-center lg:items-start lg:text-left">
+            <div className="subir" style={atraso(0)}>
+              <Logo className="h-12" />
             </div>
-            {modo === "entrar" && (
-              <div className="grid gap-1.5">
-                <Label htmlFor={`${id}-senha`}>Senha</Label>
-                <div className="flex gap-2">
-                  <Input
-                    ref={campoSenha}
-                    id={`${id}-senha`}
-                    type={verSenha ? "text" : "password"}
-                    className="min-h-11"
-                    autoComplete="current-password"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    required
-                    aria-invalid={erro?.campo === "senha"}
-                    aria-describedby={descricao("senha")}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-11 shrink-0"
-                    aria-pressed={verSenha}
-                    aria-controls={`${id}-senha`}
-                    aria-label="Mostrar senha"
-                    onClick={() => setVerSenha((v) => !v)}
-                  >
-                    {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                  </Button>
-                </div>
-              </div>
-            )}
-            {erro && (
-              <p id={`${id}-erro`} role="alert" className="text-sm font-semibold text-perigo">
-                {erro.texto}
-              </p>
-            )}
-            {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
-            <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">
-              {aviso}
+            <h1
+              ref={titulo}
+              tabIndex={-1}
+              className="subir text-2xl font-extrabold outline-none sm:text-3xl"
+              style={atraso(80)}
+              key={modo}
+            >
+              {modo === "entrar" ? "Entrar na Rota" : "Receber link de acesso"}
+            </h1>
+            <p className="subir text-foreground/80" style={atraso(140)} key={`${modo}-p`}>
+              {modo === "entrar"
+                ? "Plataforma Comercial CENTERFRIOS e 381 Distribuidora"
+                : "Primeiro acesso ou esqueceu a senha? Enviamos um link para você entrar e criar sua senha."}
             </p>
-            <Button type="submit" size="lg" className="min-h-11 transicao" disabled={enviando}>
-              {enviando ? "Aguarde…" : modo === "entrar" ? "Entrar" : "Enviar link"}
-            </Button>
-            {modo === "entrar" && (
-              <Button
-                type="button"
-                variant={sugerirLink ? "secondary" : "link"}
-                className="min-h-11 self-center"
-                onClick={() => trocar("link")}
-              >
-                <Mail aria-hidden="true" /> Primeiro acesso ou esqueci a senha
+          </div>
+          <div className="cartao subir p-6 shadow-lg" style={atraso(200)}>
+            <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
+              <div className="grid gap-1.5">
+                <Label htmlFor={`${id}-email`}>E-mail da empresa</Label>
+                <Input
+                  ref={campoEmail}
+                  id={`${id}-email`}
+                  type="email"
+                  inputMode="email"
+                  className="min-h-11"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder="nome@centerfrios.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  aria-invalid={erro?.campo === "email"}
+                  aria-describedby={descricao("email")}
+                />
+              </div>
+              {modo === "entrar" && (
+                <div className="grid gap-1.5">
+                  <Label htmlFor={`${id}-senha`}>Senha</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      ref={campoSenha}
+                      id={`${id}-senha`}
+                      type={verSenha ? "text" : "password"}
+                      className="min-h-11 min-w-0"
+                      autoComplete="current-password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      required
+                      aria-invalid={erro?.campo === "senha"}
+                      aria-describedby={descricao("senha")}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-11 shrink-0"
+                      aria-pressed={verSenha}
+                      aria-controls={`${id}-senha`}
+                      aria-label="Mostrar senha"
+                      onClick={() => setVerSenha((v) => !v)}
+                    >
+                      {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {erro && (
+                <p id={`${id}-erro`} role="alert" className="text-sm font-semibold text-perigo">
+                  {erro.texto}
+                </p>
+              )}
+              {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
+              <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">
+                {aviso}
+              </p>
+              <Button type="submit" size="lg" className="min-h-11 transicao" disabled={enviando}>
+                {enviando ? "Aguarde…" : modo === "entrar" ? "Entrar" : "Enviar link"}
               </Button>
-            )}
-          </form>
+              {modo === "entrar" && (
+                <Button
+                  type="button"
+                  variant={sugerirLink ? "secondary" : "link"}
+                  className="min-h-11 self-center"
+                  onClick={() => trocar("link")}
+                >
+                  <Mail aria-hidden="true" /> Primeiro acesso ou esqueci a senha
+                </Button>
+              )}
+            </form>
+          </div>
+          <p
+            className="subir mt-6 text-center text-sm text-foreground lg:text-left"
+            style={atraso(320)}
+          >
+            Ainda não tem acesso? Peça ao administrador para cadastrar o seu e-mail da empresa.
+          </p>
+          <div className="subir mt-6 flex justify-center lg:justify-start" style={atraso(400)}>
+            <Mascote
+              className="flutuar"
+              tamanho={64}
+              estado={modo === "entrar" ? "feliz" : "atento"}
+            />
+          </div>
         </div>
-        <p className="subir mt-6 text-center text-sm text-muted-foreground" style={atraso(320)}>
-          Ainda não tem acesso? Peça ao administrador para cadastrar o seu e-mail da empresa.
-        </p>
-        <div className="subir mt-6 flex justify-center" style={atraso(400)}>
-          <Mascote
-            className="flutuar"
-            tamanho={64}
-            estado={modo === "entrar" ? "feliz" : "atento"}
-          />
+      </div>
+      {/* Palco de mídia: depois do formulário no DOM (a tabulação começa nele), antes na tela. */}
+      <div
+        className="order-first max-[340px]:hidden lg:order-none lg:col-start-1 lg:row-start-1 lg:h-dvh lg:p-4"
+        data-testid="palco-login"
+      >
+        <div className="h-36 overflow-hidden sm:h-52 md:h-64 lg:h-full lg:rounded-3xl">
+          <Suspense fallback={<div className="size-full bg-[var(--polar-noite-900)]" />}>
+            <PalcoLogin />
+          </Suspense>
         </div>
       </div>
     </main>

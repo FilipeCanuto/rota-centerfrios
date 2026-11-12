@@ -32,3 +32,17 @@ export function validarArquivoMidia(arq: { type: string; size: number }): Result
     return { ok: false, motivo: `Arquivo grande demais. O limite é ${limite / MB} MB.` };
   return { ok: true, tipo };
 }
+
+/** Proporção recomendada do palco do login (o palco recorta com object-cover). */
+export const PROPORCAO_RECOMENDADA = "16:10 ou 16:9 (por exemplo 1920 × 1200 ou 1920 × 1080)";
+/** Intervalo entre itens do palco do login. */
+export const INTERVALO_PALCO_MS = 12_000;
+
+/** Move o item de `de` para `para`, devolvendo uma lista nova (índices fora da lista não mudam nada). */
+export function moverItem<T>(lista: readonly T[], de: number, para: number): T[] {
+  const nova = [...lista];
+  if (de === para || de < 0 || para < 0 || de >= nova.length || para >= nova.length) return nova;
+  const [item] = nova.splice(de, 1);
+  nova.splice(para, 0, item as T);
+  return nova;
+}

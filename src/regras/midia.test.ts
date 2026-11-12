@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validarArquivoMidia } from "./midia";
+import { moverItem, validarArquivoMidia } from "./midia";
 
 const MB = 1024 * 1024;
 
@@ -22,5 +22,18 @@ describe("validarArquivoMidia", () => {
     expect(validarArquivoMidia({ type: "application/pdf", size: 10 }).ok).toBe(false);
     expect(validarArquivoMidia({ type: "image/jpeg", size: 5 * MB + 1 }).ok).toBe(false);
     expect(validarArquivoMidia({ type: "video/webm", size: 25 * MB + 1 }).ok).toBe(false);
+  });
+});
+
+describe("moverItem", () => {
+  it("move para cima e para baixo sem alterar a lista original", () => {
+    const l = ["a", "b", "c"];
+    expect(moverItem(l, 0, 2)).toEqual(["b", "c", "a"]);
+    expect(moverItem(l, 2, 0)).toEqual(["c", "a", "b"]);
+    expect(l).toEqual(["a", "b", "c"]);
+  });
+  it("ignora índices fora da lista", () => {
+    expect(moverItem(["a", "b"], 0, 5)).toEqual(["a", "b"]);
+    expect(moverItem(["a", "b"], -1, 0)).toEqual(["a", "b"]);
   });
 });

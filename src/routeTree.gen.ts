@@ -25,6 +25,7 @@ import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authent
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
+import { Route as AuthenticatedConfiguracoesIndexRouteImport } from './routes/_authenticated/configuracoes.index'
 import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
 import { Route as AuthenticatedConfiguracoesImportacaoRouteImport } from './routes/_authenticated/configuracoes.importacao'
 
@@ -110,6 +111,12 @@ const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
   path: '/clientes/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfiguracoesIndexRoute =
+  AuthenticatedConfiguracoesIndexRouteImport.update({
+    id: '/configuracoes/',
+    path: '/configuracoes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfiguracoesFeriadosRoute =
   AuthenticatedConfiguracoesFeriadosRouteImport.update({
     id: '/configuracoes/feriados',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,6 +190,7 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
+  '/_authenticated/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
     | '/clientes/'
+    | '/configuracoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
     | '/clientes'
+    | '/configuracoes'
   id:
     | '__root__'
     | '/'
@@ -241,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes/feriados'
     | '/_authenticated/configuracoes/importacao'
     | '/_authenticated/clientes/'
+    | '/_authenticated/configuracoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes/': {
+      id: '/_authenticated/configuracoes/'
+      path: '/configuracoes'
+      fullPath: '/configuracoes/'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes/feriados': {
       id: '/_authenticated/configuracoes/feriados'
       path: '/configuracoes/feriados'
@@ -396,6 +416,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
   AuthenticatedConfiguracoesImportacaoRoute: typeof AuthenticatedConfiguracoesImportacaoRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
+  AuthenticatedConfiguracoesIndexRoute: typeof AuthenticatedConfiguracoesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -414,6 +435,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesImportacaoRoute:
     AuthenticatedConfiguracoesImportacaoRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
+  AuthenticatedConfiguracoesIndexRoute: AuthenticatedConfiguracoesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
