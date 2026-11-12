@@ -115,3 +115,28 @@ test("navegação só com teclado: o primeiro Tab mostra Pular para o conteúdo"
   await page.keyboard.press("Enter");
   await expect(page.locator("#conteudo")).toBeFocused();
 });
+
+test("links: card abre o detalhe pelo teclado, o detalhe passa no axe e o filtro esconde a outra seção", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await simularBackend(page);
+  await page.goto("/links");
+  const card = page.getByRole("button", { name: "Ver detalhes de Catálogo de freezers" });
+  await card.focus();
+  await page.keyboard.press("Enter");
+  const detalhe = page.getByRole("dialog", { name: "Catálogo de freezers" });
+  await expect(detalhe).toBeVisible();
+  await expect(detalhe.getByRole("button", { name: "Enviar pelo WhatsApp" })).toBeVisible();
+  await semViolacoes(page, { modal: true });
+  await page.keyboard.press("Escape");
+  await expect(detalhe).toBeHidden();
+  await expect(card).toBeFocused();
+
+  await page.getByRole("button", { name: "Internos" }).click();
+  await expect(page.getByRole("heading", { name: "Uso interno do time" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Para enviar aos clientes" })).toBeHidden();
+  // Link interno nunca oferece WhatsApp.
+  await expect(page.getByRole("button", { name: "Enviar pelo WhatsApp" })).toHaveCount(0);
+  await semViolacoes(page);
+});

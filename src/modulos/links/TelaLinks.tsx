@@ -1,13 +1,15 @@
 import { Link2, Lock, Plus, Search, Users } from "lucide-react";
-import { useState, type ComponentType } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
+import { Contador, transicaoDeVisao } from "@/design-system/movimento";
 import { useSessao } from "@/modulos/sessao/sessao";
 import { useLinks, type Link } from "./dados";
+import { DetalheLink } from "./DetalheLink";
 import { FormLink } from "./FormLink";
 import { ItemLink } from "./ItemLink";
 import { filtrarLinks, type FiltroPublico } from "./publico";
@@ -24,6 +26,12 @@ export function TelaLinks() {
   const [form, setForm] = useState<{ link: Link | null } | null>(null);
   const [filtro, setFiltro] = useState<FiltroPublico>("todos");
   const [busca, setBusca] = useState("");
+  const [detalhe, setDetalhe] = useState<Link | null>(null);
+  // O detalhe sai da tela na hora (para o card "encolher" de volta), então o foco é devolvido aqui.
+  const origemDetalhe = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!detalhe) origemDetalhe.current?.focus();
+  }, [detalhe]);
   // Diretoria e administrador escrevem (RLS); os demais só consultam.
   const podeEditar = !!sessao?.papeis.some((p) => p === "diretoria" || p === "administrador");
   const empresas = sessao?.empresas ?? [];
@@ -43,27 +51,37 @@ export function TelaLinks() {
     const lista = grupos?.[chave] ?? [];
     const idTitulo = `secao-${chave}`;
     return (
-      <section aria-labelledby={idTitulo} className="flex flex-col gap-2">
-        <div>
-          <h2 id={idTitulo} className="flex items-center gap-2 font-display text-xl font-bold">
+      <section aria-labelledby={idTitulo} className="flex flex-col gap-3">
+        <div className="flex items-center gap-3 border-b pb-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-muted">
             <Icone className="size-5" aria-hidden="true" />
-            {titulo}
-            <span className="numeros text-base font-semibold text-muted-foreground">
-              ({lista.length})
-            </span>
-          </h2>
-          <p className="text-sm text-muted-foreground">{descricao}</p>
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 id={idTitulo} className="font-display text-xl font-bold leading-tight">
+              {titulo}
+            </h2>
+            <p className="text-sm text-muted-foreground">{descricao}</p>
+          </div>
+          <p className="numeros rounded-full bg-muted px-3 py-1 text-sm font-semibold">
+            <Contador valor={lista.length} />
+            <span className="sr-only"> {lista.length === 1 ? "link" : "links"}</span>
+          </p>
         </div>
         {lista.length === 0 ? (
           <p className="cartao p-4 text-sm text-muted-foreground">{vazioMsg ?? vazio}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="cascata grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {lista.map((l) => (
               <ItemLink
                 key={l.id}
                 link={l}
                 empresa={nomeEmpresa(l.empresa_id)}
                 podeEditar={podeEditar}
+                emDetalhe={detalhe?.id === l.id}
+                aoAbrirDetalhe={() => {
+                  origemDetalhe.current = document.activeElement as HTMLElement | null;
+                  transicaoDeVisao(() => setDetalhe(l));
+                }}
                 aoEditar={() => setForm({ link: l })}
               />
             ))}
@@ -84,7 +102,11 @@ export function TelaLinks() {
         )}
       </div>
       {q.isPending ? (
-        <Skeleton className="h-40 w-full" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+          <Skeleton className="h-44" />
+          <Skeleton className="h-44" />
+          <Skeleton className="h-44 max-sm:hidden" />
+        </div>
       ) : q.isError ? (
         <EstadoErro
           titulo="Não foi possível carregar os links."
@@ -105,7 +127,7 @@ export function TelaLinks() {
                   variant={filtro === f.valor ? "default" : "outline"}
                   className="min-h-11"
                   aria-pressed={filtro === f.valor}
-                  onClick={() => setFiltro(f.valor)}
+                  onClick={() => transicaoDeVisao(() => setFiltro(f.valor))}
                 >
                   {f.rotulo}
                 </Button>
@@ -147,6 +169,16 @@ export function TelaLinks() {
             )}
         </>
       )}
+      <DetalheLink
+        link={detalhe}
+        empresa={nomeEmpresa(detalhe?.empresa_id ?? null)}
+        podeEditar={podeEditar}
+        aoFechar={() => transicaoDeVisao(() => setDetalhe(null))}
+        aoEditar={() => {
+          setForm({ link: detalhe });
+          setDetalhe(null);
+        }}
+      />
       <FormLink
         aberto={!!form}
         link={form?.link ?? null}
