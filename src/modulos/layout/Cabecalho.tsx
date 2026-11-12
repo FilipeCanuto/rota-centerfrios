@@ -24,6 +24,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { formatarPercentual } from "@/design-system/formatar";
+import {
+  definirIntensidade,
+  INTENSIDADES,
+  useIntensidade,
+  type Intensidade,
+} from "@/design-system/movimento";
 import { useTema, type Tema } from "@/design-system/tema";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotificacoes } from "@/modulos/notificacoes/dados";
@@ -38,6 +44,7 @@ export function Cabecalho() {
   const { data: cobertura } = useCoberturaCabecalho(sessao?.usuario?.id, ativas);
   const { data: notificacoes } = useNotificacoes(sessao?.usuario?.id);
   const { tema, definirTema } = useTema();
+  const intensidade = useIntensidade();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const caminho = useRouterState({ select: (r) => r.location.pathname });
@@ -195,6 +202,20 @@ export function Cabecalho() {
                   <Monitor className="mr-2 size-4" aria-hidden="true" />
                   Automático
                 </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Intensidade do movimento
+              </DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={intensidade}
+                onValueChange={(v) => definirIntensidade(v as Intensidade)}
+              >
+                {INTENSIDADES.map((i) => (
+                  <DropdownMenuRadioItem key={i.valor} value={i.valor} className="min-h-11">
+                    {i.rotulo}
+                  </DropdownMenuRadioItem>
+                ))}
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={sair} className="min-h-11">
