@@ -134,6 +134,13 @@
       "when": 1794398442905,
       "tag": "0018_painel_gestao_copiloto_notificacoes_demo",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794503837130,
+      "tag": "0019_migration",
+      "breakpoints": true
     }
   ]
 }
