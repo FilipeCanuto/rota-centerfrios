@@ -1,100 +1,124 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
+import { TransicaoEntrada } from "@/design-system/TransicaoEntrada";
 import { supabase } from "@/integrations/supabase/client";
-import { ehLinkDeRecuperacao } from "@/regras";
+import {
+  chegouPorLink,
+  esquecerChegadaPorLink,
+  marcarChegadaPorLink,
+} from "@/modulos/sessao/recuperacao";
+import { ehLinkDeAcesso, linkExpirado, mensagemSenhaNova } from "@/regras";
 
 export const Route = createFileRoute("/redefinir-senha")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Nova senha — Rota CENTERFRIOS" },
-      { name: "description", content: "Crie uma nova senha para entrar na Rota." },
+      { title: "Crie sua senha — Rota CENTERFRIOS" },
+      { name: "description", content: "Crie a senha para entrar na Rota." },
     ],
   }),
-  component: RedefinirSenha,
+  component: CriarSenha,
 });
 
-function RedefinirSenha() {
+const MINIMO = 8;
+
+function CriarSenha() {
   const id = useId();
   const navigate = useNavigate();
-  // O link do e-mail abre uma sessão de recuperação; sem ela, o link expirou ou já foi usado.
-  const [temSessao, setTemSessao] = useState<boolean | null>(null);
+  // Lido no primeiro render, antes de o Supabase limpar o endereço ao abrir a sessão do link.
+  const [veioDoLink] = useState(() => {
+    const { search, hash } = window.location;
+    if (linkExpirado(`${search}&${hash}`)) return false;
+    if (ehLinkDeAcesso(search, hash)) {
+      marcarChegadaPorLink();
+      return true;
+    }
+    return chegouPorLink();
+  });
+  // Só quem abriu um link do e-mail cria a senha aqui; uma sessão comum não troca a senha.
+  const [situacao, setSituacao] = useState<"verificando" | "pronto" | "expirado">(
+    veioDoLink ? "verificando" : "expirado",
+  );
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmacao, setConfirmacao] = useState("");
   const [verSenha, setVerSenha] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
-
-  const [email, setEmail] = useState("");
+  const [entrando, setEntrando] = useState<{ nome: string | null } | null>(null);
+  const campoSenha = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Só um link de recuperação abre esta tela. Uma sessão comum (aparelho já logado)
-    // não permite trocar a senha sem saber a atual.
-    const veioDoLink =
-      ehLinkDeRecuperacao(window.location.search, window.location.hash) ||
-      /[?&]code=/.test(window.location.search);
-    if (!veioDoLink) {
-      setTemSessao(false);
-      return;
-    }
-    const { data } = supabase.auth.onAuthStateChange((e, s) => {
-      if (e === "PASSWORD_RECOVERY") {
-        setTemSessao(true);
-        setEmail(s?.user.email ?? "");
+    if (!veioDoLink) return;
+    // getSession espera o Supabase terminar de ler o link do endereço.
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        esquecerChegadaPorLink();
+        return setSituacao("expirado");
       }
+      setEmail(data.session.user.email ?? "");
+      setSituacao("pronto");
     });
-    // Se o evento de recuperação passou antes de este efeito assinar, a sessão já aberta pelo link vale.
-    void supabase.auth.getSession().then(({ data: d }) => {
-      if (d.session) {
-        setTemSessao(true);
-        setEmail(d.session.user.email ?? "");
-      }
-    });
-    const limite = setTimeout(() => setTemSessao((v) => v ?? false), 8000);
-    return () => {
-      clearTimeout(limite);
-      data.subscription.unsubscribe();
-    };
-  }, []);
+  }, [veioDoLink]);
+
+  async function entrar() {
+    esquecerChegadaPorLink();
+    const { data: u } = await supabase.auth.getUser();
+    const { data } = await supabase
+      .from("usuarios")
+      .select("nome")
+      .eq("auth_user_id", u.user?.id ?? "")
+      .maybeSingle();
+    setEntrando({ nome: data?.nome ?? null });
+  }
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
-    if (senha.length < 6) return setErro("A senha precisa ter pelo menos 6 caracteres.");
+    if (senha.length < MINIMO) {
+      campoSenha.current?.focus();
+      return setErro(`A senha precisa ter pelo menos ${MINIMO} caracteres.`);
+    }
     if (senha !== confirmacao) return setErro("As duas senhas não são iguais.");
     setErro(null);
     setEnviando(true);
     const { error } = await supabase.auth.updateUser({ password: senha });
     setEnviando(false);
-    if (error)
-      return setErro(
-        /different from the old/i.test(error.message)
-          ? "A nova senha precisa ser diferente da anterior."
-          : /weak|short|characters/i.test(error.message)
-            ? "Escolha uma senha mais forte, com pelo menos 6 caracteres."
-            : "Não foi possível salvar a nova senha. Peça um novo link.",
-      );
-    navigate({ to: "/inicio", replace: true });
+    if (error) return setErro(mensagemSenhaNova(error.message));
+    await entrar();
   }
+
+  if (entrando)
+    return (
+      <TransicaoEntrada
+        nome={entrando.nome}
+        aoTerminar={() => void navigate({ to: "/inicio", replace: true })}
+      />
+    );
 
   return (
     <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-md">
         <BotaoVoltar className="-ml-3 mb-4" />
-        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+        <div className="subir mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
-          <h1 className="text-2xl font-extrabold">Crie uma nova senha</h1>
+          <h1 className="text-2xl font-extrabold">Crie sua senha</h1>
+          {situacao === "pronto" && (
+            <p className="text-muted-foreground">
+              Você já entrou com o link. Crie uma senha para as próximas vezes ou siga sem criar.
+            </p>
+          )}
         </div>
-        <div className="cartao p-6">
-          {temSessao === false ? (
+        <div className="cartao subir p-6" style={{ "--atraso": "120ms" } as React.CSSProperties}>
+          {situacao === "expirado" ? (
             <div role="alert" className="flex flex-col gap-3">
               <p>Este link expirou ou já foi usado.</p>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="min-h-11">
                 <Link to="/auth">Pedir um novo link</Link>
               </Button>
             </div>
@@ -113,6 +137,7 @@ function RedefinirSenha() {
                 <Label htmlFor={`${id}-senha`}>Nova senha</Label>
                 <div className="flex gap-2">
                   <Input
+                    ref={campoSenha}
                     id={`${id}-senha`}
                     type={verSenha ? "text" : "password"}
                     className="min-h-11"
@@ -120,13 +145,14 @@ function RedefinirSenha() {
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     required
-                    minLength={6}
-                    aria-describedby={erro ? `${id}-erro` : undefined}
+                    minLength={MINIMO}
+                    aria-describedby={`${id}-dica${erro ? ` ${id}-erro` : ""}`}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    className="size-11 shrink-0"
                     aria-pressed={verSenha}
                     aria-controls={`${id}-senha`}
                     aria-label="Mostrar senha"
@@ -135,6 +161,9 @@ function RedefinirSenha() {
                     {verSenha ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
                   </Button>
                 </div>
+                <p id={`${id}-dica`} className="text-sm text-muted-foreground">
+                  Pelo menos {MINIMO} caracteres, misturando letras e números.
+                </p>
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor={`${id}-confirmar`}>Repita a nova senha</Label>
@@ -154,8 +183,22 @@ function RedefinirSenha() {
                   {erro}
                 </p>
               )}
-              <Button type="submit" size="lg" disabled={enviando || temSessao === null}>
-                {enviando ? "Salvando…" : "Salvar nova senha"}
+              <Button
+                type="submit"
+                size="lg"
+                className="min-h-11"
+                disabled={enviando || situacao !== "pronto"}
+              >
+                {enviando ? "Salvando…" : "Salvar senha e entrar"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="min-h-11"
+                disabled={situacao !== "pronto"}
+                onClick={() => void entrar()}
+              >
+                Agora não, entrar sem criar senha
               </Button>
             </form>
           )}

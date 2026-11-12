@@ -15,7 +15,6 @@ import { ProvedorTema, scriptTemaInicial } from "@/design-system/tema";
 import { salvarTemaDoUsuario } from "@/modulos/sessao/sessao";
 import { supabase } from "@/integrations/supabase/client";
 import { BotaoVoltar } from "@/design-system/BotaoVoltar";
-import { ehLinkDeRecuperacao } from "@/regras";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
