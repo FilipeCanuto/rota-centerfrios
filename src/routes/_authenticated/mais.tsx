@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileText, FileUp, Link2, Palette, Trash2, Trophy, Users } from "lucide-react";
+import { CalendarOff, FileText, FileUp, Link2, Trash2, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -21,11 +21,11 @@ export const Route = createFileRoute("/_authenticated/mais")({
   head: () => ({
     meta: [
       { title: "Mais — Rota CENTERFRIOS" },
-      { name: "description", content: "Configurações, design system e dados de demonstração." },
+      { name: "description", content: "Atalhos, configurações e dados de demonstração." },
       { property: "og:title", content: "Mais — Rota CENTERFRIOS" },
       {
         property: "og:description",
-        content: "Configurações, design system e dados de demonstração.",
+        content: "Atalhos, configurações e dados de demonstração.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -88,19 +88,6 @@ function Mais() {
             </Link>
           </Button>
         </div>
-      </section>
-      <section aria-labelledby="ds" className="cartao p-5">
-        <h2 id="ds" className="mb-2 text-lg font-bold">
-          Design system Polar
-        </h2>
-        <p className="mb-4 text-muted-foreground">
-          Tokens de cor, tipografia e componentes nos temas claro e escuro.
-        </p>
-        <Button asChild variant="outline" className="h-auto whitespace-normal text-left">
-          <Link to="/design-system">
-            <Palette aria-hidden="true" /> Abrir design system
-          </Link>
-        </Button>
       </section>
       {diretoria && (
         <section aria-labelledby="config" className="cartao p-5">

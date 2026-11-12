@@ -7,6 +7,8 @@ export * from "./orcamentos";
 export * from "./gamificacao";
 export * from "./copiloto";
 export * from "./gestao";
+export * from "./autenticacao";
+export * from "./calendario";
 export * from "./saude";
 export * from "./planilha";
 export * from "./importacao";

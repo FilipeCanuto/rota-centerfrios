@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   beforeLoad: async () => {
+    levarLinkDeRecuperacao();
     const { data } = await supabase.auth.getUser();
     throw redirect({ to: data.user ? "/inicio" : "/auth" });
   },

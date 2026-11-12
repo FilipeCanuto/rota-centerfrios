@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,10 @@ import { SeloStatus } from "@/design-system/SeloStatus";
 import { Snowflake } from "lucide-react";
 
 export const Route = createFileRoute("/design-system")({
+  // Vitrine só de desenvolvimento: no app publicado a página não existe.
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) throw notFound();
+  },
   head: () => ({
     meta: [
       { title: "Design system Polar — Rota CENTERFRIOS" },

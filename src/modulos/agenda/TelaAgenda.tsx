@@ -8,24 +8,30 @@ import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { supabase } from "@/integrations/supabase/client";
 import { usePainel } from "@/modulos/inicio/dados";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
-import { formatarISO, hojeEmMaceio, paraData } from "@/regras";
+import {
+  agruparPorDia,
+  formatarISO,
+  gradeDoMes,
+  hojeEmMaceio,
+  inicioSemana,
+  paraData,
+  somarDias,
+  somarMeses,
+  type EventoCalendario,
+} from "@/regras";
 import { useGerarTarefasDosAlertas, useTarefas, type NovaTarefa, type Tarefa } from "./dados";
+import { CalendarioMes, LegendaCalendario } from "./Calendario";
+import { DiaDaAgenda } from "./DiaDaAgenda";
+import { useExtrasCalendario } from "./dadosCalendario";
 import { FormTarefa } from "./FormTarefa";
 import { ItemTarefa } from "./ItemTarefa";
 
-type Modo = "dia" | "semana" | "lista";
+type Modo = "mes" | "dia" | "semana" | "lista";
 const diaLongo = new Intl.DateTimeFormat("pt-BR", {
   weekday: "long",
   day: "numeric",
   month: "long",
 });
-const somarDias = (iso: string, n: number) => {
-  const d = paraData(iso);
-  d.setDate(d.getDate() + n);
-  return formatarISO(d);
-};
-/** Segunda-feira da semana da data. */
-const inicioSemana = (iso: string) => somarDias(iso, -((paraData(iso).getDay() + 6) % 7));
 
 export function TelaAgenda({
   novoPara,
@@ -40,18 +46,21 @@ export function TelaAgenda({
   const empresas = useEmpresasAtivas();
   const eu = sessao?.usuario?.id;
   const hoje = formatarISO(hojeEmMaceio());
-  const [modo, setModo] = useState<Modo>("dia");
+  const [modo, setModo] = useState<Modo>("mes");
   const [base, setBase] = useState(hoje);
   const [form, setForm] = useState<(NovaTarefa & { nomeCliente?: string | undefined }) | null>(
     null,
   );
 
+  const grade = gradeDoMes(base);
   const [inicio, fim] =
-    modo === "dia"
-      ? [base, base]
-      : modo === "semana"
-        ? [inicioSemana(base), somarDias(inicioSemana(base), 6)]
-        : [hoje, somarDias(hoje, 29)];
+    modo === "mes"
+      ? [grade[0]!, grade.at(-1)!]
+      : modo === "dia"
+        ? [base, base]
+        : modo === "semana"
+          ? [inicioSemana(base), somarDias(inicioSemana(base), 6)]
+          : [hoje, somarDias(hoje, 29)];
   // Atrasadas só na lista e no dia de hoje: em outro dia elas confundiriam.
   const tarefas = useTarefas(
     eu,
@@ -63,6 +72,28 @@ export function TelaAgenda({
   // Tarefas automáticas: o plano do dia vira retornos na agenda (o banco não duplica).
   const painel = usePainel(eu, empresas).data;
   const gerar = useGerarTarefasDosAlertas(eu);
+  const extras = useExtrasCalendario(eu, empresas, inicio, fim);
+  // Recompras previstas só daqui para frente: as já vencidas aparecem nos alertas do Início.
+  const eventos: EventoCalendario[] = [
+    ...(tarefas.data ?? []).map((t): EventoCalendario => ({
+      id: `t-${t.id}`,
+      dia: t.data,
+      tipo: t.tipo === "retorno" ? "retorno" : "agendamento",
+      titulo: t.titulo,
+    })),
+    ...(extras.data ?? []),
+    ...(painel?.recomprasPrevistas ?? [])
+      .filter((r) => r.data >= hoje && r.data >= inicio && r.data <= fim)
+      .map((r): EventoCalendario => ({
+        id: `r-${r.cliente_id}`,
+        dia: r.data,
+        tipo: "recompra",
+        titulo: `Recompra prevista: ${r.nome}`,
+        detalhe: "Pelo intervalo médio entre as compras",
+        clienteId: r.cliente_id,
+      })),
+  ];
+  const eventosPorDia = agruparPorDia(eventos);
   const chavePlano = painel?.plano.map((i) => i.cliente.id).join(",");
   useEffect(() => {
     if (!painel?.plano.length) return;
@@ -136,20 +167,60 @@ export function TelaAgenda({
       nomeCliente: t.clientes?.nome,
     });
 
+  const nomeMes = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" });
   const titulo =
-    modo === "dia"
-      ? diaLongo.format(paraData(base))
-      : modo === "semana"
-        ? `Semana de ${diaLongo.format(paraData(inicio))}`
-        : "Próximos 30 dias e atrasadas";
-  const porDia = new Map<string, Tarefa[]>();
-  for (const t of tarefas.data ?? []) porDia.set(t.data, [...(porDia.get(t.data) ?? []), t]);
+    modo === "mes"
+      ? nomeMes.format(paraData(base))
+      : modo === "dia"
+        ? diaLongo.format(paraData(base))
+        : modo === "semana"
+          ? `Semana de ${diaLongo.format(paraData(inicio))}`
+          : "Próximos 30 dias e atrasadas";
+  const passo = (n: number) =>
+    setBase(modo === "mes" ? somarMeses(base, n) : somarDias(base, n * (modo === "dia" ? 1 : 7)));
+  const rotuloNav = (anterior: boolean) =>
+    modo === "mes"
+      ? anterior
+        ? "Mês anterior"
+        : "Próximo mês"
+      : modo === "dia"
+        ? anterior
+          ? "Dia anterior"
+          : "Próximo dia"
+        : anterior
+          ? "Semana anterior"
+          : "Próxima semana";
+  const tarefasPorDia = new Map<string, Tarefa[]>();
+  for (const t of tarefas.data ?? [])
+    tarefasPorDia.set(t.data, [...(tarefasPorDia.get(t.data) ?? []), t]);
+  // No dia de hoje, as atrasadas ainda abertas vêm antes, cada uma no seu dia.
+  const atrasadas =
+    modo === "dia" && base === hoje ? [...tarefasPorDia.keys()].filter((d) => d < hoje) : [];
+  const dias =
+    modo === "semana"
+      ? Array.from({ length: 7 }, (_, i) => somarDias(inicio, i))
+      : [...atrasadas, base];
+
+  const cartaoDoDia = (dia: string, comTitulo: boolean) => (
+    <DiaDaAgenda
+      key={dia}
+      dia={dia}
+      hoje={hoje}
+      comTitulo={comTitulo}
+      tarefas={tarefasPorDia.get(dia) ?? []}
+      extras={(eventosPorDia.get(dia) ?? []).filter(
+        (e) => e.tipo !== "agendamento" && e.tipo !== "retorno",
+      )}
+      aoEditar={editar}
+      aoAgendar={() => setForm(nova({ data: dia }))}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-extrabold sm:text-3xl">Agenda</h1>
-        <Button onClick={() => setForm(nova({}))} disabled={!eu}>
+        <Button className="min-h-11" onClick={() => setForm(nova({}))} disabled={!eu}>
           <Plus aria-hidden="true" /> Nova tarefa
         </Button>
       </div>
@@ -161,14 +232,15 @@ export function TelaAgenda({
           aria-label="Visão da agenda"
           className="flex gap-1 rounded-lg bg-muted p-1"
         >
-          {(["dia", "semana", "lista"] as const).map((m) => (
+          {(["mes", "semana", "dia", "lista"] as const).map((m) => (
             <Button
               key={m}
               variant={modo === m ? "default" : "ghost"}
               aria-pressed={modo === m}
+              className="min-h-11"
               onClick={() => setModo(m)}
             >
-              {m === "dia" ? "Dia" : m === "semana" ? "Semana" : "Lista"}
+              {m === "mes" ? "Mês" : m === "dia" ? "Dia" : m === "semana" ? "Semana" : "Lista"}
             </Button>
           ))}
         </div>
@@ -177,19 +249,21 @@ export function TelaAgenda({
             <Button
               variant="outline"
               size="icon"
-              aria-label={modo === "dia" ? "Dia anterior" : "Semana anterior"}
-              onClick={() => setBase(somarDias(base, modo === "dia" ? -1 : -7))}
+              className="min-h-11 min-w-11"
+              aria-label={rotuloNav(true)}
+              onClick={() => passo(-1)}
             >
               <ChevronLeft aria-hidden="true" />
             </Button>
-            <Button variant="outline" onClick={() => setBase(hoje)}>
+            <Button variant="outline" className="min-h-11" onClick={() => setBase(hoje)}>
               Hoje
             </Button>
             <Button
               variant="outline"
               size="icon"
-              aria-label={modo === "dia" ? "Próximo dia" : "Próxima semana"}
-              onClick={() => setBase(somarDias(base, modo === "dia" ? 1 : 7))}
+              className="min-h-11 min-w-11"
+              aria-label={rotuloNav(false)}
+              onClick={() => passo(1)}
             >
               <ChevronRight aria-hidden="true" />
             </Button>
@@ -213,32 +287,31 @@ export function TelaAgenda({
             <Skeleton className="h-16 rounded-lg" />
             <Skeleton className="h-16 rounded-lg" />
           </div>
-        ) : tarefas.data.length === 0 ? (
-          <EstadoVazio icone={CalendarDays} titulo="Nada agendado">
-            Os retornos do plano do dia entram aqui sozinhos. Use “Nova tarefa” para marcar visitas
-            e ligações.
-          </EstadoVazio>
+        ) : modo === "lista" ? (
+          tarefas.data.length === 0 ? (
+            <EstadoVazio icone={CalendarDays} titulo="Nada agendado">
+              Os retornos do plano do dia entram aqui sozinhos. Use “Nova tarefa” para marcar
+              visitas e ligações.
+            </EstadoVazio>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {[...tarefasPorDia.keys()].map((dia) => cartaoDoDia(dia, true))}
+            </div>
+          )
         ) : (
           <div className="flex flex-col gap-4">
-            {[...porDia.entries()].map(([dia, lista]) => (
-              <div key={dia} className="cartao px-4">
-                {(modo !== "dia" || dia !== base) && (
-                  <h3 className="pt-3 font-semibold first-letter:uppercase">
-                    <time dateTime={dia}>{diaLongo.format(paraData(dia))}</time>
-                  </h3>
-                )}
-                <ul className="divide-y">
-                  {lista.map((t) => (
-                    <ItemTarefa
-                      key={t.id}
-                      tarefa={t}
-                      atrasada={t.data < hoje}
-                      aoEditar={() => editar(t)}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {modo === "mes" && (
+              <CalendarioMes
+                selecionado={base}
+                hoje={hoje}
+                eventosPorDia={eventosPorDia}
+                aoSelecionar={setBase}
+              />
+            )}
+            <LegendaCalendario />
+            {modo === "mes"
+              ? cartaoDoDia(base, true)
+              : dias.map((d) => cartaoDoDia(d, modo === "semana"))}
           </div>
         )}
       </section>

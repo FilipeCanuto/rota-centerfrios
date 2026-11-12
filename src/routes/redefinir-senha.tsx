@@ -4,8 +4,10 @@ import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { ehLinkDeRecuperacao } from "@/regras";
 
 export const Route = createFileRoute("/redefinir-senha")({
   ssr: false,
@@ -34,9 +36,9 @@ function RedefinirSenha() {
   useEffect(() => {
     // Só um link de recuperação abre esta tela. Uma sessão comum (aparelho já logado)
     // não permite trocar a senha sem saber a atual.
-    const veioDoLink = /type=recovery|[?&]code=/.test(
-      window.location.search + window.location.hash,
-    );
+    const veioDoLink =
+      ehLinkDeRecuperacao(window.location.search, window.location.hash) ||
+      /[?&]code=/.test(window.location.search);
     if (!veioDoLink) {
       setTemSessao(false);
       return;
@@ -45,6 +47,13 @@ function RedefinirSenha() {
       if (e === "PASSWORD_RECOVERY") {
         setTemSessao(true);
         setEmail(s?.user.email ?? "");
+      }
+    });
+    // Se o evento de recuperação passou antes de este efeito assinar, a sessão já aberta pelo link vale.
+    void supabase.auth.getSession().then(({ data: d }) => {
+      if (d.session) {
+        setTemSessao(true);
+        setEmail(d.session.user.email ?? "");
       }
     });
     const limite = setTimeout(() => setTemSessao((v) => v ?? false), 8000);
@@ -76,6 +85,7 @@ function RedefinirSenha() {
   return (
     <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-md">
+        <BotaoVoltar className="-ml-3 mb-4" />
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
           <h1 className="text-2xl font-extrabold">Crie uma nova senha</h1>

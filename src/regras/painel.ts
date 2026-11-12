@@ -3,6 +3,7 @@ import {
   clienteSemCompra,
   cobertura,
   orcamentoParado,
+  dataPrevistaRecompra,
   statusRecompra,
   ultimaInteracaoQualificada,
   type StatusRecompra,
@@ -207,6 +208,7 @@ export function calcularPainel(input: {
   const alertas: Alerta[] = [];
   const recompra = new Map<string, StatusRecompra>();
   let orcamentosParados = 0;
+  const recomprasPrevistas: { cliente_id: string; nome: string; data: string }[] = [];
   let reativados = 0;
   for (const e of empresas)
     for (const c of e.dados.clientes) {
@@ -214,6 +216,8 @@ export function calcularPainel(input: {
       if (a.item) itens.push(a.item);
       alertas.push(...a.alertas);
       recompra.set(c.id, a.recompra);
+      const prevista = dataPrevistaRecompra(c.compras, e.cfg);
+      if (prevista) recomprasPrevistas.push({ cliente_id: c.id, nome: c.nome, data: prevista });
       orcamentosParados += a.orcamentosParados;
       if (reativado(c, hoje, e.cfg)) reativados++;
     }
@@ -237,6 +241,7 @@ export function calcularPainel(input: {
     plano: itens.slice(0, maxPlano),
     alertas,
     orcamentosParados,
+    recomprasPrevistas,
     recompra,
     metasDoDia: [
       { chave: "vendas", nome: "Vendas", atual: faturadoHoje, alvo: mDia, moeda: true },

@@ -10,8 +10,11 @@ export const USUARIO_ID = "00000000-0000-4000-8000-000000000002";
 export const EMPRESA_CF = "00000000-0000-4000-8000-0000000000c1";
 export const EMPRESA_381 = "00000000-0000-4000-8000-0000000000c2";
 
-const hoje = new Date().toISOString().slice(0, 10);
-const diasAtras = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
+// Datas no calendário de Maceió, como o app: com a data em UTC os testes quebravam depois das 21h.
+const diaEmMaceio = (ms: number) =>
+  new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Maceio" }).format(new Date(ms));
+const hoje = diaEmMaceio(Date.now());
+const diasAtras = (n: number) => diaEmMaceio(Date.now() - n * 86_400_000);
 
 const usuario = {
   id: AUTH_ID,

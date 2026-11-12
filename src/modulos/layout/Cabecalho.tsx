@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, LogOut, Monitor, Moon, Sun, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { formatarPercentual } from "@/design-system/formatar";
 import { useTema, type Tema } from "@/design-system/tema";
@@ -39,6 +40,7 @@ export function Cabecalho() {
   const { tema, definirTema } = useTema();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const caminho = useRouterState({ select: (r) => r.location.pathname });
 
   async function sair() {
     await qc.cancelQueries();
@@ -52,6 +54,7 @@ export function Cabecalho() {
   return (
     <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
       <div className="flex items-center gap-2 px-3 py-2 sm:px-4">
+        {caminho !== "/inicio" && <BotaoVoltar />}
         <SidebarTrigger
           className="hidden size-11 md:inline-flex"
           aria-label="Recolher ou expandir menu"

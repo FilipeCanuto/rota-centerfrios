@@ -4,13 +4,17 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BotaoVoltar } from "@/design-system/BotaoVoltar";
 import { Logo } from "@/design-system/Logo";
 import { Pinguim } from "@/design-system/Pinguim";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
+import { cadastroDeContaExistente, causaDoLogin, linkExpirado, MENSAGEM_LOGIN } from "@/regras";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  beforeLoad: () => levarLinkDeRecuperacao(),
   head: () => ({
     meta: [
       { title: "Entrar — Rota CENTERFRIOS" },
@@ -65,6 +69,7 @@ function Entrar() {
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [podeReenviar, setPodeReenviar] = useState(false);
   const titulo = useRef<HTMLHeadingElement>(null);
   const trocar = (m: Modo) => {
     setModo(m);
@@ -72,6 +77,7 @@ function Entrar() {
     requestAnimationFrame(() => titulo.current?.focus());
     setErro(null);
     setAviso(null);
+    setPodeReenviar(false);
   };
 
   useEffect(() => {
@@ -80,7 +86,12 @@ function Entrar() {
       window.location.search + "&" + window.location.hash.slice(1),
     );
     const falha = params.get("error_description");
-    if (falha) setErro(mensagemPrimeiroAcesso(falha));
+    if (falha)
+      setErro(
+        linkExpirado(params.toString())
+          ? "O link expirou ou já foi usado. Peça um novo em “Esqueci minha senha”."
+          : mensagemPrimeiroAcesso(falha),
+      );
   }, []);
 
   useEffect(() => {
@@ -100,7 +111,11 @@ function Entrar() {
     setEnviando(true);
     if (modo === "entrar") {
       const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) setErro("E-mail ou senha incorretos, ou e-mail ainda não confirmado.");
+      if (error) {
+        const causa = causaDoLogin(error);
+        setErro(MENSAGEM_LOGIN[causa]);
+        setPodeReenviar(causa === "nao_confirmado");
+      }
     } else if (modo === "recuperar") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/redefinir-senha`,
@@ -108,15 +123,33 @@ function Entrar() {
       if (error) setErro("Não foi possível enviar o link agora. Tente de novo em alguns minutos.");
       else setAviso("Se esse e-mail tiver acesso, enviamos um link para criar uma nova senha.");
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
         options: { emailRedirectTo: window.location.origin, data: { full_name: nome } },
       });
       if (error) setErro(mensagemPrimeiroAcesso(error.message));
+      else if (cadastroDeContaExistente(data.user))
+        setErro(
+          "Este e-mail já tem cadastro (por exemplo, pelo Google). Use “Esqueci minha senha” para criar uma senha.",
+        );
       else setAviso("Senha criada. Confirme pelo link enviado ao seu e-mail para entrar.");
     }
     setEnviando(false);
+  }
+
+  async function reenviar() {
+    setErro(null);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) setErro("Não foi possível reenviar agora. Tente de novo em alguns minutos.");
+    else {
+      setPodeReenviar(false);
+      setAviso("Enviamos um novo e-mail de confirmação. Confira também a caixa de spam.");
+    }
   }
 
   async function google() {
@@ -130,6 +163,9 @@ function Entrar() {
   return (
     <main id="conteudo" className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-md">
+        {modo !== "entrar" && (
+          <BotaoVoltar aoVoltar={() => trocar("entrar")} className="-ml-3 mb-4" />
+        )}
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
           <Logo className="h-14" />
           <h1 ref={titulo} tabIndex={-1} className="text-2xl font-extrabold outline-none">
@@ -213,6 +249,11 @@ function Entrar() {
                 {erro}
               </p>
             )}
+            {podeReenviar && (
+              <Button type="button" variant="outline" className="min-h-11" onClick={reenviar}>
+                Reenviar e-mail de confirmação
+              </Button>
+            )}
             {/* Região sempre montada para o leitor de tela anunciar o aviso. */}
             <p role="status" className="text-sm font-semibold text-sucesso empty:hidden">
               {aviso}
@@ -262,11 +303,7 @@ function Entrar() {
                 Já fui convidado: criar minha senha
               </Button>
             </>
-          ) : (
-            <Button variant="link" className="px-1" onClick={() => trocar("entrar")}>
-              Voltar para entrar
-            </Button>
-          )}
+          ) : null}
         </div>
         <div className="mt-6 flex justify-center text-foreground">
           <Pinguim className="size-10" />
