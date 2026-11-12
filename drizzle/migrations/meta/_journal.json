@@ -141,6 +141,13 @@
       "when": 1794503837130,
       "tag": "0019_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794515686454,
+      "tag": "0020_conceder_diretoria_adm_centerfrios",
+      "breakpoints": true
     }
   ]
 }
