@@ -202,15 +202,15 @@ function Corpo({
             </select>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor={`${id}-p`}>Quem pode receber</Label>
+            <Label htmlFor={`${id}-p`}>Quem pode receber?</Label>
             <select
               id={`${id}-p`}
               className={selecao}
               value={f.publico}
               onChange={(e) => mudar({ publico: e.target.value as LinkForm["publico"] })}
             >
-              <option value="interno">Só a equipe</option>
-              <option value="cliente">Pode ir ao cliente</option>
+              <option value="interno">Só o time</option>
+              <option value="cliente">Pode enviar a clientes</option>
             </select>
           </div>
           <div className="grid gap-1.5">

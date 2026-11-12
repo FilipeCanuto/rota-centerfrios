@@ -43,3 +43,4 @@ use the editor.
 - Production bootstrap calls demo cleanup followed by the idempotent national-holiday loader; demo loading reuses companies and existing memberships and never overwrites real targets. Why: historical seed migrations remain immutable without forcing demo data into real use.
 - Status is always icon + word (`SeloStatus`); charts always ship a text summary and a "Ver como tabela" toggle (`GraficoAnel`). Why: WCAG 2.2 AA requirement.
 - Gamification points and badges are written only by role-checked SECURITY DEFINER functions with idempotent upserts; weights and campaign text live in company-scoped configuration tables. Why: prevent self-awarded points and let diretoria tune rules.
+- Links carry `publico` (`interno` default | `cliente`); only `cliente` links may be sent to customers (WhatsApp hidden for internal ones), checked via `podeEnviarAoCliente`. Why: avoid leaking internal material.

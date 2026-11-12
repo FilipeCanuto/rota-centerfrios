@@ -1,10 +1,11 @@
-import { Copy, ExternalLink, MessageCircle, Pencil } from "lucide-react";
+import { Copy, ExternalLink, Lock, MessageCircle, Pencil, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAnunciar } from "@/design-system/Anunciador";
 import { SeloStatus } from "@/design-system/SeloStatus";
 import { whatsappManual } from "@/integracoes/manual";
 import { linkAssinado, type Link } from "./dados";
+import { podeEnviarAoCliente } from "./publico";
 
 /** Abre a aba já no clique (o navegador bloquearia depois da espera) e a isola da página. */
 function abrirAba() {
@@ -25,6 +26,7 @@ export function ItemLink({
   aoEditar: () => void;
 }) {
   const anunciar = useAnunciar();
+  const paraCliente = podeEnviarAoCliente(link);
 
   /** Endereço a enviar: o link, ou o link temporário (7 dias) do arquivo. */
   async function endereco() {
@@ -37,14 +39,20 @@ export function ItemLink({
   async function copiar() {
     try {
       await navigator.clipboard.writeText(await endereco());
-      toast.success(link.arquivo_path ? "Link copiado. Vale por 7 dias." : "Link copiado.");
-      anunciar("Link copiado.");
+      if (paraCliente) {
+        toast.success(link.arquivo_path ? "Link copiado. Vale por 7 dias." : "Link copiado.");
+        anunciar("Link copiado.");
+      } else {
+        toast.warning("Link copiado. Este link é interno. Não envie ao cliente.");
+        anunciar("Link copiado. Este link é interno. Não envie ao cliente.");
+      }
     } catch {
       toast.error("Não foi possível copiar o link.");
     }
   }
 
   async function whatsapp() {
+    if (!paraCliente) return;
     // Abre a janela já no clique; o navegador bloquearia depois da espera.
     const janela = abrirAba();
     try {
@@ -71,9 +79,25 @@ export function ItemLink({
   }
 
   return (
-    <li className="flex flex-col gap-2 p-4">
+    <li
+      className={`cartao flex flex-col gap-2 border-l-4 p-4 ${
+        paraCliente ? "border-l-primary" : "border-l-muted-foreground border-dashed"
+      }`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-semibold">{link.titulo}</h3>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-sm font-semibold ${
+            paraCliente ? "border-primary/40 text-primary" : "border-border text-foreground"
+          }`}
+        >
+          {paraCliente ? (
+            <Users className="size-4" aria-hidden="true" />
+          ) : (
+            <Lock className="size-4" aria-hidden="true" />
+          )}
+          {paraCliente ? "Cliente" : "Interno"}
+        </span>
         <SeloStatus tom="info">{link.arquivo_path ? "Arquivo" : "Link"}</SeloStatus>
         {!link.ativo && <SeloStatus tom="atencao">Inativo</SeloStatus>}
         <span className="ml-auto text-sm text-muted-foreground">{empresa}</span>
@@ -86,9 +110,15 @@ export function ItemLink({
         <Button variant="outline" className="min-h-11" onClick={copiar}>
           <Copy aria-hidden="true" /> Copiar link
         </Button>
-        <Button variant="outline" className="min-h-11" onClick={whatsapp}>
-          <MessageCircle aria-hidden="true" /> Enviar pelo WhatsApp
-        </Button>
+        {paraCliente ? (
+          <Button variant="outline" className="min-h-11" onClick={whatsapp}>
+            <MessageCircle aria-hidden="true" /> Enviar pelo WhatsApp
+          </Button>
+        ) : (
+          <span className="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground">
+            <Lock className="size-4" aria-hidden="true" /> Uso interno
+          </span>
+        )}
         {podeEditar && (
           <Button variant="ghost" className="min-h-11" onClick={aoEditar}>
             <Pencil aria-hidden="true" /> Editar
