@@ -20,6 +20,7 @@ import { useMascote } from "@/modulos/mascote/MascoteProvider";
 import { mensagem, type ChaveMensagem } from "@/modulos/mascote/mensagens";
 import { useRegistrarAlertas } from "@/modulos/notificacoes/dados";
 import { usePainel } from "./dados";
+import { SimularAlertas } from "./SimularAlertas";
 
 const TOM: Record<MotivoTipo, { tom: TomStatus; rotulo: string }> = {
   recompra_urgente: { tom: "perigo", rotulo: "Urgente" },
@@ -107,6 +108,7 @@ export function PainelInicio() {
         </p>
         <h1 className="text-2xl font-extrabold sm:text-3xl">Olá, {usuario?.nome ?? "…"}</h1>
       </div>
+      <SimularAlertas />
 
       {error && !p ? (
         <EstadoErro
