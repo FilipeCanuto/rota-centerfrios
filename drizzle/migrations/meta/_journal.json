@@ -148,6 +148,13 @@
       "when": 1794515686454,
       "tag": "0020_conceder_diretoria_adm_centerfrios",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794601215038,
+      "tag": "0021_avisos_midia_login",
+      "breakpoints": true
     }
   ]
 }

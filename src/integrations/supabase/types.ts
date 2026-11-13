@@ -78,6 +78,65 @@ export type Database = {
           },
         ]
       }
+      avisos: {
+        Row: {
+          arquivo_path: string
+          ativo: boolean
+          created_at: string
+          criado_por: string | null
+          empresa: string
+          fim: string | null
+          id: string
+          inicio: string | null
+          link: string | null
+          ordem: number
+          texto_alternativo: string
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_path: string
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          empresa?: string
+          fim?: string | null
+          id?: string
+          inicio?: string | null
+          link?: string | null
+          ordem?: number
+          texto_alternativo: string
+          tipo: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_path?: string
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          empresa?: string
+          fim?: string | null
+          id?: string
+          inicio?: string | null
+          link?: string | null
+          ordem?: number
+          texto_alternativo?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avisos_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clientes: {
         Row: {
           cidade: string | null
@@ -650,6 +709,50 @@ export type Database = {
           {
             foreignKeyName: "metas_vendedor_id_fkey"
             columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      midia_login: {
+        Row: {
+          arquivo_path: string
+          ativo: boolean
+          created_at: string
+          criado_por: string | null
+          id: string
+          ordem: number
+          texto_alternativo: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_path: string
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          ordem?: number
+          texto_alternativo: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_path?: string
+          ativo?: boolean
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          ordem?: number
+          texto_alternativo?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "midia_login_criado_por_fkey"
+            columns: ["criado_por"]
             isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
@@ -1323,6 +1426,7 @@ export type Database = {
           origem: Database["public"]["Enums"]["origem_dado"]
           perfil: Database["public"]["Enums"]["app_role"]
           pinguim_versao: string
+          pode_publicar_avisos: boolean
           tema: string
         }
         Insert: {
@@ -1339,6 +1443,7 @@ export type Database = {
           origem?: Database["public"]["Enums"]["origem_dado"]
           perfil?: Database["public"]["Enums"]["app_role"]
           pinguim_versao?: string
+          pode_publicar_avisos?: boolean
           tema?: string
         }
         Update: {
@@ -1355,6 +1460,7 @@ export type Database = {
           origem?: Database["public"]["Enums"]["origem_dado"]
           perfil?: Database["public"]["Enums"]["app_role"]
           pinguim_versao?: string
+          pode_publicar_avisos?: boolean
           tema?: string
         }
         Relationships: [
@@ -1456,6 +1562,7 @@ export type Database = {
           origem: Database["public"]["Enums"]["origem_dado"]
           perfil: Database["public"]["Enums"]["app_role"]
           pinguim_versao: string
+          pode_publicar_avisos: boolean
           tema: string
         }
         SetofOptions: {
@@ -1566,6 +1673,11 @@ export type Database = {
         Returns: Json
       }
       meu_usuario_id: { Args: never; Returns: string }
+      midia_arquivo_valido: {
+        Args: { _metadata: Json; _nome: string }
+        Returns: boolean
+      }
+      midia_login_arquivo_ativo: { Args: { _nome: string }; Returns: boolean }
       painel_gestao: {
         Args: { _empresa_id: string; _hoje?: string }
         Returns: Json
@@ -1574,6 +1686,7 @@ export type Database = {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
         Returns: Json
       }
+      pode_publicar_avisos: { Args: never; Returns: boolean }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
       ranking: {
         Args: { _empresa_id: string; _fim: string; _inicio: string }
