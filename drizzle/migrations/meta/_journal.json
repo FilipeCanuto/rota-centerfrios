@@ -155,6 +155,13 @@
       "when": 1794601215038,
       "tag": "0021_avisos_midia_login",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794602197256,
+      "tag": "0022_restringir_leitura_avisos",
+      "breakpoints": true
     }
   ]
 }
