@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { moverItem, validarArquivoMidia } from "./midia";
+import {
+  limitarFoco,
+  moverItem,
+  proporcaoDoPalco,
+  rotuloProporcao,
+  validarArquivoMidia,
+} from "./midia";
 
 const MB = 1024 * 1024;
 
@@ -35,5 +41,17 @@ describe("moverItem", () => {
   it("ignora índices fora da lista", () => {
     expect(moverItem(["a", "b"], 0, 5)).toEqual(["a", "b"]);
     expect(moverItem(["a", "b"], -1, 0)).toEqual(["a", "b"]);
+  });
+});
+
+describe("palco do login", () => {
+  it("desktop é quase quadrado e celular/tablet são faixas largas", () => {
+    expect(proporcaoDoPalco("desktop")).toBeCloseTo(0.93, 2);
+    expect(proporcaoDoPalco("tablet")).toBeCloseTo(3, 1);
+    expect(proporcaoDoPalco("celular")).toBeCloseTo(2.6, 1);
+    expect(rotuloProporcao(1.0345)).toBe("1,03 : 1");
+  });
+  it("limita o foco entre 0 e 100", () => {
+    expect([limitarFoco(-5), limitarFoco(49.6), limitarFoco(140)]).toEqual([0, 50, 100]);
   });
 });

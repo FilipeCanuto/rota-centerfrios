@@ -204,6 +204,13 @@ export async function simularBackend(
     configuracoes_regras: [],
     feriados: FERIADOS,
     "rpc/meus_setores": ["comercial"],
+    // `rh` aparece como disponível só aqui: o módulo de prévia vem de VITE_SETORES_PREVIA (playwright.config).
+    setores: [
+      ["comercial", "Comercial", "briefcase", true, true],
+      ["rh", "RH", "users", true, true],
+      ["financeiro", "Financeiro", "wallet", true, false],
+      ["fiscal", "Fiscal", "file-text", false, false],
+    ].map(([chave, nome, icone, ativo, disponivel]) => ({ chave, nome, icone, ativo, disponivel })),
     "rpc/painel_vendedor": PAINEL,
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,

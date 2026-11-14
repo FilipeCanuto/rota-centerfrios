@@ -124,7 +124,7 @@ test("Configurações: só administrador; aba Mídia do login lista, valida, ord
   const lista = page.getByRole("list", { name: /Mídias do login/ });
   await expect(lista.getByRole("listitem")).toHaveCount(2);
   await expect(page.getByRole("heading", { name: "Prévia do login" })).toBeVisible();
-  await expect(page.getByText("16:10 ou 16:9").first()).toBeVisible();
+  await expect(page.getByText("Proporção real do palco").first()).toBeVisible();
 
   // Primeiro não sobe; último não desce.
   await expect(page.getByRole("button", { name: "Subir: Loja CENTERFRIOS" })).toBeDisabled();
@@ -171,4 +171,26 @@ test("Mais mostra o atalho Configurações só para administrador", async ({ pag
   await page.goto("/mais");
   await page.locator("main").getByRole("link", { name: "Configurações" }).click();
   await expect(page).toHaveURL(/\/configuracoes\?aba=midia-login/);
+});
+
+test("Mídia do login: prévia por aparelho mostra a proporção real e o guia de área segura", async ({
+  page,
+}) => {
+  await simularBackend(page, { user_roles: ADMIN, midia_login: MIDIAS });
+  await simularStorage(page);
+  await page.goto("/configuracoes?aba=midia-login");
+  const proporcao = page.getByTestId("previa-proporcao");
+  await expect(proporcao).toContainText("0,93 : 1");
+  await page.locator("label", { hasText: "Celular" }).first().click();
+  await expect(proporcao).toContainText("2,60 : 1");
+  await page.locator("label", { hasText: "Tablet" }).first().click();
+  await expect(proporcao).toContainText("3,00 : 1");
+  await expect(page.getByText("Mostrar guia de área segura")).toBeVisible();
+
+  // Enquadrar: "Ajustar sem cortar" esconde o ponto de foco; "Preencher" mostra.
+  await page.getByRole("button", { name: "Enquadrar: Loja CENTERFRIOS" }).click();
+  const dialogo = page.getByRole("dialog");
+  await expect(dialogo.getByRole("button", { name: /ponto de foco/ })).toBeVisible();
+  await dialogo.getByRole("radio", { name: /Ajustar sem cortar/ }).check();
+  await expect(dialogo.getByRole("button", { name: /ponto de foco/ })).toHaveCount(0);
 });

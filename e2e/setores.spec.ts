@@ -75,3 +75,34 @@ test("Usuários e acessos: pré-cadastro exige pelo menos um setor", async ({ pa
   await dialogo.getByRole("button", { name: "Pré-cadastrar" }).click();
   await expect(dialogo.getByRole("alert")).toHaveText("Marque pelo menos um setor.");
 });
+
+test("Configurações > Setores (administrador): lista, estado de módulo e criação", async ({
+  page,
+}) => {
+  await simularBackend(page, { user_roles: [{ role: "administrador" }] });
+  await page.goto("/configuracoes?aba=setores");
+  const lista = page.getByRole("list", { name: "Setores" });
+  await expect(lista.getByRole("listitem")).toHaveCount(4);
+  await expect(lista.getByText("No ar")).toHaveCount(2);
+  await expect(lista.getByText("Módulo em construção")).toHaveCount(2);
+  // Sem botão de excluir: setor só se desativa.
+  await expect(page.getByRole("button", { name: /Excluir/ })).toHaveCount(0);
+  await expect(page.getByRole("switch", { name: "Ativo: Fiscal" })).not.toBeChecked();
+
+  await page.getByRole("button", { name: "Novo setor" }).click();
+  const dialogo = page.getByRole("dialog");
+  await dialogo.getByLabel("Nome do setor").fill("A");
+  await dialogo.getByRole("button", { name: "Criar setor" }).click();
+  await expect(dialogo.getByRole("alert")).toContainText("Informe o nome");
+});
+
+test("Cadastro de usuário lista setor ativo mesmo sem módulo no ar, mas não o inativo", async ({
+  page,
+}) => {
+  await simularBackend(page, { user_roles: [{ role: "administrador" }] });
+  await page.goto("/configuracoes?aba=usuarios");
+  await page.getByRole("button", { name: "Pré-cadastrar" }).click();
+  const dialogo = page.getByRole("dialog");
+  await expect(dialogo.getByRole("checkbox", { name: "Financeiro" })).toBeVisible();
+  await expect(dialogo.getByRole("checkbox", { name: "Fiscal" })).toHaveCount(0);
+});

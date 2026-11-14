@@ -1,13 +1,16 @@
 import { Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo-centerfrios.png.asset.json";
-import { INTERVALO_PALCO_MS, type TipoMidia } from "@/regras";
+import { INTERVALO_PALCO_MS, type Enquadramento, type TipoMidia } from "@/regras";
 
 export interface ItemPalco {
   id: string;
   tipo: TipoMidia;
   url?: string | undefined;
   texto_alternativo: string;
+  enquadramento?: Enquadramento | undefined;
+  foco_x?: number | undefined;
+  foco_y?: number | undefined;
 }
 
 const consulta = (q: string) => typeof window !== "undefined" && window.matchMedia(q).matches;
@@ -60,29 +63,54 @@ function Item({
     if (tocarVideo && !saindo) void v.play().catch(() => undefined);
     else v.pause();
   }, [tocarVideo, saindo]);
-  const classe = `absolute inset-0 size-full object-cover ${saindo ? "palco-sair" : "palco-entrar"}`;
   if (!item.url) return null;
-  if (item.tipo === "video")
+  const ajustar = item.enquadramento === "ajustar";
+  const foco = { objectPosition: `${item.foco_x ?? 50}% ${item.foco_y ?? 50}%` };
+  const anim = saindo ? "palco-sair" : "palco-entrar";
+  // "Ajustar sem cortar": a mídia inteira (contain) sobre uma cópia desfocada dela mesma.
+  const classe = `absolute inset-0 size-full ${ajustar ? "object-contain" : "object-cover"} ${anim}`;
+  const fundo = `absolute inset-0 size-full scale-110 object-cover blur-2xl opacity-70 ${anim}`;
+  if (item.tipo === "video") {
+    // O primeiro quadro faz o papel de poster (o cadastro não guarda uma imagem à parte).
+    const src = `${item.url}#t=0.1`;
     return (
-      <video
-        ref={video}
-        // O primeiro quadro faz o papel de poster (o cadastro não guarda uma imagem à parte).
-        src={`${item.url}#t=0.1`}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-label={item.texto_alternativo}
-        className={classe}
-      />
+      <>
+        {ajustar && (
+          <video
+            src={src}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            className={fundo}
+          />
+        )}
+        <video
+          ref={video}
+          src={src}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={item.texto_alternativo}
+          style={ajustar ? undefined : foco}
+          className={classe}
+        />
+      </>
     );
+  }
   return (
-    <img
-      src={item.url}
-      alt={item.texto_alternativo}
-      decoding="async"
-      className={`${classe} ${item.tipo === "imagem" && !saindo ? "ken-burns" : ""}`}
-    />
+    <>
+      {ajustar && <img src={item.url} alt="" aria-hidden="true" className={fundo} />}
+      <img
+        src={item.url}
+        alt={item.texto_alternativo}
+        decoding="async"
+        style={ajustar ? undefined : foco}
+        className={`${classe} ${item.tipo === "imagem" && !ajustar && !saindo ? "ken-burns" : ""}`}
+      />
+    </>
   );
 }
 

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAnunciar } from "@/design-system/Anunciador";
+import { EnquadrarMidia } from "./EnquadrarMidia";
 import { moverItem } from "@/regras";
 import {
   useApagarMidiaLogin,
@@ -63,6 +64,9 @@ export function ListaMidiaLogin({ itens }: { itens: Item[] }) {
         texto_alternativo: m.texto_alternativo,
         ordem: m.ordem,
         ativo,
+        enquadramento: m.enquadramento,
+        foco_x: m.foco_x,
+        foco_y: m.foco_y,
       });
       anunciar(ativo ? "Mídia ativada." : "Mídia desativada.");
     } catch {
@@ -128,6 +132,7 @@ export function ListaMidiaLogin({ itens }: { itens: Item[] }) {
             >
               <ArrowDown aria-hidden="true" />
             </Button>
+            <EnquadrarMidia m={m} />
             <div className="flex min-h-11 items-center gap-2 px-2">
               <Switch
                 id={`ativa-${m.id}`}

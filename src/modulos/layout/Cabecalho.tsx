@@ -35,13 +35,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNotificacoes } from "@/modulos/notificacoes/dados";
 import { podeVerAmbas, useEmpresa, useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import { ABA_PADRAO } from "@/modulos/configuracoes/abas";
-import { CHAVES_DISPONIVEIS } from "@/modulos/setores/setores";
+import { useCatalogo } from "@/modulos/setores/setores";
 import { BuscaGlobal } from "./BuscaGlobal";
 import { podeConfigurar } from "./navegacao";
 import { useCoberturaCabecalho } from "./dados";
 
 export function Cabecalho() {
   const { data: sessao } = useSessao();
+  const { data: catalogo } = useCatalogo();
+  const chavesDisp = catalogo?.chaves ?? [];
   const { empresa, definir } = useEmpresa();
   const ativas = useEmpresasAtivas();
   const { data: cobertura } = useCoberturaCabecalho(sessao?.usuario?.id, ativas);
@@ -167,14 +169,13 @@ export function Cabecalho() {
             <DropdownMenuContent align="end" className="w-60">
               <DropdownMenuLabel>{sessao?.usuario?.nome ?? "Usuário"}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {sessao &&
-                sessao.setores.filter((s) => CHAVES_DISPONIVEIS.includes(s)).length > 1 && (
-                  <DropdownMenuItem asChild className="min-h-11">
-                    <Link to="/setores" search={{ trocar: true }}>
-                      <ArrowLeftRight aria-hidden="true" /> Trocar de setor
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+              {sessao && sessao.setores.filter((s) => chavesDisp.includes(s)).length > 1 && (
+                <DropdownMenuItem asChild className="min-h-11">
+                  <Link to="/setores" search={{ trocar: true }}>
+                    <ArrowLeftRight aria-hidden="true" /> Trocar de setor
+                  </Link>
+                </DropdownMenuItem>
+              )}
               {sessao && podeConfigurar(sessao.papeis) && (
                 <DropdownMenuItem asChild className="min-h-11">
                   <Link to="/configuracoes" search={{ aba: ABA_PADRAO }}>
@@ -183,7 +184,7 @@ export function Cabecalho() {
                 </DropdownMenuItem>
               )}
               {sessao &&
-                (sessao.setores.filter((s) => CHAVES_DISPONIVEIS.includes(s)).length > 1 ||
+                (sessao.setores.filter((s) => chavesDisp.includes(s)).length > 1 ||
                   podeConfigurar(sessao.papeis)) && <DropdownMenuSeparator />}
               {sessao && sessao.empresas.length > 1 && (
                 <>

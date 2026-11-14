@@ -12,11 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { MalhaLuz } from "@/modulos/login/MalhaLuz";
 import { useSessao } from "@/modulos/sessao/sessao";
 import {
-  CHAVES_DISPONIVEIS,
   lembrarSetor,
   setorLembrado,
-  setorPorChave,
-  type Setor,
+  useCatalogo,
+  type SetorTela,
 } from "@/modulos/setores/setores";
 import { destinoAposLogin } from "@/regras";
 
@@ -37,20 +36,27 @@ function TelaSetores() {
   const { trocar } = Route.useSearch();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { data: sessao, isLoading, isError, refetch } = useSessao();
+  const sessaoQ = useSessao();
+  const catalogoQ = useCatalogo();
+  const sessao = sessaoQ.data;
+  const catalogo = catalogoQ.data;
+  const isLoading = sessaoQ.isLoading || catalogoQ.isLoading;
+  const isError = sessaoQ.isError || catalogoQ.isError;
+  const refetch = () => Promise.all([sessaoQ.refetch(), catalogoQ.refetch()]);
   const [lembrar, setLembrar] = useState(() => !trocar && setorLembrado() !== null);
   const idLembrar = useId();
 
-  const destino = sessao
-    ? destinoAposLogin(sessao.setores, CHAVES_DISPONIVEIS, trocar ? null : setorLembrado())
-    : null;
-  const direto = destino?.tipo === "direto" ? setorPorChave(destino.setor) : undefined;
+  const destino =
+    sessao && catalogo
+      ? destinoAposLogin(sessao.setores, catalogo.chaves, trocar ? null : setorLembrado())
+      : null;
+  const direto = destino?.tipo === "direto" ? catalogo?.porChave(destino.setor) : undefined;
 
   useEffect(() => {
     if (direto) void navigate({ to: direto.rotaInicial, replace: true });
   }, [direto, navigate]);
 
-  function entrar(s: Setor) {
+  function entrar(s: SetorTela) {
     lembrarSetor(lembrar ? s.chave : null);
     void navigate({ to: s.rotaInicial });
   }
@@ -104,7 +110,7 @@ function TelaSetores() {
         </div>
         <ul className="cascata grid gap-3 sm:grid-cols-2" aria-label="Setores liberados">
           {destino.setores.map((chave) => {
-            const s = setorPorChave(chave)!;
+            const s = catalogo!.porChave(chave)!;
             return (
               <li key={chave}>
                 <button
