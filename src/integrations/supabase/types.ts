@@ -1507,6 +1507,7 @@ export type Database = {
       }
       usuarios: {
         Row: {
+          acesso_total: boolean
           apelido_copiloto: string
           ativo: boolean
           auth_user_id: string | null
@@ -1525,6 +1526,7 @@ export type Database = {
           tema: string
         }
         Insert: {
+          acesso_total?: boolean
           apelido_copiloto?: string
           ativo?: boolean
           auth_user_id?: string | null
@@ -1543,6 +1545,7 @@ export type Database = {
           tema?: string
         }
         Update: {
+          acesso_total?: boolean
           apelido_copiloto?: string
           ativo?: boolean
           auth_user_id?: string | null
@@ -1650,6 +1653,7 @@ export type Database = {
       admin_atualizar_usuario: {
         Args: { _dados: Json; _usuario_id: string }
         Returns: {
+          acesso_total: boolean
           apelido_copiloto: string
           ativo: boolean
           auth_user_id: string | null
@@ -1727,6 +1731,34 @@ export type Database = {
       copiar_feriados_para_ano: {
         Args: { _ano_destino: number; _ano_origem: number }
         Returns: Json
+      }
+      definir_acesso_total: {
+        Args: { _acesso_total: boolean; _usuario_id: string }
+        Returns: {
+          acesso_total: boolean
+          apelido_copiloto: string
+          ativo: boolean
+          auth_user_id: string | null
+          copiloto_minimizado: boolean
+          created_at: string
+          demo: boolean
+          email: string | null
+          empresa_id: string | null
+          equipe_id: string | null
+          id: string
+          nome: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          perfil: Database["public"]["Enums"]["app_role"]
+          pinguim_versao: string
+          pode_publicar_avisos: boolean
+          tema: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "usuarios"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       eh_admin: { Args: never; Returns: boolean }
       ficha_cliente: {

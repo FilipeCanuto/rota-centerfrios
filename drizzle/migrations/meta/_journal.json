@@ -176,6 +176,13 @@
       "when": 1794673667851,
       "tag": "0024_setores_editaveis_enquadramento_midia",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794674472931,
+      "tag": "0025_acesso_total",
+      "breakpoints": true
     }
   ]
 }
