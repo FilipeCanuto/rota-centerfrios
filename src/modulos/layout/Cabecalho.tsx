@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, LogOut, Monitor, Moon, Sun, Users } from "lucide-react";
+import { ArrowLeftRight, Bell, LogOut, Monitor, Moon, Settings, Sun, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,7 +34,10 @@ import { useTema, type Tema } from "@/design-system/tema";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotificacoes } from "@/modulos/notificacoes/dados";
 import { podeVerAmbas, useEmpresa, useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
+import { ABA_PADRAO } from "@/modulos/configuracoes/abas";
+import { CHAVES_DISPONIVEIS } from "@/modulos/setores/setores";
 import { BuscaGlobal } from "./BuscaGlobal";
+import { podeConfigurar } from "./navegacao";
 import { useCoberturaCabecalho } from "./dados";
 
 export function Cabecalho() {
@@ -164,6 +167,24 @@ export function Cabecalho() {
             <DropdownMenuContent align="end" className="w-60">
               <DropdownMenuLabel>{sessao?.usuario?.nome ?? "Usuário"}</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {sessao &&
+                sessao.setores.filter((s) => CHAVES_DISPONIVEIS.includes(s)).length > 1 && (
+                  <DropdownMenuItem asChild className="min-h-11">
+                    <Link to="/setores" search={{ trocar: true }}>
+                      <ArrowLeftRight aria-hidden="true" /> Trocar de setor
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+              {sessao && podeConfigurar(sessao.papeis) && (
+                <DropdownMenuItem asChild className="min-h-11">
+                  <Link to="/configuracoes" search={{ aba: ABA_PADRAO }}>
+                    <Settings aria-hidden="true" /> Configurações
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {sessao &&
+                (sessao.setores.filter((s) => CHAVES_DISPONIVEIS.includes(s)).length > 1 ||
+                  podeConfigurar(sessao.papeis)) && <DropdownMenuSeparator />}
               {sessao && sessao.empresas.length > 1 && (
                 <>
                   <DropdownMenuLabel className="text-xs text-muted-foreground sm:hidden">

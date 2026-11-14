@@ -159,16 +159,16 @@ test("Configurações: só administrador; aba Mídia do login lista, valida, ord
   await expect(lista.getByRole("listitem")).toHaveCount(2);
 });
 
-test("Configurações recusa quem não é administrador", async ({ page }) => {
-  await simularBackend(page);
+test("Configurações recusa quem não é administrador nem diretoria", async ({ page }) => {
+  await simularBackend(page, { user_roles: [{ role: "vendedor" }] });
   await page.goto("/configuracoes");
-  await expect(page.getByText("Só administradores acessam as configurações")).toBeVisible();
+  await expect(page.getByText("Só administradores e diretoria acessam")).toBeVisible();
   await expect(page.getByRole("tab")).toHaveCount(0);
 });
 
 test("Mais mostra o atalho Configurações só para administrador", async ({ page }) => {
   await simularBackend(page, { user_roles: ADMIN });
   await page.goto("/mais");
-  await page.getByRole("link", { name: "Configurações" }).click();
+  await page.locator("main").getByRole("link", { name: "Configurações" }).click();
   await expect(page).toHaveURL(/\/configuracoes\?aba=midia-login/);
 });

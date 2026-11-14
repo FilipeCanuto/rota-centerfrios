@@ -97,7 +97,9 @@ function CriarSenha() {
     return (
       <TransicaoEntrada
         nome={entrando.nome}
-        aoTerminar={() => void navigate({ to: "/inicio", replace: true })}
+        aoTerminar={() =>
+          void navigate({ to: "/setores", search: { trocar: false }, replace: true })
+        }
       />
     );
 

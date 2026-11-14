@@ -1,6 +1,7 @@
-import { ImageIcon, type LucideIcon } from "lucide-react";
+import { ImageIcon, UserCog, type LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
 import MidiaLoginAba from "./MidiaLoginAba";
+import UsuariosAba from "./UsuariosAba";
 
 export interface AbaConfiguracao {
   id: string;
@@ -19,6 +20,12 @@ export const ABAS_CONFIGURACAO: AbaConfiguracao[] = [
     rotulo: "Mídia do login",
     icone: ImageIcon,
     Componente: MidiaLoginAba,
+  },
+  {
+    id: "usuarios",
+    rotulo: "Usuários e acessos",
+    icone: UserCog,
+    Componente: UsuariosAba,
   },
 ];
 

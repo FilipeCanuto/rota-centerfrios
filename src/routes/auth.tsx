@@ -105,7 +105,7 @@ function Entrar() {
   useEffect(() => {
     // Já tem sessão neste aparelho: vai direto, sem animação.
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/inicio", replace: true });
+      if (data.user) navigate({ to: "/setores", search: { trocar: false }, replace: true });
     });
     const { data } = supabase.auth.onAuthStateChange((e, s) => {
       if (e !== "SIGNED_IN" || !s) return;
@@ -165,7 +165,9 @@ function Entrar() {
     return (
       <TransicaoEntrada
         nome={entrando.nome}
-        aoTerminar={() => void navigate({ to: "/inicio", replace: true })}
+        aoTerminar={() =>
+          void navigate({ to: "/setores", search: { trocar: false }, replace: true })
+        }
       />
     );
 
