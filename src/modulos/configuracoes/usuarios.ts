@@ -21,6 +21,8 @@ export interface UsuarioAcessos {
   temLogin: boolean;
   ativo: boolean;
   pode_publicar_avisos: boolean;
+  /** Só leitura: alterado apenas pela função de servidor `definir_acesso_total`. */
+  acesso_total: boolean;
   papeis: string[];
   empresas: string[];
   setores: string[];
@@ -43,7 +45,7 @@ export function useUsuariosAcessos() {
         lista(
           bd
             .from("usuarios")
-            .select("id,nome,email,auth_user_id,ativo,pode_publicar_avisos")
+            .select("id,nome,email,auth_user_id,ativo,pode_publicar_avisos,acesso_total")
             .eq("demo", false)
             .order("nome"),
         ),
@@ -61,6 +63,7 @@ export function useUsuariosAcessos() {
         temLogin: u["auth_user_id"] != null,
         ativo: u["ativo"] !== false,
         pode_publicar_avisos: u["pode_publicar_avisos"] === true,
+        acesso_total: u["acesso_total"] === true,
         papeis:
           u["auth_user_id"] != null
             ? de(roles, "user_id", "role", u["auth_user_id"])

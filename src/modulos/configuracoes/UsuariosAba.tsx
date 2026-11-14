@@ -57,6 +57,7 @@ export default function UsuariosAba() {
                 {u.setores.map((s) => setorPorChave(s)?.nome ?? s).join(", ") || "Sem setor"}
               </span>
             </div>
+            {u.acesso_total && <SeloStatus tom="conquista">Acesso total</SeloStatus>}
             {!u.ativo ? (
               <SeloStatus tom="perigo">Inativa</SeloStatus>
             ) : u.temLogin ? (
@@ -95,7 +96,9 @@ export default function UsuariosAba() {
               {editando ? `Acessos de ${editando.nome}` : "Pré-cadastrar usuário"}
             </DialogTitle>
             <DialogDescription>
-              {editando
+              {editando?.acesso_total
+                ? "Esta conta tem acesso total: entra em todos os setores, inclusive os novos. Essa marca não é alterada por aqui."
+                : editando
                 ? "Marque pelo menos um setor. A pessoa só entra nos setores marcados."
                 : "A pessoa entra com o e-mail da empresa pelo “Primeiro acesso”."}
             </DialogDescription>
