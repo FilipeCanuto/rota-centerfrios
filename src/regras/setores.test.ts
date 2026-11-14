@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { destinoAposLogin, setorDaRota, validarAcessos } from "./setores";
+import {
+  chaveDoSetor,
+  chavesDisponiveis,
+  destinoAposLogin,
+  setorDaRota,
+  validarAcessos,
+  validarSetor,
+} from "./setores";
 
 describe("destinoAposLogin", () => {
   const disp = ["comercial", "rh"];
@@ -55,4 +62,29 @@ describe("validarAcessos", () => {
     expect(validarAcessos({ ...ok, setores: [] })?.campo).toBe("setores"));
   it("recusa e-mail de fora da empresa", () =>
     expect(validarAcessos({ ...ok, email: "ana@gmail.com" })?.campo).toBe("email"));
+});
+
+describe("catálogo de setores", () => {
+  const l = (chave: string, ativo: boolean, disponivel: boolean) => ({
+    chave,
+    nome: chave,
+    icone: null,
+    ativo,
+    disponivel,
+  });
+  it("só entra setor ativo, disponível e com módulo no código", () => {
+    const linhas = [
+      l("comercial", true, true),
+      l("rh", true, false),
+      l("fiscal", true, true),
+      l("x", false, true),
+    ];
+    expect(chavesDisponiveis(linhas, ["comercial", "x"])).toEqual(["comercial"]);
+  });
+  it("gera a chave sem acento e valida", () => {
+    expect(chaveDoSetor("Logística Sul")).toBe("logistica_sul");
+    expect(validarSetor("Logística Sul", "logistica_sul")).toBeNull();
+    expect(validarSetor("A", "a")).not.toBeNull();
+    expect(validarSetor("123", chaveDoSetor("123"))).not.toBeNull();
+  });
 });

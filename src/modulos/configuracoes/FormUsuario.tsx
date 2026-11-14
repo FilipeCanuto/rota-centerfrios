@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAnunciar } from "@/design-system/Anunciador";
 import { useSessao } from "@/modulos/sessao/sessao";
-import { CHAVES_DISPONIVEIS, SETORES_DISPONIVEIS } from "@/modulos/setores/setores";
+import { useCatalogo } from "@/modulos/setores/setores";
 import { validarAcessos } from "@/regras";
 import { PAPEIS, useSalvarUsuario, type UsuarioAcessos } from "./usuarios";
 
@@ -63,6 +63,9 @@ export function FormUsuario({
 }) {
   const id = useId();
   const { data: sessao } = useSessao();
+  const { data: catalogo } = useCatalogo();
+  // Todo setor ativo pode receber acesso; só os "disponíveis" aparecem no login (ver docs/setores.md).
+  const ativas = (catalogo?.linhas ?? []).filter((l) => l.ativo);
   const salvar = useSalvarUsuario();
   const anunciar = useAnunciar();
   const [nome, setNome] = useState(usuario?.nome ?? "");
@@ -70,10 +73,8 @@ export function FormUsuario({
   const [papeis, setPapeis] = useState(usuario?.papeis ?? ["vendedor"]);
   const [empresas, setEmpresas] = useState(usuario?.empresas ?? []);
   // Setores indisponíveis não aparecem, mas continuam gravados como estavam.
-  const ocultos = (usuario?.setores ?? []).filter((s) => !CHAVES_DISPONIVEIS.includes(s));
-  const [setores, setSetores] = useState(
-    (usuario?.setores ?? ["comercial"]).filter((s) => CHAVES_DISPONIVEIS.includes(s)),
-  );
+  const ocultos = (usuario?.setores ?? []).filter((s) => !ativas.some((a) => a.chave === s));
+  const [setores, setSetores] = useState(usuario?.setores ?? ["comercial"]);
   const [avisos, setAvisos] = useState(usuario?.pode_publicar_avisos ?? false);
   const [ativo, setAtivo] = useState(usuario?.ativo ?? true);
   const [erro, setErro] = useState<{ campo: string; mensagem: string } | null>(null);
@@ -87,7 +88,7 @@ export function FormUsuario({
     try {
       await salvar.mutateAsync({
         ...form,
-        setores: [...setores, ...ocultos],
+        setores: [...setores.filter((s) => ativas.some((a) => a.chave === s)), ...ocultos],
         id: usuario?.id ?? null,
         ativo,
         pode_publicar_avisos: avisos,
@@ -151,7 +152,7 @@ export function FormUsuario({
       <Caixas
         id={`${id}-setores`}
         legenda="Setores liberados"
-        opcoes={SETORES_DISPONIVEIS.map((s) => ({ valor: s.chave, rotulo: s.nome }))}
+        opcoes={ativas.map((l) => ({ valor: l.chave, rotulo: l.nome }))}
         marcados={setores}
         erro={msg("setores")}
         aoMudar={setSetores}

@@ -3,7 +3,7 @@ import { levarLinkDeRecuperacao } from "@/modulos/sessao/recuperacao";
 import { supabase } from "@/integrations/supabase/client";
 import { Estrutura } from "@/modulos/layout/Estrutura";
 import { consultaSessao } from "@/modulos/sessao/sessao";
-import { CHAVES_DISPONIVEIS, ROTAS_POR_SETOR } from "@/modulos/setores/setores";
+import { consultaCatalogo, ROTAS_POR_SETOR } from "@/modulos/setores/setores";
 import { setorDaRota } from "@/regras";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -15,8 +15,11 @@ export const Route = createFileRoute("/_authenticated")({
     // Guarda única por setor. É só navegação: quem decide o acesso aos dados é o banco (tem_setor).
     const setor = setorDaRota(location.pathname, ROTAS_POR_SETOR);
     if (!setor) return;
-    const sessao = await context.queryClient.ensureQueryData(consultaSessao);
-    if (!CHAVES_DISPONIVEIS.includes(setor) || !sessao?.setores.includes(setor))
+    const [sessao, catalogo] = await Promise.all([
+      context.queryClient.ensureQueryData(consultaSessao),
+      context.queryClient.ensureQueryData(consultaCatalogo),
+    ]);
+    if (!catalogo.chaves.includes(setor) || !sessao?.setores.includes(setor))
       throw redirect({ to: "/setores", search: { trocar: false } });
   },
   component: Estrutura,

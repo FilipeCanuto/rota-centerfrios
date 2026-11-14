@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { validarArquivoMidia, type TipoMidia } from "@/regras";
+import { validarArquivoMidia, type Enquadramento, type TipoMidia } from "@/regras";
 
 // Ver nota em modulos/avisos/dados.ts sobre o `bd` sem tipos.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,6 +14,10 @@ export interface MidiaLogin {
   texto_alternativo: string;
   ordem: number;
   ativo: boolean;
+  enquadramento: Enquadramento;
+  /** Ponto de foco (0–100) do modo "preencher". */
+  foco_x: number;
+  foco_y: number;
   criado_por: string | null;
   created_at: string;
   updated_at: string;
@@ -44,6 +48,9 @@ export interface MidiaLoginForm {
   texto_alternativo: string;
   ordem: number;
   ativo: boolean;
+  enquadramento?: Enquadramento | undefined;
+  foco_x?: number | undefined;
+  foco_y?: number | undefined;
   arquivo?: File | undefined;
   arquivo_path?: string | undefined;
   tipo?: TipoMidia | undefined;
@@ -69,6 +76,9 @@ export function useSalvarMidiaLogin() {
         texto_alternativo: f.texto_alternativo,
         ordem: f.ordem,
         ativo: f.ativo,
+        enquadramento: f.enquadramento ?? "preencher",
+        foco_x: f.foco_x ?? 50,
+        foco_y: f.foco_y ?? 50,
       };
       const r = f.id
         ? await bd.from("midia_login").update(campos).eq("id", f.id)

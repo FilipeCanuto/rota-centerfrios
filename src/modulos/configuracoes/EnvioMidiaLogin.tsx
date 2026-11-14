@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAnunciar } from "@/design-system/Anunciador";
-import { MIMES_ACEITOS, validarArquivoMidia } from "@/regras";
+import { MIMES_ACEITOS, RECOMENDACAO_MIDIA, validarArquivoMidia } from "@/regras";
 import { useSalvarMidiaLogin } from "./midiaLogin";
 
 /** Envio de um arquivo novo: valida formato e peso antes de subir (o servidor confere de novo). */
@@ -68,9 +68,10 @@ export function EnvioMidiaLogin({ proximaOrdem }: { proximaOrdem: number }) {
           onChange={(e) => escolher(e.target.files?.[0])}
         />
         <p id={`${id}-dica`} className="text-sm text-muted-foreground">
-          JPG, PNG, WebP, AVIF, GIF, MP4 ou WebM. Imagem e GIF até 5 MB; vídeo até 25 MB. Prefira
-          proporção 16:10 ou 16:9 (1920 × 1200 ou 1920 × 1080). Dica: comprima imagens (WebP/AVIF) e
-          use vídeos curtos, sem som, de até 10 s em loop.
+          JPG, PNG, WebP, AVIF, GIF, MP4 ou WebM. Imagem e GIF até 5 MB; vídeo até 25 MB. No desktop
+          o palco é quase quadrado; no tablet e no celular é uma faixa larga (veja as proporções
+          reais na prévia). Recomendado: imagem {RECOMENDACAO_MIDIA.imagem}; vídeo{" "}
+          {RECOMENDACAO_MIDIA.video}. Deixe o assunto no centro e ajuste depois em “Enquadrar”.
         </p>
       </div>
       <div className="grid gap-1.5">

@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { SeloStatus } from "@/design-system/SeloStatus";
-import { setorPorChave } from "@/modulos/setores/setores";
+import { useCatalogo } from "@/modulos/setores/setores";
 import { FormUsuario } from "./FormUsuario";
 import { PAPEIS, useUsuariosAcessos, type UsuarioAcessos } from "./usuarios";
 
@@ -20,6 +20,8 @@ const rotuloPapel = (p: string) => PAPEIS.find((x) => x.valor === p)?.rotulo ?? 
 
 export default function UsuariosAba() {
   const { data, isLoading, isError, refetch, isFetching } = useUsuariosAcessos();
+  const { data: catalogo } = useCatalogo();
+  const nomeSetor = (c: string) => catalogo?.linhas.find((l) => l.chave === c)?.nome ?? c;
   // undefined = fechado; null = pré-cadastro; usuário = edição.
   const [editando, setEditando] = useState<UsuarioAcessos | null | undefined>(undefined);
 
@@ -54,7 +56,7 @@ export default function UsuariosAba() {
               </span>
               <span className="text-sm">
                 {u.papeis.map(rotuloPapel).join(", ") || "Sem papel"} ·{" "}
-                {u.setores.map((s) => setorPorChave(s)?.nome ?? s).join(", ") || "Sem setor"}
+                {u.setores.map((s) => nomeSetor(s)).join(", ") || "Sem setor"}
               </span>
             </div>
             {u.acesso_total && <SeloStatus tom="conquista">Acesso total</SeloStatus>}
