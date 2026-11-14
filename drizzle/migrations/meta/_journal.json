@@ -183,6 +183,13 @@
       "when": 1794674472931,
       "tag": "0025_acesso_total",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794674715375,
+      "tag": "0026_setores_leitura_usuario_vinculado",
+      "breakpoints": true
     }
   ]
 }
