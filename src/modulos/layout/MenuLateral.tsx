@@ -12,12 +12,18 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/design-system/Logo";
 import { Mascote } from "@/design-system/Mascote";
-import { DESTINOS } from "./navegacao";
+import { Settings } from "lucide-react";
+import { ABA_PADRAO } from "@/modulos/configuracoes/abas";
+import { useSessao } from "@/modulos/sessao/sessao";
+import { DESTINOS, podeConfigurar } from "./navegacao";
 
 export function MenuLateral() {
   const { state } = useSidebar();
   const recolhido = state === "collapsed";
   const caminho = useRouterState({ select: (r) => r.location.pathname });
+  const { data: sessao } = useSessao();
+  const configurar = sessao && podeConfigurar(sessao.papeis);
+  const emConfiguracoes = caminho === "/configuracoes";
   return (
     <Sidebar collapsible="icon" className="hidden md:flex">
       <SidebarHeader className="h-16 justify-center px-3">
@@ -46,6 +52,25 @@ export function MenuLateral() {
                     </SidebarMenuItem>
                   );
                 })}
+                {configurar && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={emConfiguracoes}
+                      tooltip="Configurações"
+                      className="pressionar min-h-11 text-[0.9375rem]"
+                    >
+                      <Link
+                        to="/configuracoes"
+                        search={{ aba: ABA_PADRAO }}
+                        aria-current={emConfiguracoes ? "page" : undefined}
+                      >
+                        <Settings aria-hidden="true" />
+                        <span>Configurações</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </nav>
           </SidebarGroupContent>

@@ -21,6 +21,8 @@ export default defineConfig({
     command: "npx -y bun@1.3.4 x vite dev --port 5173 --strictPort",
     url: "http://localhost:5173/auth",
     reuseExistingServer: true,
+    // Liga o setor RH só nos testes, para exercitar o seletor com dois setores.
+    env: { VITE_SETORES_PREVIA: "rh" },
     timeout: 120_000,
   },
 });

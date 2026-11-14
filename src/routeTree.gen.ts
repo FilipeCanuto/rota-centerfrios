@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as SetoresRouteImport } from './routes/setores'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedConversasRouteImport } from './routes/_authenticated/conversas'
 import { Route as AuthenticatedGamificacaoRouteImport } from './routes/_authenticated/gamificacao'
@@ -51,6 +52,11 @@ const DesignSystemRoute = DesignSystemRouteImport.update({
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetoresRoute = SetoresRouteImport.update({
+  id: '/setores',
+  path: '/setores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/setores': typeof SetoresRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/gamificacao': typeof AuthenticatedGamificacaoRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/setores': typeof SetoresRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/conversas': typeof AuthenticatedConversasRoute
   '/gamificacao': typeof AuthenticatedGamificacaoRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/design-system': typeof DesignSystemRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/setores': typeof SetoresRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/conversas': typeof AuthenticatedConversasRoute
   '/_authenticated/gamificacao': typeof AuthenticatedGamificacaoRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/redefinir-senha'
+    | '/setores'
     | '/agenda'
     | '/conversas'
     | '/gamificacao'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/redefinir-senha'
+    | '/setores'
     | '/agenda'
     | '/conversas'
     | '/gamificacao'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/design-system'
     | '/redefinir-senha'
+    | '/setores'
     | '/_authenticated/agenda'
     | '/_authenticated/conversas'
     | '/_authenticated/gamificacao'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DesignSystemRoute: typeof DesignSystemRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  SetoresRoute: typeof SetoresRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/redefinir-senha'
       fullPath: '/redefinir-senha'
       preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setores': {
+      id: '/setores'
+      path: '/setores'
+      fullPath: '/setores'
+      preLoaderRoute: typeof SetoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/agenda': {
@@ -447,6 +467,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DesignSystemRoute: DesignSystemRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  SetoresRoute: SetoresRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

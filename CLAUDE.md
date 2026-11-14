@@ -27,6 +27,7 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - Pontos e selos só são gravados por funções do banco; o app nunca escreve em `pontos` ou `selos`.
 - O vendedor só altera colunas liberadas por permissão de coluna (ex.: orçamentos: `ultimo_followup`, `proximo_followup`, `observacao`).
 - Avisos e mídia do login: "Pode publicar avisos" (`usuarios.pode_publicar_avisos`, padrão desligada) só o administrador altera, pela função `admin_atualizar_usuario`; a checagem é do banco (`pode_publicar_avisos()`), a tela só esconde botões. Mídia do login é só do administrador. Arquivos: JPG, PNG, WebP, AVIF, GIF, MP4, WebM; 5 MB imagem/GIF e 25 MB vídeo (`src/regras/midia.ts`, repetido no servidor). Texto alternativo é obrigatório.
+- Setores: acesso = papel **e** setor. Registro em `src/modulos/setores/setores.ts`, guarda única no `beforeLoad` de `src/routes/_authenticated/route.tsx`, seletor em `/setores`; no banco, `tem_setor()` em políticas RESTRICTIVE. Tela nova de um setor entra nos prefixos `rotas` do setor. Setor novo em 3 passos: [docs/setores.md](docs/setores.md).
 - Dado de cliente não vai para endereço (URL), log nem serviço externo.
 - Mascote: as telas só emitem eventos por `useMascote()` (`notificar`, `definirEstado`) e nunca importam o desenho. Contrato e como adicionar estado, mensagem e evento em [docs/mascote.md](docs/mascote.md).
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).

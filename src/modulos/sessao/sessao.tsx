@@ -18,12 +18,29 @@ export interface Sessao {
   } | null;
   papeis: Perfil[];
   empresas: { id: string; nome: string }[];
+  /** Setores liberados e ativos (o banco também confere cada acesso por `tem_setor`). */
+  setores: string[];
+}
+
+// shortcut: `meus_setores` não está nos tipos gerados até a mensagem 18 do Lovable; depois, tirar o cast.
+const bd = supabase as unknown as {
+  rpc: (
+    f: "meus_setores",
+  ) => PromiseLike<{ data: string[] | null; error: { code?: string } | null }>;
+};
+
+async function carregarSetores(): Promise<string[]> {
+  const { data, error } = await bd.rpc("meus_setores");
+  // shortcut: antes da migração 18 a função não existe e todos seguem no Comercial; apagar depois.
+  if (error?.code === "PGRST202") return ["comercial"];
+  if (error) throw error;
+  return data ?? [];
 }
 
 async function carregarSessao(): Promise<Sessao | null> {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user) return null;
-  const [{ data: usuario }, { data: papeis }, { data: empresas }] = await Promise.all([
+  const [{ data: usuario }, { data: papeis }, { data: empresas }, setores] = await Promise.all([
     supabase
       .from("usuarios")
       .select("id,nome,apelido_copiloto,pinguim_versao,copiloto_minimizado,tema,demo")
@@ -31,12 +48,14 @@ async function carregarSessao(): Promise<Sessao | null> {
       .maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", u.user.id),
     supabase.from("empresas").select("id,nome").order("created_at"),
+    carregarSetores(),
   ]);
   return {
     authId: u.user.id,
     usuario: (usuario as Sessao["usuario"]) ?? null,
     papeis: (papeis ?? []).map((p) => p.role as Perfil),
     empresas: empresas ?? [],
+    setores,
   };
 }
 

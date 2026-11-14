@@ -25,7 +25,7 @@ export const Route = createFileRoute("/")({
   beforeLoad: async () => {
     levarLinkDeRecuperacao("/");
     const { data } = await supabase.auth.getUser();
-    throw redirect({ to: data.user ? "/inicio" : "/auth" });
+    throw redirect({ to: data.user ? "/setores" : "/auth" });
   },
   component: () => null,
 });

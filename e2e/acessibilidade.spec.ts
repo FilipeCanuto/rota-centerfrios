@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { CLIENTE_ID, simularBackend } from "./simulacao";
+import { CLIENTE_ID, simularBackend, USUARIO_ID } from "./simulacao";
 
 /** Todas as telas, verificadas com axe (WCAG 2.2 AA) em cada projeto (celular/desktop × claro/escuro). */
 const ROTAS: { url: string; titulo: string; logado: boolean; extras?: Record<string, unknown> }[] =
@@ -28,6 +28,27 @@ const ROTAS: { url: string; titulo: string; logado: boolean; extras?: Record<str
       extras: { user_roles: [{ role: "administrador" }], midia_login: [] },
     },
     { url: "/configuracoes/feriados", titulo: "Feriados e dias sem expediente", logado: true },
+    {
+      url: "/configuracoes?aba=usuarios",
+      titulo: "Configurações",
+      logado: true,
+      extras: {
+        user_roles: [{ role: "administrador" }],
+        usuario_setores: [{ usuario_id: USUARIO_ID, setor: "comercial" }],
+      },
+    },
+    {
+      url: "/setores?caso=escolher",
+      titulo: "Escolha o setor",
+      logado: true,
+      extras: { "rpc/meus_setores": ["comercial", "rh"] },
+    },
+    {
+      url: "/setores?caso=sem-acesso",
+      titulo: "Sem acesso liberado",
+      logado: true,
+      extras: { "rpc/meus_setores": [] },
+    },
   ];
 
 /** Roda o axe na página como está agora e falha listando o que encontrou. */

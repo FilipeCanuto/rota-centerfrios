@@ -2,6 +2,11 @@
 
 Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada etapa.
 
+## Situação em 14/11/2026
+
+- Mensagens 10 a 16 aplicadas (migrações até 0022). 17 e 18 com texto pronto, a enviar.
+- Setores de acesso no ramo `feat/setores-acesso`: [setores.md](setores.md).
+
 ## Situação em 11/11/2026
 
 - Passo 2 (regras de negócio) no `main` (PR #1). Etapa 1 no `main` (PR #2).
@@ -31,6 +36,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
 | 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
 | — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída (aguarda PR); contrato em `docs/mascote.md`. Falta comparar a arte com a imagem de referência |
+| — | Setores de acesso: seletor depois do login, guarda de rota única, aba Usuários e acessos, Configurações no menu lateral e no avatar | `feat/setores-acesso` | Concluída no app (aguarda PR e a mensagem 18) |
 | — | Login em duas colunas (palco de mídia) e Configurações com abas (Mídia do login) | `feat/login-configuracoes` | Concluída (aguarda PR); relatório em [relatorio-login-configuracoes.md](relatorio-login-configuracoes.md). Próxima aba: Avisos (uma linha em `src/modulos/configuracoes/abas.tsx`) |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
@@ -42,8 +48,9 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 13 | Links e arquivos (empresa nula, arquivo, bucket `arquivos`) | Aplicada (0016) |
 | 14 | Gamificação (pesos, pontos por função, selos, ranking, Instagram) | Aplicada (0017) |
 | 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
-| 16 | Avisos, mídia do login e permissão "Pode publicar avisos" (`pode_publicar_avisos`, tabelas `avisos` e `midia_login`, buckets `avisos` e `midia-login`) | **Texto pronto, ainda não enviado ao Lovable.** Código em `src/modulos/avisos/dados.ts` e `src/modulos/configuracoes/midiaLogin.ts` só funciona depois da migração; telas e o interruptor na gestão de usuários (hoje não há tela de usuários) ficam para os próximos passos |
+| 16 | Avisos, mídia do login e permissão "Pode publicar avisos" | Aplicada (0021, 0022). A permissão já pode ser ligada na aba Usuários e acessos |
 | 17 | Mascote (4 chaves `mascote_*` em `configuracoes_regras`) | **Texto pronto, ainda não enviado ao Lovable.** Sem a migração o app usa a reserva de `REGRAS_PADRAO` |
+| 18 | Setores e acesso (`usuario_setores`, `tem_setor`, `meus_setores`, políticas RESTRICTIVE do Comercial, `usuarios.ativo`, `admin_pre_cadastrar`, `admin_salvar_acessos`) | **Texto pronto, ainda não enviado.** Antes dela todos seguem no Comercial e a aba Usuários e acessos mostra erro ao carregar |
 
 ## Decisões tomadas nesta fase
 

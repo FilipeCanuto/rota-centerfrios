@@ -14,3 +14,4 @@ export * from "./planilha";
 export * from "./importacao";
 export * from "./midia";
 export * from "./mascote";
+export * from "./setores";

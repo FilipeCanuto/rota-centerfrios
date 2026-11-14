@@ -7,3 +7,7 @@ export const DESTINOS = [
   { titulo: "Agenda", url: "/agenda", icone: CalendarDays },
   { titulo: "Mais", url: "/mais", icone: MoreHorizontal },
 ] as const;
+
+/** Configurações aparece para administrador (todas as abas) e diretoria (Feriados e Importação). */
+export const podeConfigurar = (papeis: readonly string[]) =>
+  papeis.includes("administrador") || papeis.includes("diretoria");

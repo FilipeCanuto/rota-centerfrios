@@ -203,6 +203,7 @@ export async function simularBackend(
     ],
     configuracoes_regras: [],
     feriados: FERIADOS,
+    "rpc/meus_setores": ["comercial"],
     "rpc/painel_vendedor": PAINEL,
     clientes: CLIENTES_LISTA,
     "rpc/ficha_cliente": FICHA,
