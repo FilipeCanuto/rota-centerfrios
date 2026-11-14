@@ -1411,9 +1411,65 @@ export type Database = {
           },
         ]
       }
+      usuario_setores: {
+        Row: {
+          ativo: boolean
+          empresa_id: string | null
+          id: string
+          liberado_em: string
+          liberado_por: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          setor: string
+          usuario_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          empresa_id?: string | null
+          id?: string
+          liberado_em?: string
+          liberado_por?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          setor: string
+          usuario_id: string
+        }
+        Update: {
+          ativo?: boolean
+          empresa_id?: string | null
+          id?: string
+          liberado_em?: string
+          liberado_por?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          setor?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_setores_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_setores_liberado_por_fkey"
+            columns: ["liberado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_setores_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usuarios: {
         Row: {
           apelido_copiloto: string
+          ativo: boolean
           auth_user_id: string | null
           copiloto_minimizado: boolean
           created_at: string
@@ -1431,6 +1487,7 @@ export type Database = {
         }
         Insert: {
           apelido_copiloto?: string
+          ativo?: boolean
           auth_user_id?: string | null
           copiloto_minimizado?: boolean
           created_at?: string
@@ -1448,6 +1505,7 @@ export type Database = {
         }
         Update: {
           apelido_copiloto?: string
+          ativo?: boolean
           auth_user_id?: string | null
           copiloto_minimizado?: boolean
           created_at?: string
@@ -1550,6 +1608,7 @@ export type Database = {
         Args: { _dados: Json; _usuario_id: string }
         Returns: {
           apelido_copiloto: string
+          ativo: boolean
           auth_user_id: string | null
           copiloto_minimizado: boolean
           created_at: string
@@ -1571,6 +1630,26 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_pre_cadastrar: {
+        Args: {
+          _email: string
+          _empresas: string[]
+          _nome: string
+          _papeis: Database["public"]["Enums"]["app_role"][]
+          _pode_publicar_avisos?: boolean
+          _setores: string[]
+        }
+        Returns: string
+      }
+      admin_salvar_acessos: {
+        Args: {
+          _empresas: string[]
+          _papeis: Database["public"]["Enums"]["app_role"][]
+          _setores: string[]
+          _usuario_id: string
+        }
+        Returns: undefined
       }
       apagar_dados_demo: { Args: never; Returns: Json }
       atualizar_selos: {
@@ -1673,6 +1752,7 @@ export type Database = {
         Returns: Json
       }
       meu_usuario_id: { Args: never; Returns: string }
+      meus_setores: { Args: never; Returns: string[] }
       midia_arquivo_valido: {
         Args: { _metadata: Json; _nome: string }
         Returns: boolean
@@ -1708,6 +1788,9 @@ export type Database = {
         Returns: undefined
       }
       tem_empresa: { Args: { _empresa_id: string }; Returns: boolean }
+      tem_setor:
+        | { Args: { _setor: string }; Returns: boolean }
+        | { Args: { _setor: string; _usuario_id: string }; Returns: boolean }
       validar_post_instagram: {
         Args: { _aprovar: boolean; _motivo: string; _post_id: string }
         Returns: {

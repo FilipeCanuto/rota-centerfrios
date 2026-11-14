@@ -162,6 +162,13 @@
       "when": 1794602197256,
       "tag": "0022_restringir_leitura_avisos",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794667542579,
+      "tag": "0023_setores_acesso",
+      "breakpoints": true
     }
   ]
 }
