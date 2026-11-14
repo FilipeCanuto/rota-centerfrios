@@ -721,6 +721,9 @@ export type Database = {
           ativo: boolean
           created_at: string
           criado_por: string | null
+          enquadramento: string
+          foco_x: number
+          foco_y: number
           id: string
           ordem: number
           texto_alternativo: string
@@ -732,6 +735,9 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           criado_por?: string | null
+          enquadramento?: string
+          foco_x?: number
+          foco_y?: number
           id?: string
           ordem?: number
           texto_alternativo: string
@@ -743,6 +749,9 @@ export type Database = {
           ativo?: boolean
           created_at?: string
           criado_por?: string | null
+          enquadramento?: string
+          foco_x?: number
+          foco_y?: number
           id?: string
           ordem?: number
           texto_alternativo?: string
@@ -1264,6 +1273,36 @@ export type Database = {
           },
         ]
       }
+      setores: {
+        Row: {
+          ativo: boolean
+          chave: string
+          created_at: string
+          disponivel: boolean
+          icone: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          chave: string
+          created_at?: string
+          disponivel?: boolean
+          icone?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          chave?: string
+          created_at?: string
+          disponivel?: boolean
+          icone?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tarefas_agenda: {
         Row: {
           cliente_id: string | null
@@ -1604,6 +1643,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_atualizar_setor: {
+        Args: { _chave: string; _dados: Json }
+        Returns: undefined
+      }
       admin_atualizar_usuario: {
         Args: { _dados: Json; _usuario_id: string }
         Returns: {
@@ -1630,6 +1673,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_criar_setor: {
+        Args: { _chave: string; _icone?: string; _nome: string }
+        Returns: undefined
       }
       admin_pre_cadastrar: {
         Args: {
