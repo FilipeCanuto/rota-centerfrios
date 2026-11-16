@@ -17,6 +17,8 @@ export interface ConfiguracaoRegras {
   /** Expediente (hora cheia, fuso de Maceió): fora dele o mascote descansa e não fala. */
   expediente_inicio_hora: number;
   expediente_fim_hora: number;
+  /** Carrinho: máximo de carrinhos abertos por vendedor (o banco aplica o mesmo valor). */
+  carrinho_max_abertos: number;
 }
 
 /** Reserva usada só quando a empresa não tem a chave cadastrada. */
@@ -34,6 +36,7 @@ export const REGRAS_PADRAO: ConfiguracaoRegras = {
   mascote_incentivo_atingimento: 0.7,
   expediente_inicio_hora: 8,
   expediente_fim_hora: 18,
+  carrinho_max_abertos: 3,
 };
 
 export function montarConfiguracao(linhas: { chave: string; valor: number }[]): ConfiguracaoRegras {

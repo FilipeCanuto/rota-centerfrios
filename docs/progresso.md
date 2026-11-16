@@ -2,6 +2,11 @@
 
 Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada etapa.
 
+## Situação em 16/11/2026
+
+- Base do carrinho no ramo `feat/carrinho-base` (sem telas): regras em `src/regras/carrinho.ts` (limite de carrinhos, corrida, totais em centavos, desconto, idempotência, CSV), `Shop9Gateway` manual e esqueleto da API em `src/integracoes`, importação de produtos. Banco na mensagem 20 (`docs/lovable/20-carrinho-orcamento-shop9.md`), a enviar. Pedido à Idealsoft: [shop9-mapeamento.md](shop9-mapeamento.md).
+- Falta: telas do catálogo, carrinho, liberação de desconto e fila de envio (depois da mensagem 20 aplicada e dos tipos regenerados).
+
 ## Situação em 14/11/2026
 
 - Mensagens 10 a 16 aplicadas (migrações até 0022). 17 e 18 com texto pronto, a enviar.

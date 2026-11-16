@@ -27,6 +27,7 @@ import { Historico } from "./Historico";
 import { ListaErros, Mapeamento, Previa } from "./Mapeamento";
 
 const TIPOS: { valor: TipoImportacao; rotulo: string }[] = [
+  { valor: "produtos", rotulo: "Produtos" },
   { valor: "clientes", rotulo: "Clientes" },
   { valor: "vendas", rotulo: "Vendas faturadas" },
   { valor: "orcamentos", rotulo: "Orçamentos" },
@@ -153,7 +154,7 @@ export function TelaImportacao() {
             aria-describedby={erroArquivo ? `${id}-erro` : undefined}
           />
           <p className="text-sm text-muted-foreground">
-            Importe primeiro os clientes; vendas e orçamentos usam o código do cliente.
+            Importe primeiro produtos e clientes; vendas e orçamentos usam esses códigos.
           </p>
         </div>
         {erroArquivo && (

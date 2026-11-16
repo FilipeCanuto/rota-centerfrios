@@ -1,8 +1,10 @@
+import type { OrcamentoParaEnvio } from "@/regras/carrinho";
+
 /**
  * Contratos das integrações futuras (ERP, WhatsApp, Instagram, IA, voz).
  * As telas dependem só destas interfaces; cada uma tem hoje uma implementação "manual".
  */
-export type TipoImportacaoShop9 = "clientes" | "vendas" | "orcamentos";
+export type TipoImportacaoShop9 = "produtos" | "clientes" | "vendas" | "orcamentos";
 
 export interface ResultadoImportacao {
   importacao_id: string;
@@ -62,4 +64,19 @@ export interface Voz {
   /** Lê o texto em voz alta (resumo do copiloto). */
   falar(texto: string): void;
   parar(): void;
+}
+
+/**
+ * Envio de orçamentos da Rota ao Shop9 (fila `shop9_envios` no banco, com chave de idempotência).
+ * "manual": exporta os pendentes em CSV e a pessoa lança no Shop9; "api": envia direto (desligado até a Idealsoft liberar).
+ */
+export interface Shop9Gateway {
+  nome: string;
+  automatico: boolean;
+  /** Orçamentos da Rota com envio pendente ou com erro, da empresa. */
+  pendentes(empresaId: string): Promise<OrcamentoParaEnvio[]>;
+  /** Arquivo para lançamento manual (CSV). */
+  exportar(orcamentos: OrcamentoParaEnvio[]): string;
+  /** Registra que foi lançado no Shop9 com este código; a próxima importação de orçamentos confirma. */
+  marcarEnviado(orcamentoId: string, codigoShop9: string): Promise<void>;
 }
