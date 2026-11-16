@@ -36,7 +36,9 @@ test("Início: hierarquia, barra da meta do mês, tabela e axe", async ({ page }
   const r = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
-  expect(r.violations.map((v) => v.id)).toEqual([]);
+  expect(
+    r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`),
+  ).toEqual([]);
 
   // Sem rolagem lateral.
   const largura = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -49,4 +51,27 @@ test("Personalizar o copiloto fica nas preferências do cabeçalho", async ({ pa
   await page.getByRole("button", { name: "Menu do usuário" }).click();
   await page.getByRole("menuitem", { name: "Personalizar o copiloto" }).click();
   await expect(page.getByRole("dialog", { name: "Personalizar o copiloto" })).toBeVisible();
+});
+
+test("Gestão usa a mesma barra para a equipe e para cada vendedor", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await simularBackend(page);
+  await page.goto("/gestao");
+  await expect(page.getByRole("img", { name: /Meta do mês da equipe/ }).first()).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: /Meta do mês de .+: \d+% atingido/ }).first(),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: /Ver tabela/ })
+    .first()
+    .click();
+  await expect(page.getByRole("table").first()).toBeVisible();
+  const r = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(
+    r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`),
+  ).toEqual([]);
+  const largura = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  expect(largura).toBeLessThanOrEqual(0);
 });

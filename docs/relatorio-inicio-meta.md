@@ -22,12 +22,14 @@ Branch `feat/inicio-meta`. Sem mudança de banco. Este relatório substitui, nes
 ## Verificações
 - `tsc` e `eslint` sem erros nos arquivos alterados (os 8 avisos de fast refresh já existiam).
 - `vitest`: 139 testes passando, incluindo `ritmo.test.ts` (6 testes, com feriados).
-- e2e `e2e/inicio-meta.spec.ts`: hierarquia, barra, tabela, axe e ausência de rolagem lateral, em celular e desktop, nos temas claro e escuro. O `/inicio` do `acessibilidade.spec.ts` também passa. Um teste falhou uma vez porque a página veio em branco enquanto o servidor de desenvolvimento ainda compilava; rodado de novo, passou.
+- e2e `e2e/inicio-meta.spec.ts`: Gestão com a barra da equipe e a de cada vendedor (tabela, axe e sem rolagem lateral); no Início, hierarquia, barra, tabela, axe e ausência de rolagem lateral, em celular e desktop, nos temas claro e escuro. O `/inicio` do `acessibilidade.spec.ts` também passa. Um teste falhou uma vez porque a página veio em branco enquanto o servidor de desenvolvimento ainda compilava; rodado de novo, passou.
 - `vite build` ok.
 
 ## Capturas
 Em `docs/capturas/inicio-meta/` (antes e depois, no celular claro e no desktop escuro). O "depois" foi tirado antes de dois ajustes finos, feitos sem uma terceira rodada de capturas: a linha tracejada do ritmo deixou de cruzar o rótulo "50%" e o nome do logo em texto ficou menor no celular.
 
+- **Gestão** (supervisor e diretoria, `TelaGestao.tsx`): a `BarraMeta` substitui a barra simples no total da equipe e no cartão de cada vendedor, com os feriados da empresa. A prop `rotulo` diferencia cada barra para o leitor de tela (ex.: "Meta do mês de Ana").
+- A tabela da barra, quando rola na horizontal, agora recebe foco pelo teclado (região com nome). O axe apontou isso nos cartões estreitos da Gestão no celular.
+
 ## Pendente / riscos
-- Ainda não troquei a barra simples das telas de supervisor e diretoria (`TelaGestao`) pela `BarraMeta`; o componente já está pronto para isso.
 - Os itens repetidos no plano da simulação vêm da visão "Ambas as empresas" do backend simulado e já existiam antes desta mudança.

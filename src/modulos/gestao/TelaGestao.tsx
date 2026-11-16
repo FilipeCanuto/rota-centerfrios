@@ -5,9 +5,10 @@ import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { Contador } from "@/design-system/movimento";
 import { formatarMoeda } from "@/design-system/formatar";
-import { Progresso } from "@/design-system/Progresso";
+import { BarraMeta } from "@/design-system/BarraMeta";
 import { useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import {
+  calcularRitmo,
   formatarISO,
   hojeEmMaceio,
   resumirVendedor,
@@ -85,6 +86,21 @@ function Empresa({ g, hoje, nome }: { g: GestaoEmpresa; hoje: Date; nome?: strin
             v={<Contador valor={total.faturadoHoje} formatar={formatarMoeda} />}
           />
         </dl>
+        {total.meta > 0 && (
+          <div className="mt-5">
+            <BarraMeta
+              faturado={total.faturado}
+              meta={total.meta}
+              rotulo={nome ? `Meta do mês da equipe ${nome}` : "Meta do mês da equipe"}
+              ritmo={calcularRitmo({
+                faturado: total.faturado,
+                meta: total.meta,
+                hoje,
+                feriados: g.feriados,
+              })}
+            />
+          </div>
+        )}
       </div>
       <ul className="cascata grid gap-4 lg:grid-cols-2">
         {g.linhas.map((l) => (
@@ -126,20 +142,17 @@ function Vendedor({
       {r.atingimento === null ? (
         <p className="text-muted-foreground">Sem meta cadastrada neste mês.</p>
       ) : (
-        <>
-          <p className="font-semibold">{`Meta de vendas: ${pct(r.atingimento)} (esperado até hoje ${pct(r.esperado)})`}</p>
-          <Progresso valor={Math.min(r.atingimento, 1)} rotulo="Atingimento da meta de vendas" />
-          {r.esperado !== null && (
-            <div>
-              <SeloStatus tom={r.atingimento >= r.esperado ? "sucesso" : "atencao"}>
-                {r.atingimento >= r.esperado ? "No ritmo da meta" : "Abaixo do esperado até hoje"}
-              </SeloStatus>
-            </div>
-          )}
-          <p className="numeros text-sm">
-            {formatarMoeda(Number(l.faturado_mes))} de {formatarMoeda(Number(l.meta?.meta_vendas))}
-          </p>
-        </>
+        <BarraMeta
+          faturado={Number(l.faturado_mes)}
+          meta={Number(l.meta?.meta_vendas)}
+          rotulo={`Meta do mês de ${l.nome}`}
+          ritmo={calcularRitmo({
+            faturado: Number(l.faturado_mes),
+            meta: Number(l.meta?.meta_vendas),
+            hoje,
+            feriados: g.feriados,
+          })}
+        />
       )}
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         <Dado k="Faturado hoje" v={formatarMoeda(Number(l.faturado_hoje))} />

@@ -26,10 +26,13 @@ export function BarraMeta({
   faturado,
   meta,
   ritmo,
+  rotulo = "Meta do mês",
 }: {
   faturado: number;
   meta: number;
   ritmo: Ritmo;
+  /** Nome que distingue várias barras na mesma tela (ex.: "Meta do mês de Ana"). */
+  rotulo?: string;
 }) {
   const id = useId();
   const raiz = useRef<HTMLDivElement>(null);
@@ -47,7 +50,7 @@ export function BarraMeta({
   const fProj = pos(r.projecaoPct);
   const s = STATUS[r.status];
   const descricao =
-    `Meta do mês: ${pctTxt(r.atingido)} atingido, ${formatarMoeda(faturado)} de ${formatarMoeda(meta)}. ` +
+    `${rotulo}: ${pctTxt(r.atingido)} atingido, ${formatarMoeda(faturado)} de ${formatarMoeda(meta)}. ` +
     (r.concluido ? "Mês concluído. " : `Onde deveria estar hoje: ${pctTxt(r.ritmo)}. `) +
     `Projeção do mês: ${formatarMoeda(r.projecao)} (${pctTxt(r.projecaoPct)} da meta). Status: ${s.texto}.`;
 
@@ -113,12 +116,20 @@ export function BarraMeta({
           onClick={() => setTabela((v) => !v)}
         >
           {tabela ? "Ocultar tabela" : "Ver tabela"}
+          {rotulo !== "Meta do mês" && <span className="sr-only"> ({rotulo})</span>}
         </Button>
         <div id={`${id}-tab`}>
           {tabela && (
-            <div className="barra-meta__tabela mt-3 overflow-x-auto rounded-lg border">
+            <div
+              // Região rolável precisa de foco pelo teclado (axe scrollable-region-focusable).
+              // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+              tabIndex={0}
+              role="region"
+              aria-label={`${rotulo} em tabela`}
+              className="barra-meta__tabela mt-3 overflow-x-auto rounded-lg border focus-visible:outline-2 focus-visible:outline-ring"
+            >
               <table className="w-full min-w-[18rem] text-sm">
-                <caption className="sr-only">Meta do mês em tabela</caption>
+                <caption className="sr-only">{rotulo} em tabela</caption>
                 <tbody>
                   {linhas.map(([k, v]) => (
                     <tr key={k} className="border-b last:border-0">
