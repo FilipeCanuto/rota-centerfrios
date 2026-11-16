@@ -18,6 +18,8 @@ Branch `feat/inicio-meta`. Sem mudança de banco. Este relatório substitui, nes
   - Se a imagem do logo falhar, aparece o nome em texto, sem empurrar o cabeçalho.
   - A data aparece só com a primeira letra maiúscula ("Segunda-feira, 16 de novembro").
   - O botão "Ouvir" está oculto (`VOZ_LIGADA = false`); o código foi mantido.
+- **Gestão** (supervisor e diretoria, `TelaGestao.tsx`): a `BarraMeta` substitui a barra simples no total da equipe e no cartão de cada vendedor, com os feriados da empresa. A prop `rotulo` diferencia cada barra para o leitor de tela (ex.: "Meta do mês de Ana").
+- A tabela da barra, quando rola na horizontal, agora recebe foco pelo teclado (região com nome). O axe apontou isso nos cartões estreitos da Gestão no celular.
 
 ## Verificações
 - `tsc` e `eslint` sem erros nos arquivos alterados (os 8 avisos de fast refresh já existiam).
@@ -27,9 +29,6 @@ Branch `feat/inicio-meta`. Sem mudança de banco. Este relatório substitui, nes
 
 ## Capturas
 Em `docs/capturas/inicio-meta/` (antes e depois, no celular claro e no desktop escuro). O "depois" foi tirado antes de dois ajustes finos, feitos sem uma terceira rodada de capturas: a linha tracejada do ritmo deixou de cruzar o rótulo "50%" e o nome do logo em texto ficou menor no celular.
-
-- **Gestão** (supervisor e diretoria, `TelaGestao.tsx`): a `BarraMeta` substitui a barra simples no total da equipe e no cartão de cada vendedor, com os feriados da empresa. A prop `rotulo` diferencia cada barra para o leitor de tela (ex.: "Meta do mês de Ana").
-- A tabela da barra, quando rola na horizontal, agora recebe foco pelo teclado (região com nome). O axe apontou isso nos cartões estreitos da Gestão no celular.
 
 ## Pendente / riscos
 - Os itens repetidos no plano da simulação vêm da visão "Ambas as empresas" do backend simulado e já existiam antes desta mudança.
