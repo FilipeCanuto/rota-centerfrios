@@ -77,7 +77,7 @@ export function Cabecalho() {
   const naoLidas = (notificacoes ?? []).filter((n) => !n.lida_em);
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur [box-shadow:0_8px_24px_-18px_color-mix(in_oklab,var(--cor-sombra)_35%,transparent)]">
       <div className="flex items-center gap-2 px-3 py-2 sm:px-4">
         {caminho !== "/inicio" && <BotaoVoltar />}
         <SidebarTrigger

@@ -33,8 +33,13 @@ const leve = () => {
   const n = navigator as Navigator & { deviceMemory?: number };
   return (n.hardwareConcurrency ?? 8) <= 2 || (n.deviceMemory ?? 8) <= 1;
 };
-if (typeof document !== "undefined" && leve())
-  document.documentElement.setAttribute("data-movimento", "leve");
+if (typeof document !== "undefined") {
+  if (leve()) document.documentElement.setAttribute("data-movimento", "leve");
+  // Aba oculta: o CSS pausa toda animação contínua (html[data-aba-oculta]).
+  document.addEventListener("visibilitychange", () =>
+    document.documentElement.toggleAttribute("data-aba-oculta", document.hidden),
+  );
+}
 
 /**
  * Preferência "Intensidade do movimento" (por aparelho, em localStorage). O CSS lê
