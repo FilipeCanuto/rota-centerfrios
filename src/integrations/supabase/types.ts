@@ -137,6 +137,96 @@ export type Database = {
           },
         ]
       }
+      carrinhos: {
+        Row: {
+          atualizado_em: string
+          cancelado_em: string | null
+          cliente_id: string
+          concluido_em: string | null
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          estado: string
+          id: string
+          motivo_cancelamento_id: string | null
+          motivo_cancelamento_texto: string | null
+          orcamento_id: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          total: number
+          vendedor_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          cancelado_em?: string | null
+          cliente_id: string
+          concluido_em?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id: string
+          estado?: string
+          id?: string
+          motivo_cancelamento_id?: string | null
+          motivo_cancelamento_texto?: string | null
+          orcamento_id?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          total?: number
+          vendedor_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          cancelado_em?: string | null
+          cliente_id?: string
+          concluido_em?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id?: string
+          estado?: string
+          id?: string
+          motivo_cancelamento_id?: string | null
+          motivo_cancelamento_texto?: string | null
+          orcamento_id?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          total?: number
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrinhos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrinhos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrinhos_motivo_cancelamento_id_fkey"
+            columns: ["motivo_cancelamento_id"]
+            isOneToOne: false
+            referencedRelation: "motivos_cancelamento_carrinho"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrinhos_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrinhos_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clientes: {
         Row: {
           cidade: string | null
@@ -525,6 +615,152 @@ export type Database = {
           },
         ]
       }
+      itens_carrinho: {
+        Row: {
+          carrinho_id: string
+          codigo_shop9: string
+          created_at: string
+          demo: boolean
+          desconto_pct: number
+          descricao: string
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          preco_unit: number
+          produto_id: string
+          quantidade: number
+          total: number
+          unidade: string
+        }
+        Insert: {
+          carrinho_id: string
+          codigo_shop9: string
+          created_at?: string
+          demo?: boolean
+          desconto_pct?: number
+          descricao: string
+          empresa_id: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_unit: number
+          produto_id: string
+          quantidade: number
+          total: number
+          unidade: string
+        }
+        Update: {
+          carrinho_id?: string
+          codigo_shop9?: string
+          created_at?: string
+          demo?: boolean
+          desconto_pct?: number
+          descricao?: string
+          empresa_id?: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_unit?: number
+          produto_id?: string
+          quantidade?: number
+          total?: number
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_carrinho_carrinho_id_fkey"
+            columns: ["carrinho_id"]
+            isOneToOne: false
+            referencedRelation: "carrinhos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_carrinho_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_carrinho_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      itens_orcamento: {
+        Row: {
+          codigo_shop9: string
+          created_at: string
+          demo: boolean
+          desconto_pct: number
+          descricao: string
+          empresa_id: string
+          id: string
+          orcamento_id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          preco_unit: number
+          produto_id: string | null
+          quantidade: number
+          total: number
+          unidade: string
+        }
+        Insert: {
+          codigo_shop9: string
+          created_at?: string
+          demo?: boolean
+          desconto_pct?: number
+          descricao: string
+          empresa_id: string
+          id?: string
+          orcamento_id: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_unit: number
+          produto_id?: string | null
+          quantidade: number
+          total: number
+          unidade: string
+        }
+        Update: {
+          codigo_shop9?: string
+          created_at?: string
+          demo?: boolean
+          desconto_pct?: number
+          descricao?: string
+          empresa_id?: string
+          id?: string
+          orcamento_id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_unit?: number
+          produto_id?: string | null
+          quantidade?: number
+          total?: number
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_orcamento_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_orcamento_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: false
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_orcamento_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       itens_venda: {
         Row: {
           cliente_id: string
@@ -592,6 +828,173 @@ export type Database = {
           },
           {
             foreignKeyName: "itens_venda_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liberacoes_desconto: {
+        Row: {
+          carrinho_id: string | null
+          cliente_id: string
+          created_at: string
+          decidido_em: string | null
+          decidido_por: string | null
+          demo: boolean
+          desconto_pct: number
+          empresa_id: string
+          estado: string
+          id: string
+          motivo: string
+          observacao_decisao: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          pct_aprovado: number | null
+          produto_id: string | null
+          valida_ate: string | null
+          vendedor_id: string
+        }
+        Insert: {
+          carrinho_id?: string | null
+          cliente_id: string
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          demo?: boolean
+          desconto_pct: number
+          empresa_id: string
+          estado?: string
+          id?: string
+          motivo: string
+          observacao_decisao?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          pct_aprovado?: number | null
+          produto_id?: string | null
+          valida_ate?: string | null
+          vendedor_id: string
+        }
+        Update: {
+          carrinho_id?: string | null
+          cliente_id?: string
+          created_at?: string
+          decidido_em?: string | null
+          decidido_por?: string | null
+          demo?: boolean
+          desconto_pct?: number
+          empresa_id?: string
+          estado?: string
+          id?: string
+          motivo?: string
+          observacao_decisao?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          pct_aprovado?: number | null
+          produto_id?: string | null
+          valida_ate?: string | null
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liberacoes_desconto_carrinho_id_fkey"
+            columns: ["carrinho_id"]
+            isOneToOne: false
+            referencedRelation: "carrinhos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_desconto_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_desconto_decidido_por_fkey"
+            columns: ["decidido_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_desconto_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_desconto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liberacoes_desconto_vendedor_id_fkey"
+            columns: ["vendedor_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      limites_desconto: {
+        Row: {
+          created_at: string
+          definido_por: string
+          demo: boolean
+          empresa_id: string
+          id: string
+          limite_pct: number
+          motivo: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          vendedor_id: string
+          vigencia_fim: string | null
+          vigencia_inicio: string
+        }
+        Insert: {
+          created_at?: string
+          definido_por: string
+          demo?: boolean
+          empresa_id: string
+          id?: string
+          limite_pct: number
+          motivo?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          vendedor_id: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Update: {
+          created_at?: string
+          definido_por?: string
+          demo?: boolean
+          empresa_id?: string
+          id?: string
+          limite_pct?: number
+          motivo?: string | null
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          vendedor_id?: string
+          vigencia_fim?: string | null
+          vigencia_inicio?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "limites_desconto_definido_por_fkey"
+            columns: ["definido_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "limites_desconto_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "limites_desconto_vendedor_id_fkey"
             columns: ["vendedor_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
@@ -768,6 +1171,50 @@ export type Database = {
           },
         ]
       }
+      motivos_cancelamento_carrinho: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          exige_texto: boolean
+          id: string
+          ordem: number
+          origem: Database["public"]["Enums"]["origem_dado"]
+          texto: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          demo?: boolean
+          empresa_id: string
+          exige_texto?: boolean
+          id?: string
+          ordem?: number
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          texto: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          demo?: boolean
+          empresa_id?: string
+          exige_texto?: boolean
+          id?: string
+          ordem?: number
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "motivos_cancelamento_carrinho_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notas_cliente: {
         Row: {
           autor_id: string | null
@@ -889,15 +1336,20 @@ export type Database = {
       }
       orcamentos: {
         Row: {
+          carrinho_id: string | null
+          chave_idempotencia: string | null
           cliente_id: string
           codigo_shop9: string | null
           created_at: string
           data: string
           demo: boolean
           empresa_id: string
+          envio_codigo_shop9: string | null
+          envio_estado: string | null
           id: string
           observacao: string | null
           origem: Database["public"]["Enums"]["origem_dado"]
+          origem_rota: boolean
           proximo_followup: string | null
           status: string
           ultimo_followup: string | null
@@ -905,15 +1357,20 @@ export type Database = {
           vendedor_id: string | null
         }
         Insert: {
+          carrinho_id?: string | null
+          chave_idempotencia?: string | null
           cliente_id: string
           codigo_shop9?: string | null
           created_at?: string
           data?: string
           demo?: boolean
           empresa_id: string
+          envio_codigo_shop9?: string | null
+          envio_estado?: string | null
           id?: string
           observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          origem_rota?: boolean
           proximo_followup?: string | null
           status?: string
           ultimo_followup?: string | null
@@ -921,15 +1378,20 @@ export type Database = {
           vendedor_id?: string | null
         }
         Update: {
+          carrinho_id?: string | null
+          chave_idempotencia?: string | null
           cliente_id?: string
           codigo_shop9?: string | null
           created_at?: string
           data?: string
           demo?: boolean
           empresa_id?: string
+          envio_codigo_shop9?: string | null
+          envio_estado?: string | null
           id?: string
           observacao?: string | null
           origem?: Database["public"]["Enums"]["origem_dado"]
+          origem_rota?: boolean
           proximo_followup?: string | null
           status?: string
           ultimo_followup?: string | null
@@ -937,6 +1399,13 @@ export type Database = {
           vendedor_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "orcamentos_carrinho_id_fkey"
+            columns: ["carrinho_id"]
+            isOneToOne: false
+            referencedRelation: "carrinhos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orcamentos_cliente_id_fkey"
             columns: ["cliente_id"]
@@ -1158,6 +1627,56 @@ export type Database = {
           },
         ]
       }
+      produtos: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          codigo_shop9: string
+          created_at: string
+          demo: boolean
+          descricao: string
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          preco_tabela: number
+          unidade: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          codigo_shop9: string
+          created_at?: string
+          demo?: boolean
+          descricao: string
+          empresa_id: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_tabela: number
+          unidade?: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          codigo_shop9?: string
+          created_at?: string
+          demo?: boolean
+          descricao?: string
+          empresa_id?: string
+          id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          preco_tabela?: number
+          unidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registro_auditoria: {
         Row: {
           acao: string
@@ -1302,6 +1821,75 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      shop9_envios: {
+        Row: {
+          atualizado_em: string
+          chave_idempotencia: string
+          codigo_shop9: string | null
+          confirmado_em: string | null
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          enviado_em: string | null
+          estado: string
+          id: string
+          orcamento_id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          proxima_tentativa: string
+          tentativas: number
+          ultimo_erro: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          chave_idempotencia: string
+          codigo_shop9?: string | null
+          confirmado_em?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id: string
+          enviado_em?: string | null
+          estado?: string
+          id?: string
+          orcamento_id: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          proxima_tentativa?: string
+          tentativas?: number
+          ultimo_erro?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          chave_idempotencia?: string
+          codigo_shop9?: string | null
+          confirmado_em?: string | null
+          created_at?: string
+          demo?: boolean
+          empresa_id?: string
+          enviado_em?: string | null
+          estado?: string
+          id?: string
+          orcamento_id?: string
+          origem?: Database["public"]["Enums"]["origem_dado"]
+          proxima_tentativa?: string
+          tentativas?: number
+          ultimo_erro?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop9_envios_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop9_envios_orcamento_id_fkey"
+            columns: ["orcamento_id"]
+            isOneToOne: true
+            referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tarefas_agenda: {
         Row: {
@@ -1646,6 +2234,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      abrir_carrinho: { Args: { _cliente_id: string }; Returns: string }
+      adicionar_item_carrinho: {
+        Args: {
+          _carrinho_id: string
+          _desconto_pct?: number
+          _produto_id: string
+          _quantidade: number
+        }
+        Returns: string
+      }
       admin_atualizar_setor: {
         Args: { _chave: string; _dados: Json }
         Returns: undefined
@@ -1702,6 +2300,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      alterar_item_carrinho: {
+        Args: { _desconto_pct: number; _item_id: string; _quantidade: number }
+        Returns: undefined
+      }
       apagar_dados_demo: { Args: never; Returns: Json }
       atualizar_selos: {
         Args: { _dia: string; _empresa_id: string; _vendedor_id: string }
@@ -1718,19 +2320,94 @@ export type Database = {
         }
         Returns: undefined
       }
+      buscar_produtos: {
+        Args: { _empresa_id: string; _limite?: number; _termo: string }
+        Returns: {
+          ativo: boolean
+          atualizado_em: string
+          codigo_shop9: string
+          created_at: string
+          demo: boolean
+          descricao: string
+          empresa_id: string
+          id: string
+          origem: Database["public"]["Enums"]["origem_dado"]
+          preco_tabela: number
+          unidade: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "produtos"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       calcular_pontos_dia: {
         Args: { _dia: string; _empresa_id: string; _vendedor_id: string }
         Returns: Json
       }
+      cancelar_carrinho: {
+        Args: { _carrinho_id: string; _motivo_id: string; _texto?: string }
+        Returns: undefined
+      }
       carregar_dados_demo: { Args: { _vendedores?: string[] }; Returns: Json }
       carregar_feriados_nacionais: { Args: never; Returns: number }
+      carrinho_checar_item: {
+        Args: { _d: number; _q: number }
+        Returns: undefined
+      }
+      carrinho_recalcular: {
+        Args: { _carrinho_id: string }
+        Returns: undefined
+      }
+      carrinho_travar_aberto: {
+        Args: { _carrinho_id: string }
+        Returns: {
+          atualizado_em: string
+          cancelado_em: string | null
+          cliente_id: string
+          concluido_em: string | null
+          created_at: string
+          demo: boolean
+          empresa_id: string
+          estado: string
+          id: string
+          motivo_cancelamento_id: string | null
+          motivo_cancelamento_texto: string | null
+          orcamento_id: string | null
+          origem: Database["public"]["Enums"]["origem_dado"]
+          total: number
+          vendedor_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "carrinhos"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       cobertura_vendedor: {
         Args: { _empresa_id: string; _hoje: string; _vendedor_id: string }
         Returns: Json
       }
+      com_supervisiona: {
+        Args: { _empresa_id: string; _vendedor_id: string }
+        Returns: boolean
+      }
+      concluir_carrinho: { Args: { _carrinho_id: string }; Returns: string }
       copiar_feriados_para_ano: {
         Args: { _ano_destino: number; _ano_origem: number }
         Returns: Json
+      }
+      decidir_liberacao_desconto: {
+        Args: {
+          _aprovar: boolean
+          _id: string
+          _observacao?: string
+          _pct_aprovado?: number
+          _valida_ate?: string
+        }
+        Returns: undefined
       }
       definir_acesso_total: {
         Args: { _acesso_total: boolean; _usuario_id: string }
@@ -1759,6 +2436,16 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      definir_limite_desconto: {
+        Args: {
+          _empresa_id: string
+          _limite_pct: number
+          _motivo?: string
+          _vendedor_id: string
+          _vigencia_fim?: string
+        }
+        Returns: string
       }
       eh_admin: { Args: never; Returns: boolean }
       ficha_cliente: {
@@ -1826,9 +2513,18 @@ export type Database = {
         Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
         Returns: Json
       }
+      importar_produtos: {
+        Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
+        Returns: Json
+      }
       importar_vendas: {
         Args: { _arquivo: string; _empresa_id: string; _linhas: Json }
         Returns: Json
+      }
+      imutavel_unaccent: { Args: { "": string }; Returns: string }
+      limite_desconto: {
+        Args: { _empresa_id: string; _vendedor_id: string }
+        Returns: number
       }
       meu_usuario_id: { Args: never; Returns: string }
       meus_setores: { Args: never; Returns: string[] }
@@ -1847,6 +2543,19 @@ export type Database = {
       }
       pode_publicar_avisos: { Args: never; Returns: boolean }
       pode_ver_vendedor: { Args: { _vendedor_id: string }; Returns: boolean }
+      produtos_comprados: {
+        Args: { _cliente_id: string; _limite?: number }
+        Returns: {
+          ativo: boolean
+          codigo_shop9: string
+          descricao: string
+          preco_tabela: number
+          quantidade_total: number
+          ultima_compra: string
+          unidade: string
+          vezes: number
+        }[]
+      }
       ranking: {
         Args: { _empresa_id: string; _fim: string; _inicio: string }
         Returns: {
@@ -1866,10 +2575,46 @@ export type Database = {
         }
         Returns: undefined
       }
+      remover_item_carrinho: { Args: { _item_id: string }; Returns: undefined }
+      shop9_marcar_enviado: {
+        Args: { _codigo_shop9: string; _orcamento_id: string }
+        Returns: undefined
+      }
+      shop9_pendentes: { Args: { _empresa_id: string }; Returns: Json }
+      shop9_registrar_tentativa: {
+        Args: {
+          _codigo_shop9?: string
+          _envio_id: string
+          _erro?: string
+          _ok: boolean
+        }
+        Returns: undefined
+      }
+      solicitar_liberacao_desconto: {
+        Args: {
+          _carrinho_id?: string
+          _cliente_id: string
+          _desconto_pct: number
+          _motivo: string
+          _produto_id?: string
+        }
+        Returns: string
+      }
       tem_empresa: { Args: { _empresa_id: string }; Returns: boolean }
       tem_setor:
         | { Args: { _setor: string }; Returns: boolean }
         | { Args: { _setor: string; _usuario_id: string }; Returns: boolean }
+      validar_desconto: {
+        Args: {
+          _carrinho_id: string
+          _cliente_id: string
+          _desconto_pct: number
+          _empresa_id: string
+          _produto_id: string
+          _vendedor_id: string
+        }
+        Returns: boolean
+      }
       validar_post_instagram: {
         Args: { _aprovar: boolean; _motivo: string; _post_id: string }
         Returns: {
