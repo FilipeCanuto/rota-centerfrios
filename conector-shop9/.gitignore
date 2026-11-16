@@ -2,3 +2,4 @@ config.json
 estado.json*
 logs/
 node_modules/
+chave-privada.pem*

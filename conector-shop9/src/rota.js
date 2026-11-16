@@ -30,7 +30,7 @@ export function criarClienteRota(cfg, { log = () => {}, esperar = dormir, tentat
           method: "POST",
           headers: cabecalhosAssinados({
             conectorId: cfg.conector_id,
-            token: cfg.token,
+            chavePrivada: cfg.chavePrivada,
             metodo: "POST",
             caminho,
             corpo,

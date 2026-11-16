@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { assinar, sha256Hex, textoCanonico } from "../src/assinatura.js";
+import { createPublicKey, verify } from "node:crypto";
+import { textoCanonico } from "../src/assinatura.js";
 
 /**
  * Rota falsa para os testes: repete as regras do servidor real (src/integracoes/conectorServidor.server.ts)
@@ -8,13 +9,13 @@ import { assinar, sha256Hex, textoCanonico } from "../src/assinatura.js";
  */
 export function iniciarRotaFalsa({
   conectorId,
-  token,
+  chavePublica,
   modo = "conector",
   ambiente = "homologacao",
   limitePorMinuto = 120,
 }) {
   const db = {
-    conector: { id: conectorId, token_hash: sha256Hex(token), ativo: true, versao: null },
+    conector: { id: conectorId, chave_publica: chavePublica, ativo: true, versao: null },
     config: { modo, ambiente },
     nonces: new Map(),
     envios: [],
@@ -81,11 +82,14 @@ export function iniciarRotaFalsa({
     const ts = h["x-conector-ts"];
     if (!ts || Math.abs(Date.now() - Number(ts)) > 5 * 60_000)
       return responder(401, { erro: "autenticacao" });
-    const esperada = assinar(
-      db.conector.token_hash,
-      textoCanonico(ts, h["x-conector-nonce"], req.method, caminho, corpo),
-    );
-    if (esperada !== h["x-conector-assinatura"]) return responder(401, { erro: "autenticacao" });
+    const chave = createPublicKey({
+      key: { kty: "OKP", crv: "Ed25519", x: db.conector.chave_publica },
+      format: "jwk",
+    });
+    const can = textoCanonico(ts, h["x-conector-nonce"], req.method, caminho, corpo);
+    const assinatura = Buffer.from(String(h["x-conector-assinatura"] ?? ""), "base64url");
+    if (assinatura.length !== 64 || !verify(null, Buffer.from(can), chave, assinatura))
+      return responder(401, { erro: "autenticacao" });
     if (db.nonces.has(h["x-conector-nonce"])) return responder(409, { erro: "repetida" });
     db.nonces.set(h["x-conector-nonce"], Date.now());
     const ultimoMinuto = [...db.nonces.values()].filter((t) => Date.now() - t < 60_000).length;

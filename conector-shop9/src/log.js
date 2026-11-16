@@ -6,7 +6,7 @@ import { dirname } from "node:path";
  * Chaves suspeitas são trocadas por "***" e textos longos cortados (nunca grava corpo de cliente).
  */
 const SENSIVEL =
-  /token|senha|password|secret|serie|assinatura|authorization|signature|cpf|cnpj|telefone|email/i;
+  /token|senha|password|secret|privad|serie|assinatura|authorization|signature|cpf|cnpj|telefone|email/i;
 const MAX_ARQUIVO = 5 * 1024 * 1024;
 
 export function limpar(valor, chave = "") {

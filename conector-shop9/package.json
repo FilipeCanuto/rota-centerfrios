@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/servico.js",
     "simulador": "node src/shop9/simulador.js",
+    "gerar-chave": "node src/gerar-chave.js",
     "test": "node --test test/"
   },
   "dependencies": {},

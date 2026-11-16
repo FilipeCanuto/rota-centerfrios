@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
-import { assinar, cabecalhosAssinados, sha256Hex, textoCanonico } from "../src/assinatura.js";
+import { createPrivateKey, generateKeyPairSync } from "node:crypto";
+import { assinar, cabecalhosAssinados, chavePublicaDe, textoCanonico } from "../src/assinatura.js";
 import { validarConfig } from "../src/config.js";
 import { limpar } from "../src/log.js";
 import { ciclo, criarEstado } from "../src/principal.js";
@@ -10,12 +11,19 @@ import { iniciarRotaFalsa } from "./rota-falsa.js";
 
 const CONECTOR_ID = "11111111-2222-4333-8444-555555555555";
 const EMPRESA = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
-const TOKEN = "t".repeat(48);
+const { privateKey: CHAVE } = generateKeyPairSync("ed25519");
+const PUBLICA = chavePublicaDe(CHAVE);
+const { privateKey: OUTRA } = generateKeyPairSync("ed25519");
+// Chave do vetor fixo: semente 0x07 × 32 (mesma de src/regras/conector.test.ts).
+const VETOR = createPrivateKey({
+  key: Buffer.concat([Buffer.from("302e020100300506032b657004220420", "hex"), Buffer.alloc(32, 7)]),
+  format: "der",
+  type: "pkcs8",
+});
 
 describe("assinatura", () => {
   it("bate com o vetor de src/regras/conector.test.ts da Rota", () => {
-    const chave = sha256Hex("token-de-teste");
-    assert.equal(chave, "20fd0ba9f641280a22f72a1145a0892b225fb0b2fdd75a53ba4f83f4596c72ae");
+    assert.equal(chavePublicaDe(VETOR), "6kpsY-KcUgq-9VB7Ey7F-ZVHdq6-vnuSQh7qaRRG0iw");
     const can = textoCanonico(
       "1700000000000",
       "nonce-0123456789abcdef",
@@ -24,8 +32,8 @@ describe("assinatura", () => {
       "{}",
     );
     assert.equal(
-      assinar(chave, can),
-      "7e5c9d6a074633f9f3adcb73252742b69b07129fd9737c0298515c22ee37f55d",
+      assinar(VETOR, can),
+      "dYSqeaWIhAGH3azVRxIragH2nNd5BoH3LwtDtgx-8CAbIQLZF0WFJiA1RUuV1eDTeEwLkcnGsrbOuYN0E1wbAA",
     );
   });
 });
@@ -48,7 +56,7 @@ describe("segurança local", () => {
   it("config exige https para a Rota e credenciais completas", () => {
     const base = {
       conector_id: CONECTOR_ID,
-      token: TOKEN,
+      chavePrivada: CHAVE,
       filiais: { [EMPRESA]: "01" },
       shop9: { homologacao: { url: "http://s", serie: "s", senha: "p" } },
     };
@@ -69,12 +77,12 @@ describe("ponta a ponta com o simulador", () => {
   let shop9, rota, ctx, cfg;
   before(async () => {
     shop9 = await iniciarSimulador();
-    rota = await iniciarRotaFalsa({ conectorId: CONECTOR_ID, token: TOKEN });
+    rota = await iniciarRotaFalsa({ conectorId: CONECTOR_ID, chavePublica: PUBLICA });
     cfg = validarConfig(
       {
         rota_url: rota.url,
         conector_id: CONECTOR_ID,
-        token: TOKEN,
+        chavePrivada: CHAVE,
         filiais: { [EMPRESA]: "01" },
         shop9: { homologacao: { url: shop9.url, serie: shop9.serie, senha: shop9.senha } },
       },
@@ -166,7 +174,7 @@ describe("ponta a ponta com o simulador", () => {
     const caminho = "/api/conector/heartbeat";
     const h = cabecalhosAssinados({
       conectorId: CONECTOR_ID,
-      token: TOKEN,
+      chavePrivada: CHAVE,
       metodo: "POST",
       caminho,
       corpo,
@@ -177,15 +185,15 @@ describe("ponta a ponta com o simulador", () => {
     assert.equal((await enviar(h)).status, 409, "repetição bloqueada");
     const outro = cabecalhosAssinados({
       conectorId: CONECTOR_ID,
-      token: "x".repeat(48),
+      chavePrivada: OUTRA,
       metodo: "POST",
       caminho,
       corpo,
     });
-    assert.equal((await enviar(outro)).status, 401, "token errado");
+    assert.equal((await enviar(outro)).status, 401, "assinada com outra chave");
     const h2 = cabecalhosAssinados({
       conectorId: CONECTOR_ID,
-      token: TOKEN,
+      chavePrivada: CHAVE,
       metodo: "POST",
       caminho,
       corpo,
@@ -193,7 +201,7 @@ describe("ponta a ponta com o simulador", () => {
     assert.equal((await enviar(h2, corpo.replace("x", "y"))).status, 401, "corpo alterado");
     const velho = cabecalhosAssinados({
       conectorId: CONECTOR_ID,
-      token: TOKEN,
+      chavePrivada: CHAVE,
       metodo: "POST",
       caminho,
       corpo,
@@ -210,7 +218,7 @@ describe("ponta a ponta com o simulador", () => {
     assert.deepEqual(esperas, [1000, 2000]);
   });
 
-  it("token revogado para sem reenviar", async () => {
+  it("conector revogado para sem reenviar", async () => {
     rota.db.conector.ativo = false;
     await assert.rejects(
       ctx.chamar("heartbeat", { versao: "0.1.0", shop9_ok: true }),

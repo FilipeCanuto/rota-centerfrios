@@ -1,7 +1,7 @@
 {
   "rota_url": "https://ENDERECO-DA-ROTA",
   "conector_id": "ID-MOSTRADO-NA-ROTA",
-  "token": "COLE-AQUI-O-TOKEN (ou use a variável CONECTOR_TOKEN)",
+  "chave_privada": "C:\\ProgramData\\ConectorShop9\\chave-privada.pem",
   "intervalo_s": 60,
   "lote": 500,
   "filiais": {
