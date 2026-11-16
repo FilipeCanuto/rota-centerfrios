@@ -1,0 +1,15 @@
+{
+  "rota_url": "https://ENDERECO-DA-ROTA",
+  "conector_id": "ID-MOSTRADO-NA-ROTA",
+  "token": "COLE-AQUI-O-TOKEN (ou use a variável CONECTOR_TOKEN)",
+  "intervalo_s": 60,
+  "lote": 500,
+  "filiais": {
+    "ID-DA-EMPRESA-CENTERFRIOS-NA-ROTA": "CODIGO-FILIAL-SHOP9",
+    "ID-DA-EMPRESA-381-NA-ROTA": "CODIGO-FILIAL-SHOP9"
+  },
+  "shop9": {
+    "homologacao": { "url": "http://ENDERECO-LOCAL-DO-INTEGRACOES:PORTA", "serie": "SERIE", "senha": "SENHA (ou SHOP9_SENHA)" },
+    "producao": { "url": "http://ENDERECO-LOCAL-DO-INTEGRACOES:PORTA", "serie": "SERIE", "senha": "SENHA (ou SHOP9_SENHA)" }
+  }
+}
