@@ -101,8 +101,8 @@ export default function UsuariosAba() {
               {editando?.acesso_total
                 ? "Esta conta tem acesso total: entra em todos os setores, inclusive os novos. Essa marca não é alterada por aqui."
                 : editando
-                ? "Marque pelo menos um setor. A pessoa só entra nos setores marcados."
-                : "A pessoa entra com o e-mail da empresa pelo “Primeiro acesso”."}
+                  ? "Marque pelo menos um setor. A pessoa só entra nos setores marcados."
+                  : "A pessoa entra com o e-mail da empresa pelo “Primeiro acesso”."}
             </DialogDescription>
           </DialogHeader>
           {editando !== undefined && (
