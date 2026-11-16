@@ -204,6 +204,20 @@
       "when": 1794837141336,
       "tag": "0028_revogar_apagar_dados_demo_cliente",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794857163174,
+      "tag": "0029_conector_shop9",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794857226401,
+      "tag": "0030_conector_shop9_sql",
+      "breakpoints": true
     }
   ]
 }

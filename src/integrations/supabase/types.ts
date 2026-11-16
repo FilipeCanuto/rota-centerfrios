@@ -296,6 +296,169 @@ export type Database = {
           },
         ]
       }
+      conector_eventos: {
+        Row: {
+          conector_id: string | null
+          criado_em: string
+          empresa_id: string | null
+          id: string
+          mensagem: string | null
+          ok: boolean
+          tipo: string
+        }
+        Insert: {
+          conector_id?: string | null
+          criado_em?: string
+          empresa_id?: string | null
+          id?: string
+          mensagem?: string | null
+          ok: boolean
+          tipo: string
+        }
+        Update: {
+          conector_id?: string | null
+          criado_em?: string
+          empresa_id?: string | null
+          id?: string
+          mensagem?: string | null
+          ok?: boolean
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conector_eventos_conector_id_fkey"
+            columns: ["conector_id"]
+            isOneToOne: false
+            referencedRelation: "conectores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conector_eventos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conector_lotes: {
+        Row: {
+          conector_id: string
+          criado_em: string
+          empresa_id: string
+          lote_id: string
+          resultado: Json
+          tipo: string
+        }
+        Insert: {
+          conector_id: string
+          criado_em?: string
+          empresa_id: string
+          lote_id: string
+          resultado: Json
+          tipo: string
+        }
+        Update: {
+          conector_id?: string
+          criado_em?: string
+          empresa_id?: string
+          lote_id?: string
+          resultado?: Json
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conector_lotes_conector_id_fkey"
+            columns: ["conector_id"]
+            isOneToOne: false
+            referencedRelation: "conectores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conector_lotes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conector_nonces: {
+        Row: {
+          acao: string
+          conector_id: string
+          criado_em: string
+          nonce: string
+        }
+        Insert: {
+          acao: string
+          conector_id: string
+          criado_em?: string
+          nonce: string
+        }
+        Update: {
+          acao?: string
+          conector_id?: string
+          criado_em?: string
+          nonce?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conector_nonces_conector_id_fkey"
+            columns: ["conector_id"]
+            isOneToOne: false
+            referencedRelation: "conectores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conectores: {
+        Row: {
+          ativo: boolean
+          chave_publica: string
+          created_at: string
+          criado_por: string | null
+          id: string
+          nome: string
+          revogado_em: string | null
+          shop9_ok: boolean | null
+          ultimo_contato: string | null
+          versao: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          chave_publica: string
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          nome: string
+          revogado_em?: string | null
+          shop9_ok?: boolean | null
+          ultimo_contato?: string | null
+          versao?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          chave_publica?: string
+          created_at?: string
+          criado_por?: string | null
+          id?: string
+          nome?: string
+          revogado_em?: string | null
+          shop9_ok?: boolean | null
+          ultimo_contato?: string | null
+          versao?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conectores_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracoes_regras: {
         Row: {
           chave: string
@@ -1827,6 +1990,7 @@ export type Database = {
           atualizado_em: string
           chave_idempotencia: string
           codigo_shop9: string | null
+          conector_id: string | null
           confirmado_em: string | null
           created_at: string
           demo: boolean
@@ -1837,6 +2001,7 @@ export type Database = {
           orcamento_id: string
           origem: Database["public"]["Enums"]["origem_dado"]
           proxima_tentativa: string
+          reservado_ate: string | null
           tentativas: number
           ultimo_erro: string | null
         }
@@ -1844,6 +2009,7 @@ export type Database = {
           atualizado_em?: string
           chave_idempotencia: string
           codigo_shop9?: string | null
+          conector_id?: string | null
           confirmado_em?: string | null
           created_at?: string
           demo?: boolean
@@ -1854,6 +2020,7 @@ export type Database = {
           orcamento_id: string
           origem?: Database["public"]["Enums"]["origem_dado"]
           proxima_tentativa?: string
+          reservado_ate?: string | null
           tentativas?: number
           ultimo_erro?: string | null
         }
@@ -1861,6 +2028,7 @@ export type Database = {
           atualizado_em?: string
           chave_idempotencia?: string
           codigo_shop9?: string | null
+          conector_id?: string | null
           confirmado_em?: string | null
           created_at?: string
           demo?: boolean
@@ -1871,10 +2039,18 @@ export type Database = {
           orcamento_id?: string
           origem?: Database["public"]["Enums"]["origem_dado"]
           proxima_tentativa?: string
+          reservado_ate?: string | null
           tentativas?: number
           ultimo_erro?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "shop9_envios_conector_id_fkey"
+            columns: ["conector_id"]
+            isOneToOne: false
+            referencedRelation: "conectores"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shop9_envios_empresa_id_fkey"
             columns: ["empresa_id"]
@@ -1887,6 +2063,38 @@ export type Database = {
             columns: ["orcamento_id"]
             isOneToOne: true
             referencedRelation: "orcamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop9_integracao: {
+        Row: {
+          ambiente: string
+          atualizado_em: string
+          atualizado_por: string | null
+          id: boolean
+          modo: string
+        }
+        Insert: {
+          ambiente?: string
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: boolean
+          modo?: string
+        }
+        Update: {
+          ambiente?: string
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: boolean
+          modo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop9_integracao_atualizado_por_fkey"
+            columns: ["atualizado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -2276,6 +2484,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_conector_registrar_chave: {
+        Args: { _chave_publica: string; _conector_id: string; _nome: string }
+        Returns: string
+      }
+      admin_conector_revogar: {
+        Args: { _conector_id: string }
+        Returns: undefined
+      }
       admin_criar_setor: {
         Args: { _chave: string; _icone?: string; _nome: string }
         Returns: undefined
@@ -2300,6 +2516,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_shop9_configurar: {
+        Args: { _ambiente: string; _modo: string }
+        Returns: undefined
+      }
+      admin_shop9_status: { Args: never; Returns: Json }
       alterar_item_carrinho: {
         Args: { _desconto_pct: number; _item_id: string; _quantidade: number }
         Returns: undefined
@@ -2395,6 +2616,39 @@ export type Database = {
         Returns: boolean
       }
       concluir_carrinho: { Args: { _carrinho_id: string }; Returns: string }
+      conector_chave: { Args: { _conector_id: string }; Returns: string }
+      conector_heartbeat: {
+        Args: { _conector_id: string; _shop9_ok: boolean; _versao: string }
+        Returns: Json
+      }
+      conector_registrar_pedido: {
+        Args: { _acao: string; _conector_id: string; _nonce: string }
+        Returns: undefined
+      }
+      conector_resultado: {
+        Args: {
+          _codigo_shop9: string
+          _conector_id: string
+          _envio_id: string
+          _erro: string
+          _ok: boolean
+        }
+        Returns: Json
+      }
+      conector_sincronizar: {
+        Args: {
+          _conector_id: string
+          _empresa_id: string
+          _linhas: Json
+          _lote_id: string
+          _tipo: string
+        }
+        Returns: Json
+      }
+      conector_trabalhos: {
+        Args: { _conector_id: string; _limite: number }
+        Returns: Json
+      }
       copiar_feriados_para_ano: {
         Args: { _ano_destino: number; _ano_origem: number }
         Returns: Json
