@@ -1,11 +1,12 @@
 # Shop9 — o que pedir à Idealsoft na homologação
 
-Hoje a Rota funciona sem API: produtos, clientes, vendas e orçamentos entram por planilha (Configurações → Importação) e os orçamentos gerados pela Rota saem em CSV para lançamento manual (`integracoes.envioShop9`). Para ligar a API (`src/integracoes/shop9Api.ts`, hoje desligada) precisamos das respostas abaixo, **por empresa** (CENTERFRIOS e 381 Distribuidora).
+Hoje a Rota funciona sem API: produtos, clientes, vendas e orçamentos entram por planilha (Configurações → Importação) e os orçamentos gerados pela Rota saem em CSV para lançamento manual (`integracoes.envioShop9`). Para ligar o envio automático (conector local, `conector-shop9/`) precisamos das respostas abaixo, **por empresa** (CENTERFRIOS e 381 Distribuidora).
 
 ## 1. Acesso
 - [ ] Ambiente de homologação (URL) e de produção; são bancos separados por empresa ou um só com código de empresa/filial?
 - [ ] Forma de autenticação (token fixo, OAuth, usuário/senha), validade e como renovar. Um usuário técnico só para a Rota, com permissão mínima (ler cadastros e vendas; criar orçamento/pedido).
-- [ ] IPs de saída precisam ser liberados? (O envio roda no servidor da Rota, nunca no navegador.)
+- [ ] O módulo Integrações aceita chamadas de outro processo **no mesmo computador/rede local**? (O conector roda ao lado dele e só faz saída HTTPS para a Rota; nenhuma porta é aberta para a internet.)
+- [ ] Autenticação do módulo Integrações: formato exato de token, timestamp e signature (hoje suposto em `conector-shop9/src/shop9/adaptador.js`).
 - [ ] Limites: requisições por minuto, tamanho de página, tamanho máximo do corpo.
 - [ ] Documentação da API (OpenAPI/Swagger ou PDF) e exemplos de requisição e resposta.
 
@@ -41,4 +42,11 @@ Hoje a Rota funciona sem API: produtos, clientes, vendas e orçamentos entram po
 - Fila `shop9_envios` com tentativas, último erro, próxima tentativa (1, 2, 4… até 60 min) e chave de idempotência única por orçamento.
 - Estado de envio separado do estado comercial: pendente → enviado → confirmado (ou erro).
 - Lançamento manual: CSV com uma linha por item (`chave_rota;data;cliente_codigo;vendedor_email;produto_codigo;descricao;unidade;quantidade;preco_unitario;desconto_pct;total_item`); quem lança informa o número do Shop9 e a próxima importação de orçamentos confirma.
-- Segredos (`SHOP9_API_URL`, `SHOP9_API_TOKEN`) só nos Secrets do servidor.
+- Credenciais do Shop9 **não** ficam na Rota: só no computador do conector (`C:\ProgramData\ConectorShop9\config.json`, protegido). Guia: [guia-conector-shop9-cit.md](guia-conector-shop9-cit.md).
+
+## Fluxo do conector
+1. A cada minuto o conector chama `POST /api/conector/heartbeat` (versão, Shop9 acessível) e recebe o **modo** (manual | conector) e o **ambiente** (homologação | produção) escolhidos em Configurações → Integrações.
+2. Modo conector: `trabalhos` devolve orçamentos pendentes da fila `shop9_envios` (reservados por 5 min); o conector cria cada um no Shop9 com a chave `rota:carrinho:<id>` e devolve o número em `resultado` (ou o erro; a Rota reagenda com espera progressiva).
+3. Sempre: `sincronizar` envia, em lotes, clientes, produtos, vendas faturadas com itens e orçamentos alterados desde a última posição (cursor local). Cada lote tem `lote_id` determinístico: reenviar o mesmo lote não grava nada de novo.
+4. Segurança de cada chamada: token do conector (a Rota guarda só o hash; mostrado uma vez; revogável e girável na tela) + HMAC-SHA256 de `data/hora + nonce + método + caminho + hash do corpo`, janela de 5 min, nonce único (repetição recusada) e limite de 120 pedidos/min. Banco: [lovable/21-conector-shop9.md](lovable/21-conector-shop9.md).
+5. Enquanto a documentação não chega, o **simulador** (`conector-shop9/src/shop9/simulador.js`) faz o papel do Shop9 nos testes; o mapeamento de campos fica em `MAPA` do adaptador.

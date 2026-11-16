@@ -44,6 +44,12 @@ const ROTAS: { url: string; titulo: string; logado: boolean; extras?: Record<str
       extras: { user_roles: [{ role: "administrador" }] },
     },
     {
+      url: "/configuracoes?aba=integracoes",
+      titulo: "Configurações",
+      logado: true,
+      extras: { user_roles: [{ role: "administrador" }] },
+    },
+    {
       url: "/setores?caso=escolher",
       titulo: "Escolha o setor",
       logado: true,
