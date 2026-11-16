@@ -4,7 +4,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 
 ## Situação em 16/11/2026
 
-- Base do carrinho no ramo `feat/carrinho-base` (sem telas): regras em `src/regras/carrinho.ts` (limite de carrinhos, corrida, totais em centavos, desconto, idempotência, CSV), `Shop9Gateway` manual e esqueleto da API em `src/integracoes`, importação de produtos. Banco na mensagem 20 (`docs/lovable/20-carrinho-orcamento-shop9.md`), a enviar. Pedido à Idealsoft: [shop9-mapeamento.md](shop9-mapeamento.md).
+- Base do carrinho no ramo `feat/carrinho-base` (sem telas): regras em `src/regras/carrinho.ts` (limite de carrinhos, corrida, totais em centavos, desconto, idempotência, CSV), `Shop9Gateway` manual e esqueleto da API em `src/integracoes`, importação de produtos. Banco na mensagem 20 (`docs/lovable/20-carrinho-orcamento-shop9.md`): enviada ao Lovable em 16/11/2026 pelo Claude Code, em 3 partes (texto igual ao arquivo) e aplicada na migração 0027; os 12 itens da conferência passaram (`tests/test_carrinho_shop9.py`). Diferenças: regras novas e motivos de cancelamento gravados como dados só nas duas empresas atuais (empresa nova precisa cadastrar os motivos); `importar_produtos` só para diretoria (como `importar_clientes`); a planilha só confirma orçamento já marcado como enviado. Pedido à Idealsoft: [shop9-mapeamento.md](shop9-mapeamento.md).
 - Falta: telas do catálogo, carrinho, liberação de desconto e fila de envio (depois da mensagem 20 aplicada e dos tipos regenerados).
 
 ## Situação em 14/11/2026
