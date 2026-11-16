@@ -673,7 +673,7 @@ html[data-aba-oculta] *::after {
 @keyframes vt-entrar {
   from {
     opacity: 0;
-    transform: translateY(var(--distancia-media));
+    transform: translateY(var(--distancia-media)) scale(var(--escala-entrada));
   }
 }
 

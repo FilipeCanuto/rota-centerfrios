@@ -86,7 +86,7 @@ export function Cabecalho() {
         />
         <Link
           to="/inicio"
-          className="pressionar min-w-0 shrink overflow-hidden rounded-md md:hidden"
+          className={`pressionar min-w-0 shrink overflow-hidden rounded-md md:hidden ${caminho !== "/inicio" ? "hidden" : ""}`}
           aria-label="Rota CENTERFRIOS — Início"
         >
           <Logo className="h-7" />
