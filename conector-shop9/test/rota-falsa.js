@@ -4,8 +4,8 @@ import { textoCanonico } from "../src/assinatura.js";
 
 /**
  * Rota falsa para os testes: repete as regras do servidor real (src/integracoes/conectorServidor.server.ts)
- * e das funções do banco (docs/lovable/21-conector-shop9.md): HMAC + janela, nonce único, revogação,
- * fila com reserva, resultado e lotes idempotentes.
+ * e das funções do banco (docs/lovable/21 e 22): Ed25519 + janela, nonce único, revogação, troca de chave com
+ * transição, pareamento por código de uso único, fila com reserva, resultado, lotes idempotentes e cursores.
  */
 export function iniciarRotaFalsa({
   conectorId,
@@ -15,7 +15,18 @@ export function iniciarRotaFalsa({
   limitePorMinuto = 120,
 }) {
   const db = {
-    conector: { id: conectorId, chave_publica: chavePublica, ativo: true, versao: null },
+    conector: {
+      id: conectorId,
+      chave_publica: chavePublica,
+      chave_anterior: null,
+      anterior_ate: 0,
+      ativo: true,
+      versao: null,
+    },
+    /** codigo → { usado } (o banco real guarda o hash e a validade de 10 min). */
+    codigos: new Map(),
+    cursores: new Map(),
+    transicaoMs: 10 * 60_000,
     config: { modo, ambiente },
     nonces: new Map(),
     envios: [],
@@ -26,7 +37,18 @@ export function iniciarRotaFalsa({
   };
 
   const acoes = {
-    heartbeat: (d) => ((db.conector.versao = d.versao), db.config),
+    heartbeat: (d) => (
+      (db.conector.versao = d.versao),
+      { ...db.config, cursores: Object.fromEntries(db.cursores) }
+    ),
+    trocar_chave: (d) => {
+      Object.assign(db.conector, {
+        chave_anterior: db.conector.chave_publica,
+        anterior_ate: Date.now() + db.transicaoMs,
+        chave_publica: d.chave_publica,
+      });
+      return { ok: true };
+    },
     trabalhos: (d) => {
       const agora = Date.now();
       const livres = db.envios.filter(
@@ -62,6 +84,7 @@ export function iniciarRotaFalsa({
       }
       const r = { inseridas, atualizadas, ignoradas: 0, erros: [] };
       db.lotes.set(chave, r);
+      if (d.cursor) db.cursores.set(`${d.tipo}:${d.empresa_id}`, d.cursor);
       return r;
     },
   };
@@ -77,19 +100,29 @@ export function iniciarRotaFalsa({
     const h = req.headers;
     const caminho = new URL(req.url, "http://x").pathname;
     const acao = caminho.replace("/api/conector/", "");
-    if (h["x-conector-id"] !== conectorId || !db.conector.ativo)
-      return responder(401, { erro: "autenticacao" });
     const ts = h["x-conector-ts"];
     if (!ts || Math.abs(Date.now() - Number(ts)) > 5 * 60_000)
       return responder(401, { erro: "autenticacao" });
-    const chave = createPublicKey({
-      key: { kty: "OKP", crv: "Ed25519", x: db.conector.chave_publica },
-      format: "jwk",
-    });
-    const can = textoCanonico(ts, h["x-conector-nonce"], req.method, caminho, corpo);
-    const assinatura = Buffer.from(String(h["x-conector-assinatura"] ?? ""), "base64url");
-    if (assinatura.length !== 64 || !verify(null, Buffer.from(can), chave, assinatura))
+    const confere = (x) => {
+      const chave = createPublicKey({ key: { kty: "OKP", crv: "Ed25519", x }, format: "jwk" });
+      const can = textoCanonico(ts, h["x-conector-nonce"], req.method, caminho, corpo);
+      const assinatura = Buffer.from(String(h["x-conector-assinatura"] ?? ""), "base64url");
+      return assinatura.length === 64 && verify(null, Buffer.from(can), chave, assinatura);
+    };
+    if (acao === "parear") {
+      const d = JSON.parse(corpo || "{}");
+      const c = db.codigos.get(String(d.codigo).toUpperCase().replace(/[\s-]/g, ""));
+      if (!confere(d.chave_publica) || !c || c.usado) return responder(401, { erro: "codigo" });
+      c.usado = true;
+      Object.assign(db.conector, { chave_publica: d.chave_publica, ativo: true, chave_anterior: null });
+      return responder(200, { conector_id: conectorId });
+    }
+    if (h["x-conector-id"] !== conectorId || !db.conector.ativo)
       return responder(401, { erro: "autenticacao" });
+    const chaves = [db.conector.chave_publica];
+    if (db.conector.chave_anterior && db.conector.anterior_ate > Date.now())
+      chaves.push(db.conector.chave_anterior);
+    if (!chaves.some(confere)) return responder(401, { erro: "autenticacao" });
     if (db.nonces.has(h["x-conector-nonce"])) return responder(409, { erro: "repetida" });
     db.nonces.set(h["x-conector-nonce"], Date.now());
     const ultimoMinuto = [...db.nonces.values()].filter((t) => Date.now() - t < 60_000).length;
