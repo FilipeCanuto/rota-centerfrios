@@ -1,0 +1,18 @@
+{
+  "name": "conector-shop9",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Conector local entre o módulo Integrações do Shop9 e a Rota. Só conexões de saída HTTPS.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "node src/servico.js",
+    "simulador": "node src/shop9/simulador.js",
+    "gerar-chave": "node src/gerar-chave.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

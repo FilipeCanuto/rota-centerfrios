@@ -1,5 +1,6 @@
-import { Building2, ImageIcon, UserCog, type LucideIcon } from "lucide-react";
+import { Building2, ImageIcon, PlugZap, UserCog, type LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
+import IntegracoesAba from "./IntegracoesAba";
 import MidiaLoginAba from "./MidiaLoginAba";
 import SetoresAba from "./SetoresAba";
 import UsuariosAba from "./UsuariosAba";
@@ -33,6 +34,12 @@ export const ABAS_CONFIGURACAO: AbaConfiguracao[] = [
     rotulo: "Setores",
     icone: Building2,
     Componente: SetoresAba,
+  },
+  {
+    id: "integracoes",
+    rotulo: "Integrações",
+    icone: PlugZap,
+    Componente: IntegracoesAba,
   },
 ];
 

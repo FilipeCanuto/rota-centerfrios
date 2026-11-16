@@ -29,6 +29,7 @@ import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedConfiguracoesIndexRouteImport } from './routes/_authenticated/configuracoes.index'
 import { Route as AuthenticatedConfiguracoesFeriadosRouteImport } from './routes/_authenticated/configuracoes.feriados'
 import { Route as AuthenticatedConfiguracoesImportacaoRouteImport } from './routes/_authenticated/configuracoes.importacao'
+import { Route as ApiConectorAcaoRouteImport } from './routes/api/conector.$acao'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -135,6 +136,11 @@ const AuthenticatedConfiguracoesImportacaoRoute =
     path: '/configuracoes/importacao',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiConectorAcaoRoute = ApiConectorAcaoRouteImport.update({
+  id: '/api/conector/$acao',
+  path: '/api/conector/$acao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
+  '/api/conector/$acao': typeof ApiConectorAcaoRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
   '/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
 }
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
+  '/api/conector/$acao': typeof ApiConectorAcaoRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesIndexRoute
 }
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
+  '/api/conector/$acao': typeof ApiConectorAcaoRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
   '/_authenticated/configuracoes/': typeof AuthenticatedConfiguracoesIndexRoute
 }
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
+    | '/api/conector/$acao'
     | '/clientes/'
     | '/configuracoes/'
   fileRoutesByTo: FileRoutesByTo
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
+    | '/api/conector/$acao'
     | '/clientes'
     | '/configuracoes'
   id:
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
     | '/_authenticated/configuracoes/importacao'
+    | '/api/conector/$acao'
     | '/_authenticated/clientes/'
     | '/_authenticated/configuracoes/'
   fileRoutesById: FileRoutesById
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   DesignSystemRoute: typeof DesignSystemRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SetoresRoute: typeof SetoresRoute
+  ApiConectorAcaoRoute: typeof ApiConectorAcaoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -419,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesImportacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/conector/$acao': {
+      id: '/api/conector/$acao'
+      path: '/api/conector/$acao'
+      fullPath: '/api/conector/$acao'
+      preLoaderRoute: typeof ApiConectorAcaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -468,6 +488,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignSystemRoute: DesignSystemRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SetoresRoute: SetoresRoute,
+  ApiConectorAcaoRoute: ApiConectorAcaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

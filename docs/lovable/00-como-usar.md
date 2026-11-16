@@ -14,6 +14,7 @@ Cole uma mensagem por vez no Lovable, **na ordem dos números**, e só passe par
 | 16 | `16-avisos-e-midia-login.md` | Avisos, mídia do login e permissão "Pode publicar avisos" |
 | 18 | `18-setores-acesso.md` | Setores de acesso (Comercial hoje), cadastro de usuários e políticas RESTRICTIVE |
 | 20 | `20-carrinho-orcamento-shop9.md` | Catálogo de produtos, carrinho, orçamento da Rota, fila de envio ao Shop9 e limites de desconto |
+| 21 | `21-conector-shop9.md` | Conector local do Shop9: chave pública Ed25519, nonces, lotes idempotentes, fila pelo conector e tela de Integrações (depois da 20) |
 
 Antes de colar a mensagem 01, troque `<EMAIL_DO_ADMINISTRADOR>` pelo e-mail de quem será o administrador.
 

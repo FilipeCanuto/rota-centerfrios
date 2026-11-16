@@ -204,6 +204,35 @@ export async function simularBackend(
     configuracoes_regras: [],
     feriados: FERIADOS,
     "rpc/meus_setores": ["comercial"],
+    "rpc/admin_shop9_status": {
+      modo: "conector",
+      ambiente: "homologacao",
+      conectores: [
+        {
+          id: "c0000000-0000-4000-8000-000000000001",
+          nome: "Computador do Integrações",
+          ativo: true,
+          ultimo_contato: new Date().toISOString(),
+          versao: "0.1.0",
+        },
+      ],
+      eventos: [
+        {
+          id: "e1",
+          criado_em: new Date().toISOString(),
+          tipo: "envio_orcamento",
+          ok: true,
+          mensagem: "ORC-1",
+        },
+        {
+          id: "e2",
+          criado_em: new Date().toISOString(),
+          tipo: "envio_orcamento",
+          ok: false,
+          mensagem: "Cliente não cadastrado no Shop9",
+        },
+      ],
+    },
     // `rh` aparece como disponível só aqui: o módulo de prévia vem de VITE_SETORES_PREVIA (playwright.config).
     setores: [
       ["comercial", "Comercial", "briefcase", true, true],
