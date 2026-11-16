@@ -40,3 +40,70 @@ Conferido e correto: todas as funções `SECURITY DEFINER` têm `search_path` fi
 | R12 | Baixo | Pontos de dias passados dependem de alguém abrir a tela. | `calcular_pontos_dia` aceita qualquer dia e regrava com a meta de hoje (documentado em `progresso.md`). | Relatado |
 
 Conferido e correto: fuso de Maceió no app (`dataLocal`) e no banco (`AT TIME ZONE 'America/Maceio'`); dia útil igual no app e no banco (segunda a sexta, menos feriados da empresa ou globais); cobertura (compra no mês ou contato qualificado) igual em `painel_vendedor`, `cobertura_vendedor`, `painel_gestao` e `calcular_pontos_dia`; "esquecido" e "90 dias" iguais no Início, na Gestão e em `remanejar_cliente`; carrinho com totais por item no servidor, limite de carrinhos com trava, um carrinho aberto por cliente (índice único), conclusão idempotente (trava + chave única), desconto validado ao adicionar, alterar e concluir, quem pede a liberação não decide e o supervisor respeita o teto; fila do Shop9 com transições válidas, reserva de 5 minutos e `SKIP LOCKED`; lotes do conector idempotentes.
+
+## 3. Robustez
+
+| Nº | Grav. | Achado | Arquivo e causa | Situação |
+| --- | --- | --- | --- | --- |
+| B1 | Alto | Queda de rede joga a pessoa para a tela de login. | `src/routes/_authenticated/route.tsx`: o `beforeLoad` chama `supabase.auth.getUser()` (vai ao servidor) a cada troca de tela; sem resposta, `data.user` vem nulo e a rota redireciona para `/auth`, mesmo com sessão válida. | |
+| B2 | Médio | Falha ao carregar a sessão vira "usuário sem papéis e sem empresas". | `src/modulos/sessao/sessao.tsx` `carregarSessao`: os erros de `usuarios`, `user_roles` e `empresas` são ignorados; o resultado vazio fica guardado por 60 s. Telas aparecem vazias e os atalhos de gestor somem, sem mensagem de erro. | |
+| B3 | Médio | Erro de permissão é repetido 3 vezes antes de aparecer. | `src/router.tsx`: `QueryClient` sem padrões; toda consulta com erro (inclusive "sem acesso") tenta de novo 3 vezes com espera, atrasando o `EstadoErro` em vários segundos. | |
+| B4 | Médio | Botão "Apagar dados de demonstração" sempre falha. | `src/routes/_authenticated/mais.tsx` e `src/modulos/configuracoes/dados.ts`: chamam `apagar_dados_demo`, que desde a `0028` só o servidor executa. | |
+| B5 | Baixo | Listas cortadas sem aviso. | `src/modulos/orcamentos/dados.ts` (200 orçamentos) e `src/modulos/clientes/dados.ts` (2.000 clientes para montar filtros, `shortcut` documentado). Total e "parados" ficam errados acima do corte. | Relatado |
+| B6 | Baixo | Contato sem proteção contra toque duplo. | `src/modulos/contato/dados.ts`: `insert` simples; repetir cria dois contatos (não altera a cobertura, que conta clientes distintos). | Relatado |
+| B7 | Baixo | Virada do dia com a tela aberta. | Documentado em `progresso.md`: as tarefas automáticas do novo dia só aparecem ao recarregar. | Relatado |
+
+Sessão vencida: o Supabase renova o token sozinho; se a renovação falha ele emite `SIGNED_OUT` e o `__root.tsx` revalida as rotas, que levam ao login. Funciona; depende de B1 para não confundir "sem rede" com "sem sessão".
+
+## 4. Desempenho
+
+| Nº | Grav. | Achado | Arquivo e causa | Situação |
+| --- | --- | --- | --- | --- |
+| D1 | Médio | Uma ida ao servidor de autenticação antes de cada tela. | Mesmo `getUser()` do B1: toda navegação espera essa resposta. | |
+| D2 | Médio | Tudo é recarregado a cada foco da janela e a cada troca de tela. | `src/router.tsx`: sem `staleTime` padrão. Voltar para a aba refaz todas as consultas ativas, inclusive `painel_vendedor` (carteira inteira em JSON, uma chamada por empresa). | |
+| D3 | Baixo | JavaScript inicial. | `vite build`: `index` 309 KB (97 KB comprimido) + `client` 216 KB (55 KB) + `route` 56 KB (17 KB), cerca de 170 KB comprimidos antes da primeira tela; as telas já são divididas por rota (110 arquivos). Aceitável; não mexido. | Relatado |
+| D4 | Baixo | Consultas sem limite pequenas. | Feriados lidos inteiros em `orcamentos/dados.ts`; `painel_vendedor` devolve a carteira toda (decisão registrada). | Relatado |
+
+Web Vitals (LCP, INP, CLS) não foram medidos nesta sessão; segue a pendência de medir em aparelho real (`DESEMPENHO=1 bun x playwright test e2e/desempenho.spec.ts`).
+
+## 5. Prontidão para conexões
+
+### 5.1 Shop9: PR #21 (conector) contra a documentação pública da Idealsoft
+
+Fonte: <https://www.idealsoft.com.br/integracoes/> (módulo Integrações do Shop Control 9), lida em 16/11/2026. O PR #21 já está no `main`; revisão sem editar. O lado da Rota (assinatura Ed25519, nonce, limite de taxa, fila, lotes idempotentes) está sólido. O lado do Shop9 (`conector-shop9/src/shop9/adaptador.js`) foi escrito por suposição e **não bate com a documentação em nenhum ponto**; hoje só funciona contra o simulador.
+
+| Tema | O que o conector faz | O que a documentação diz |
+| --- | --- | --- |
+| Autenticação | Cabeçalhos `x-shop9-serie`, `x-shop9-timestamp`, `x-shop9-signature` = HMAC em hexadecimal de `timestamp + caminho`. | `GET /auth/?serie=&codfilial=` devolve `token` e `expireAt` (UTC). Depois, em toda chamada: `Authorization: Token <token>`, `CodFilial`, `Timestamp` e `Signature` = Base64 de HMAC-SHA256 de `método em minúsculas + timestamp + Base64(corpo sem espaços nas pontas)`, com a senha do módulo. Token expira e deve ser renovado. |
+| Erros | Usa o status HTTP (`r.ok`) e separa 4xx de 5xx. | Toda resposta volta **HTTP 200** com `{sucesso, mensagem, tipo, complementoTipo, statusCode, dados}`. Com o código atual, um erro do Shop9 seria tratado como sucesso. Decidir por `sucesso` e `tipo` (`AUTENTICACAO_INVALIDA`, `CAMPO_INVALIDO`, `REGISTRO_NAO_ENCONTRADO`, `LICENCA_EXPIRADA_OU_INVALIDA`…). |
+| Paginação | `?filial=&desde=&limite=500`, resposta `Itens`, `Cursor`, `Mais`. | Página no caminho (`/clientes/1`, `/saidas/1`…), **20 registros por página** (10 em alguns), até vir `tipo = FIM_DE_PAGINA`. Filtro por data de alteração: `datade` e `dataate` (`AAAA-MM-DD HH:MM:SS`). A carga inicial são milhares de páginas: juntar páginas antes de chamar `sincronizar`. |
+| Teste de vida | `GET /status`. | Não existe; usar `/auth` ou `/filiais/1`. |
+| Orçamento | `POST /orcamentos` com `ChaveExterna`, `EmailVendedor`, `DescontoPct`. | Não existe `/orcamentos`. Orçamento é uma **saída**: `POST /saidas` (síncrono) ou `POST /vendas` (assíncrono, com recibo consultado em `GET /vendas/{recibo}`), com `codigoOperacao` (o código da operação de orçamento cadastrado no Shop9; tipos `ORC`, `DAV`, `PVN`…), `codigoCliente`, `codigoVendedor_1`, `codigoVendedor_2`, `data`, `usarValoresTabelaPrecos`, `produtos[{codigo, quantidade, precoUnitario, descontoUnitario}]`, `recebimentos`, `observacao`, `ReferenciaInterna`. Desconto é **valor por unidade**, não percentual. Vendedor é **código**, não e-mail. |
+| Idempotência | Supõe que `ChaveExterna` impede duplicar. | Não há chave externa documentada. Candidato: `ReferenciaInterna`. Sem confirmação da Idealsoft, um envio que cai depois de criar e antes de responder **duplica o orçamento** na nova tentativa. Confirmar antes de ligar o modo conector. |
+| Vendas | `/vendas` com `NumeroNota`, `DataFaturamento`… | `GET /saidas/{pág}?tipodata=E&datade=&dataate=&tiposoperacao=VND`: `tipodata` A = alteração, C = criação, **E = efetivação** (a data que a meta deve usar, R4). Detalhe em `/saidas/detalhes/{ordem}`. |
+| Devoluções | Não trata. | `GET /devolucao/{pág}?tipodata=&datade=&dataate=` e `/devolucao/detalhes/{id}`; saída pode ser inativada (`PATCH /saidas/{id}/ativar`). Resolve R2 quando houver a regra. |
+| Clientes | `RazaoSocial`, `Fone`, `EmailVendedor`. | `GET /clientes/{pág}?datade=&dataate=&ativo=A`; campos `nome`, `fantasia`, `cpfCnpj`, `telefone1`, `cidade`, `codigoClasse`, `vendedor1.codigo`, `vendedor2.codigo`, `limiteCredito`, `bloqueado` (serve para a situação financeira da ficha). O vínculo com o usuário da Rota precisa de um de-para **código do funcionário → e-mail** (`GET /funcionarios/{pág}?vendedor=true`). |
+| Produtos e preços | `Codigo`, `Descricao`, `Preco`. | `GET /produtos/{pág}`, preços em `GET /v3/precos/{pág}` e tabelas em `/tabelasprecos/{pág}`; estoque em `/v2/estoque/{pág}`. Definir qual tabela de preço vale para a Rota. |
+| Endereço do serviço | URL local do módulo, por ambiente. | "URL do serviço fornecida pela IdealSoft para o seu ambiente". Homologação: `http://idealsoftexportaweb.eastus.cloudapp.azure.com:60500/` (**HTTP sem TLS**). Série, filial de teste e senha: pedir a `suporte@idealsoft.com.br`. |
+| Licença | — | O módulo exige Shop Control 9 **Corporate** e tem custo na renovação (`comercial@idealsoft.com.br`, (41) 3013-1161). Confirmar antes de homologar. |
+
+Outros pontos do PR: o relógio do computador do conector precisa estar certo (janela de 5 minutos); `conector_resultado` não confere quem reservou (S6); `docs/shop9-mapeamento.md` ainda pede à Idealsoft itens que a documentação pública já responde (autenticação, paginação, filtros, devoluções). O que continua em aberto de fato: chave de idempotência, código da operação de orçamento, de-para de vendedor, tabela de preço, limites de requisição e se o Shop9 aceita o nosso preço e desconto.
+
+### 5.2 WhatsApp (Evolution), e-mail e Instagram
+
+| Canal | Hoje | Situação |
+| --- | --- | --- |
+| WhatsApp | `whatsappManual` (`src/integracoes/manual.ts`): só abre `wa.me`; nada é recebido nem registrado. Não havia adaptador da Evolution. | Esqueleto criado na Fase 2 |
+| E-mail (IMAP/SMTP) | Não existia. | Esqueleto criado na Fase 2 |
+| Instagram | `instagramManual`: o vendedor cola o endereço do post e o supervisor valida. Sem conexão com a conta. | Esqueleto criado na Fase 2 |
+
+## 6. Dívidas
+
+| Nº | Grav. | Achado | Arquivo e causa | Situação |
+| --- | --- | --- | --- | --- |
+| V1 | Baixo | Casts marcados `shortcut` que já podem sair. | Os tipos gerados já têm `setores`, `usuario_setores`, `avisos`, `midia_login`, `meus_setores` e as funções `admin_*`; os `supabase as any` de `avisos/dados.ts`, `configuracoes/midiaLogin.ts`, `setoresAdmin.ts`, `usuarios.ts`, `setores/setores.ts` e `sessao/sessao.tsx` ficaram. (`configuracoes/integracoesShop9.ts` é de outra sessão.) | |
+| V2 | Médio | Teste instável do Início no celular escuro. | `e2e/acessibilidade.spec.ts` (axe); `playwright.config.ts` com `retries: 0`. | |
+| V3 | Baixo | Prettier em `SimularAlertas.tsx`. | Único erro do `eslint` (linha 37, mais de 100 colunas); os outros 26 itens são avisos `react-refresh`. | |
+| V4 | Médio | Preferências e silêncio das notificações. | `preferencias_notificacao` existe (`0018`) e o mascote já a lê (`src/modulos/mascote/dados.ts`); faltam a tela de preferências e o silêncio no sino fora do expediente. | |
+| V5 | Médio | Botão "Apagar dados de demonstração". | Ver B4. | |
+| V6 | Baixo | `docs/progresso.md` desatualizado. | Etapas "aguarda PR" que já estão no `main`; mensagens 17 a 19 como "não enviadas" com as migrações 0023 a 0026 aplicadas; carrinho "sem telas". | |
