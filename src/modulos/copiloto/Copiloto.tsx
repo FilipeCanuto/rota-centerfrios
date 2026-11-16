@@ -19,6 +19,8 @@ import { apelidoValido, expressaoDoCopiloto, VERSOES_PINGUIM, type VersaoPinguim
 import { useAtualizarCopiloto } from "./dados";
 
 type Usuario = NonNullable<Sessao["usuario"]>;
+/** Voz desligada por decisão de produto; o código do "Ouvir" fica para quando ela voltar. */
+const VOZ_LIGADA = false;
 interface Contexto {
   clientesHoje: number;
   orcamentosParados: number;
@@ -68,7 +70,7 @@ export function Copiloto({ usuario, contexto }: { usuario: Usuario; contexto: Co
       </div>
       {!minimizado && (
         <div className="flex flex-wrap gap-2">
-          {voz.disponivel() && (
+          {VOZ_LIGADA && voz.disponivel() && (
             <Button variant="outline" className="min-h-11" onClick={() => voz.falar(msg)}>
               <Volume2 aria-hidden="true" /> Ouvir
             </Button>
@@ -87,6 +89,28 @@ export function Copiloto({ usuario, contexto }: { usuario: Usuario; contexto: Co
         </SheetContent>
       </Sheet>
     </section>
+  );
+}
+
+/** Painel "Personalizar o copiloto", aberto pelas preferências do cabeçalho. */
+export function PersonalizarCopiloto({
+  usuario,
+  aberto,
+  aoMudar,
+}: {
+  usuario: Usuario;
+  aberto: boolean;
+  aoMudar: (v: boolean) => void;
+}) {
+  return (
+    <Sheet open={aberto} onOpenChange={aoMudar}>
+      <SheetContent
+        side="bottom"
+        className="mx-auto max-h-[90dvh] max-w-2xl overflow-y-auto rounded-t-xl"
+      >
+        {aberto && <Personalizar usuario={usuario} aoFechar={() => aoMudar(false)} />}
+      </SheetContent>
+    </Sheet>
   );
 }
 

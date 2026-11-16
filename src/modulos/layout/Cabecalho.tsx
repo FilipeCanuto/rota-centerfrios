@@ -1,6 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeftRight, Bell, LogOut, Monitor, Moon, Settings, Sun, Users } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Bell,
+  LogOut,
+  Monitor,
+  Moon,
+  Settings,
+  Settings2,
+  Sun,
+  Users,
+} from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,12 +47,14 @@ import { useNotificacoes } from "@/modulos/notificacoes/dados";
 import { podeVerAmbas, useEmpresa, useEmpresasAtivas, useSessao } from "@/modulos/sessao/sessao";
 import { ABA_PADRAO } from "@/modulos/configuracoes/abas";
 import { useCatalogo } from "@/modulos/setores/setores";
+import { PersonalizarCopiloto } from "@/modulos/copiloto/Copiloto";
 import { BuscaGlobal } from "./BuscaGlobal";
 import { podeConfigurar } from "./navegacao";
 import { useCoberturaCabecalho } from "./dados";
 
 export function Cabecalho() {
   const { data: sessao } = useSessao();
+  const [copiloto, setCopiloto] = useState(false);
   const { data: catalogo } = useCatalogo();
   const chavesDisp = catalogo?.chaves ?? [];
   const { empresa, definir } = useEmpresa();
@@ -73,7 +86,7 @@ export function Cabecalho() {
         />
         <Link
           to="/inicio"
-          className="pressionar min-w-0 shrink rounded-md md:hidden"
+          className="pressionar min-w-0 shrink overflow-hidden rounded-md md:hidden"
           aria-label="Rota CENTERFRIOS — Início"
         >
           <Logo className="h-7" />
@@ -210,6 +223,15 @@ export function Cabecalho() {
                   <DropdownMenuSeparator className="sm:hidden" />
                 </>
               )}
+              {sessao?.usuario && (
+                <>
+                  <DropdownMenuItem onSelect={() => setCopiloto(true)} className="min-h-11">
+                    <Settings2 className="mr-2 size-4" aria-hidden="true" />
+                    Personalizar o copiloto
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuLabel className="text-xs text-muted-foreground">Tema</DropdownMenuLabel>
               <DropdownMenuRadioGroup value={tema} onValueChange={(v) => definirTema(v as Tema)}>
                 <DropdownMenuRadioItem value="claro" className="min-h-11">
@@ -248,6 +270,9 @@ export function Cabecalho() {
           </DropdownMenu>
         </div>
       </div>
+      {sessao?.usuario && (
+        <PersonalizarCopiloto usuario={sessao.usuario} aberto={copiloto} aoMudar={setCopiloto} />
+      )}
     </header>
   );
 }

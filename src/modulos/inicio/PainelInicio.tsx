@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarPlus, ClipboardCheck, MessageCircle, Sparkles, UserX } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarPlus,
+  ClipboardCheck,
+  MessageCircle,
+  Sparkles,
+  UserX,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,7 +14,7 @@ import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { Contador } from "@/design-system/movimento";
 import { GraficoAnel } from "@/design-system/GraficoAnel";
-import { Copiloto } from "@/modulos/copiloto/Copiloto";
+import { BarraMeta } from "@/design-system/BarraMeta";
 import { Progresso } from "@/design-system/Progresso";
 import { SeloStatus, type TomStatus } from "@/design-system/SeloStatus";
 import { formatarDataLonga, formatarMoeda, formatarPercentual } from "@/design-system/formatar";
@@ -103,7 +110,7 @@ export function PainelInicio() {
   return (
     <div className="cascata flex flex-col gap-5">
       <div>
-        <p className="text-sm capitalize text-muted-foreground">
+        <p className="text-sm text-muted-foreground first-letter:uppercase">
           <time dateTime={formatarISO(hoje)}>{formatarDataLonga(hoje)}</time>
         </p>
         <h1 className="text-2xl font-extrabold sm:text-3xl">Olá, {usuario?.nome ?? "…"}</h1>
@@ -120,20 +127,11 @@ export function PainelInicio() {
         <Carregando />
       ) : (
         <>
-          <Copiloto
-            usuario={usuario}
-            contexto={{
-              clientesHoje: p.plano.length,
-              orcamentosParados: p.orcamentosParados,
-              atingimento: p.atingimento,
-            }}
-          />
-          <div className="grid gap-5 lg:grid-cols-[2fr_1fr]">
-            <MetaMes p={p} />
-            <Cobertura p={p} />
-          </div>
+          {/* Ordem aprovada: o que fazer agora, meta do mês, metas do dia, cobertura, o restante. */}
+          <OQueFazer p={p} aoRegistrar={setContato} />
+          <MetaMes p={p} />
           <MetasDoDia p={p} />
-          <PlanoDoDia p={p} aoRegistrar={setContato} />
+          <Cobertura p={p} />
           <Alertas p={p} />
           <RegistrarContato
             cliente={contato}
@@ -160,58 +158,40 @@ function Carregando() {
   );
 }
 
+/** Estado vazio como chamada para ação: diz o que fazer e leva até lá. */
+function Chamada({
+  texto,
+  rotulo,
+  para,
+}: {
+  texto: string;
+  rotulo: string;
+  para: "/clientes" | "/agenda" | "/orcamentos";
+}) {
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-muted-foreground">{texto}</p>
+      <Button asChild className="min-h-11 shrink-0">
+        <Link to={para}>
+          {rotulo} <ArrowRight aria-hidden="true" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
 function MetaMes({ p }: { p: Painel }) {
-  if (p.meta.meta_vendas <= 0)
-    return (
-      <Secao id="meta" titulo="Meta do mês">
-        <p className="text-muted-foreground">Nenhuma meta cadastrada para este mês.</p>
-      </Secao>
-    );
-  const resumo = `${formatarPercentual(p.atingimento)} da meta de ${formatarMoeda(p.meta.meta_vendas)} atingidos. Faltam ${formatarMoeda(p.falta)}.`;
   return (
     <Secao id="meta" titulo="Meta do mês">
-      <div className="grid items-center gap-6 sm:grid-cols-[auto_1fr]">
-        <GraficoAnel
-          valor={p.atingimento}
-          rotulo="Atingimento da meta do mês"
-          resumo={resumo}
-          tabela={[
-            { indicador: "Meta do mês", valor: formatarMoeda(p.meta.meta_vendas) },
-            { indicador: "Faturado", valor: formatarMoeda(p.faturadoMes) },
-            { indicador: "Falta", valor: formatarMoeda(p.falta) },
-            { indicador: "Projeção", valor: formatarMoeda(p.projecao) },
-            { indicador: "Meta do dia", valor: formatarMoeda(p.metaDoDia) },
-          ]}
+      {p.meta.meta_vendas <= 0 ? (
+        <Chamada
+          texto="Nenhuma meta cadastrada para este mês. Enquanto ela não chega, avance a carteira."
+          rotulo="Ver carteira"
+          para="/clientes"
         />
-        <div className="flex flex-col gap-5">
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
-            {(
-              [
-                ["Faturado", p.faturadoMes],
-                ["Falta", p.falta],
-                ["Projeção", p.projecao],
-                ["Meta do dia", p.metaDoDia],
-              ] as const
-            ).map(([k, v]) => (
-              <div key={k}>
-                <dt className="text-sm text-muted-foreground">{k}</dt>
-                <dd className="numeros font-display text-xl font-bold">
-                  <Contador valor={v} formatar={formatarMoeda} />
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <div>
-            {p.atingimento >= 1 ? (
-              <SeloStatus tom="conquista">Meta atingida</SeloStatus>
-            ) : p.projecao >= p.meta.meta_vendas ? (
-              <SeloStatus tom="sucesso">No ritmo da meta</SeloStatus>
-            ) : (
-              <SeloStatus tom="atencao">Abaixo do ritmo</SeloStatus>
-            )}
-          </div>
-        </div>
-      </div>
+      ) : (
+        <BarraMeta faturado={p.faturadoMes} meta={p.meta.meta_vendas} ritmo={p.ritmo} />
+      )}
     </Secao>
   );
 }
@@ -270,11 +250,19 @@ function MetasDoDia({ p }: { p: Painel }) {
   );
 }
 
-function PlanoDoDia({ p, aoRegistrar }: { p: Painel; aoRegistrar: (c: ClienteContato) => void }) {
+const URGENTE: MotivoTipo[] = ["recompra_urgente", "orcamento_parado"];
+
+function OQueFazer({ p, aoRegistrar }: { p: Painel; aoRegistrar: (c: ClienteContato) => void }) {
+  const urgentes = p.alertas.filter((a) => URGENTE.includes(a.tipo));
   return (
-    <Secao id="plano" titulo={`Plano do dia (${p.plano.length})`}>
+    <Secao id="plano" titulo="O que fazer agora">
+      <h3 className="mb-3 font-semibold">Plano do dia ({p.plano.length})</h3>
       {p.plano.length === 0 ? (
-        <p className="text-muted-foreground">Nenhum cliente pendente hoje. Bom trabalho!</p>
+        <Chamada
+          texto="Nenhum cliente pendente hoje. Aproveite para adiantar a agenda da semana."
+          rotulo="Abrir a agenda"
+          para="/agenda"
+        />
       ) : (
         <ol className="cascata divide-y">
           {p.plano.map((item, i) => (
@@ -325,30 +313,47 @@ function PlanoDoDia({ p, aoRegistrar }: { p: Painel; aoRegistrar: (c: ClienteCon
           ))}
         </ol>
       )}
+      {urgentes.length > 0 && (
+        <>
+          <h3 className="mb-3 mt-6 font-semibold">Alertas urgentes ({urgentes.length})</h3>
+          <ListaAlertas alertas={urgentes} />
+        </>
+      )}
     </Secao>
   );
 }
 
-function Alertas({ p }: { p: Painel }) {
+function ListaAlertas({ alertas }: { alertas: Painel["alertas"] }) {
   return (
-    <Secao id="alertas" titulo={`Alertas do dia (${p.alertas.length})`}>
-      {p.alertas.length === 0 ? (
-        <p className="text-muted-foreground">Sem alertas hoje.</p>
-      ) : (
-        <ul className="cascata grid gap-3 md:grid-cols-2">
-          {p.alertas.slice(0, 12).map((a) => (
-            <li key={a.id} className="linha-interativa flex flex-col gap-1.5 rounded-lg border p-3">
-              <SeloStatus tom={TOM[a.tipo].tom}>{TOM[a.tipo].rotulo}</SeloStatus>
-              <p className="font-semibold">{a.titulo}</p>
-              <p className="text-sm text-muted-foreground">{a.detalhe}</p>
-            </li>
-          ))}
-        </ul>
+    <>
+      <ul className="cascata grid gap-3 md:grid-cols-2">
+        {alertas.slice(0, 12).map((a) => (
+          <li key={a.id} className="linha-interativa flex flex-col gap-1.5 rounded-lg border p-3">
+            <SeloStatus tom={TOM[a.tipo].tom}>{TOM[a.tipo].rotulo}</SeloStatus>
+            <p className="font-semibold">{a.titulo}</p>
+            <p className="text-sm text-muted-foreground">{a.detalhe}</p>
+          </li>
+        ))}
+      </ul>
+      {alertas.length > 12 && (
+        <p className="mt-3 text-sm text-muted-foreground">E mais {alertas.length - 12} alertas.</p>
       )}
-      {p.alertas.length > 12 && (
-        <p className="mt-3 text-sm text-muted-foreground">
-          E mais {p.alertas.length - 12} alertas.
-        </p>
+    </>
+  );
+}
+
+function Alertas({ p }: { p: Painel }) {
+  const outros = p.alertas.filter((a) => !URGENTE.includes(a.tipo));
+  return (
+    <Secao id="alertas" titulo={`Outros alertas (${outros.length})`}>
+      {outros.length === 0 ? (
+        <Chamada
+          texto="Sem outros alertas hoje. Que tal revisar os orçamentos em aberto?"
+          rotulo="Ver orçamentos"
+          para="/orcamentos"
+        />
+      ) : (
+        <ListaAlertas alertas={outros} />
       )}
     </Secao>
   );

@@ -35,6 +35,7 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-ouro: var(--ouro);
   --color-ouro-foreground: var(--ouro-foreground);
+  --color-ouro-texto: var(--ouro-texto);
   --color-sucesso: var(--sucesso);
   --color-atencao: var(--atencao);
   --color-perigo: var(--perigo);
@@ -162,6 +163,7 @@
   --cor-primaria-suave: var(--polar-azul-100);
   --cor-destaque: var(--polar-ouro-500);
   --cor-sobre-destaque: var(--polar-marinho);
+  --cor-ouro-texto: var(--polar-ambar-700); /* ouro como texto, AA no claro */
   --cor-sucesso: var(--polar-verde-700);
   --cor-atencao: var(--polar-ambar-700);
   --cor-perigo: var(--polar-vermelho-700);
@@ -183,6 +185,7 @@
   --cor-primaria-suave: var(--polar-noite-600);
   --cor-destaque: var(--polar-ouro-400);
   --cor-sobre-destaque: var(--polar-marinho);
+  --cor-ouro-texto: var(--polar-ouro-400);
   --cor-sucesso: var(--polar-verde-400);
   --cor-atencao: var(--polar-ouro-400);
   --cor-perigo: var(--polar-vermelho-300);
@@ -220,6 +223,7 @@
   --accent-foreground: var(--cor-texto);
   --ouro: var(--cor-destaque);
   --ouro-foreground: var(--cor-sobre-destaque);
+  --ouro-texto: var(--cor-ouro-texto);
   --sucesso: var(--cor-sucesso);
   --atencao: var(--cor-atencao);
   --perigo: var(--cor-perigo);
@@ -1108,4 +1112,58 @@ html[data-aba-oculta] .m-piscar {
   .malha {
     animation: none;
   }
+}
+
+/* ---- Barra "Meta do mês": só transform e opacity; tudo para com prefers-reduced-motion ---- */
+.barra-meta {
+  --duracao-grafico: 1400ms;
+  --curva-barra: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.barra-meta__mov {
+  transition: transform 1400ms var(--curva-barra);
+  will-change: transform;
+}
+.barra-meta__respira {
+  animation: barra-respira 3.8s ease-in-out infinite;
+}
+.barra-meta__listras {
+  animation: barra-listras 7s linear infinite;
+}
+.barra-meta__reflexo {
+  animation: barra-reflexo 9s ease-in-out infinite;
+}
+.barra-meta[data-viva="false"] :is(.barra-meta__respira, .barra-meta__listras, .barra-meta__reflexo, .barra-meta__festa) {
+  animation-play-state: paused;
+}
+.barra-meta__tabela {
+  animation: barra-tabela 360ms var(--curva-barra) both;
+}
+.barra-meta__festa {
+  animation: barra-festa 1.6s var(--curva-barra) both;
+}
+@keyframes barra-respira {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+@keyframes barra-listras {
+  to { transform: translateX(28px); }
+}
+@keyframes barra-reflexo {
+  0%, 70% { transform: translateX(-120%); opacity: 0; }
+  75% { opacity: 0.55; }
+  100% { transform: translateX(520%); opacity: 0; }
+}
+@keyframes barra-tabela {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@keyframes barra-festa {
+  0% { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+  40% { opacity: 1; transform: scale(1.25) rotate(8deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-meta__mov { transition: none; }
+  .barra-meta__respira, .barra-meta__listras, .barra-meta__reflexo, .barra-meta__festa,
+  .barra-meta__tabela { animation: none; }
+  .barra-meta__reflexo { opacity: 0; }
 }

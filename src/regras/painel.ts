@@ -17,6 +17,7 @@ import {
   type Feriados,
 } from "./datas";
 import { atingimento, metaDiariaCobertura, metaDoDia, projecao } from "./metas";
+import { calcularRitmo } from "./ritmo";
 
 /** Formato devolvido por painel_vendedor no banco (uma empresa). */
 export interface MetaBase {
@@ -235,6 +236,12 @@ export function calcularPainel(input: {
     falta: Math.max(0, meta.meta_vendas - faturadoMes),
     atingimento: atingimento(faturadoMes, meta.meta_vendas),
     projecao: projecao(faturadoMes, hoje, feriadosGerais),
+    ritmo: calcularRitmo({
+      faturado: faturadoMes,
+      meta: meta.meta_vendas,
+      hoje,
+      feriados: feriadosGerais,
+    }),
     metaDoDia: mDia,
     cobertura: cob,
     naoCobertos: cob.total - cob.cobertos,
