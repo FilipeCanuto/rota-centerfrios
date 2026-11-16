@@ -1,11 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { csvParaLancamento, type OrcamentoParaEnvio } from "@/regras/carrinho";
 import type {
   CanalMensagens,
   Copiloto,
   FonteInstagram,
   FonteShop9,
   ResultadoImportacao,
+  Shop9Gateway,
   Voz,
 } from "./tipos";
 
@@ -58,6 +60,25 @@ export const shop9PorPlanilha: FonteShop9 = {
       total.erros.push(...r.erros);
     }
     return total;
+  },
+};
+
+/** Lançamento manual: exporta pendentes em CSV e registra o código que o Shop9 deu. */
+export const shop9EnvioManual: Shop9Gateway = {
+  nome: "Lançamento manual no Shop9",
+  automatico: false,
+  async pendentes(empresaId) {
+    const { data, error } = await supabase.rpc("shop9_pendentes", { _empresa_id: empresaId });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as OrcamentoParaEnvio[];
+  },
+  exportar: csvParaLancamento,
+  async marcarEnviado(orcamentoId, codigoShop9) {
+    const { error } = await supabase.rpc("shop9_marcar_enviado", {
+      _orcamento_id: orcamentoId,
+      _codigo_shop9: codigoShop9.trim(),
+    });
+    if (error) throw new Error(error.message);
   },
 };
 

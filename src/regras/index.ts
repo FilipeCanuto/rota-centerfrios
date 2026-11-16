@@ -15,4 +15,5 @@ export * from "./importacao";
 export * from "./midia";
 export * from "./mascote";
 export * from "./setores";
+export * from "./carrinho";
 export * from "./ritmo";

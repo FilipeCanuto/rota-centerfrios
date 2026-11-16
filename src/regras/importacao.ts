@@ -2,7 +2,7 @@ import { lerData, lerNumero, lerTelefone, normalizarCabecalho, type LinhaCsv } f
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export type TipoImportacao = "clientes" | "vendas" | "orcamentos";
+export type TipoImportacao = "produtos" | "clientes" | "vendas" | "orcamentos";
 
 export interface CampoImportacao {
   chave: string;
@@ -13,6 +13,33 @@ export interface CampoImportacao {
 }
 
 export const CAMPOS: Record<TipoImportacao, CampoImportacao[]> = {
+  produtos: [
+    {
+      chave: "codigo_shop9",
+      rotulo: "Código do produto",
+      obrigatorio: true,
+      apelidos: ["codigo", "codproduto", "codigoproduto", "referencia", "cod"],
+    },
+    {
+      chave: "descricao",
+      rotulo: "Descrição",
+      obrigatorio: true,
+      apelidos: ["descricao", "produto", "nome"],
+    },
+    { chave: "unidade", rotulo: "Unidade", obrigatorio: false, apelidos: ["unidade", "un", "und"] },
+    {
+      chave: "preco_tabela",
+      rotulo: "Preço de tabela",
+      obrigatorio: true,
+      apelidos: ["precotabela", "preco", "precovenda", "valor"],
+    },
+    {
+      chave: "ativo",
+      rotulo: "Ativo (sim/não)",
+      obrigatorio: false,
+      apelidos: ["ativo", "situacao"],
+    },
+  ],
   clientes: [
     {
       chave: "codigo_shop9",
@@ -162,6 +189,9 @@ export interface ErroLinha {
 }
 export type LinhaImportacao = Record<string, unknown> & { linha: number };
 
+const ATIVO = new Set(["sim", "s", "ativo", "1", "true"]);
+const INATIVO = new Set(["nao", "não", "n", "inativo", "0", "false"]);
+
 const STATUS: Record<string, string> = {
   aberto: "aberto",
   ganho: "ganho",
@@ -223,6 +253,30 @@ export function montarLinhas(
         segmento: valor(l, "segmento"),
         cidade: valor(l, "cidade"),
         vendedor_email: valor(l, "vendedor_email").toLowerCase(),
+      };
+      vistos.set(codigo, nova);
+      linhas.push(nova);
+      return;
+    }
+
+    if (tipo === "produtos") {
+      if (vistos.has(codigo))
+        return erro(
+          "codigo_shop9",
+          `Produto ${codigo} repetido no arquivo (vale a primeira linha).`,
+        );
+      const preco = lerNumero(valor(l, "preco_tabela"));
+      if (preco === null || preco < 0) return erro("preco_tabela", "Preço inválido.");
+      const ativo = valor(l, "ativo").toLowerCase();
+      if (ativo && !ATIVO.has(ativo) && !INATIVO.has(ativo))
+        return erro("ativo", "Ativo deve ser sim ou não.");
+      const nova: LinhaImportacao = {
+        linha: n,
+        codigo_shop9: codigo,
+        descricao: valor(l, "descricao"),
+        unidade: valor(l, "unidade").toUpperCase(),
+        preco_tabela: preco,
+        ativo: !INATIVO.has(ativo),
       };
       vistos.set(codigo, nova);
       linhas.push(nova);

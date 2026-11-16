@@ -72,6 +72,43 @@ describe("mapeamento", () => {
 });
 
 describe("montar linhas", () => {
+  it("produtos: lê preço e ativo, recusa preço inválido, ativo inválido e repetidos", () => {
+    const mapa = { codigo_shop9: 0, descricao: 1, unidade: 2, preco_tabela: 3, ativo: 4 };
+    const r = montarLinhas(
+      "produtos",
+      dados(
+        ["P1", "Freezer 500L", "un", "4.599,90", ""],
+        ["P2", "Balcão", "UN", "abc", "sim"],
+        ["P1", "Repetido", "UN", "10", ""],
+        ["P3", "Antigo", "CX", "10", "não"],
+        ["P4", "Talvez", "UN", "10", "talvez"],
+      ),
+      mapa,
+    );
+    expect(r.linhas).toEqual([
+      {
+        linha: 2,
+        codigo_shop9: "P1",
+        descricao: "Freezer 500L",
+        unidade: "UN",
+        preco_tabela: 4599.9,
+        ativo: true,
+      },
+      {
+        linha: 5,
+        codigo_shop9: "P3",
+        descricao: "Antigo",
+        unidade: "CX",
+        preco_tabela: 10,
+        ativo: false,
+      },
+    ]);
+    expect(r.erros.map((e) => [e.linha, e.campo])).toEqual([
+      [3, "preco_tabela"],
+      [4, "codigo_shop9"],
+      [6, "ativo"],
+    ]);
+  });
   const mapaCli = {
     codigo_shop9: 0,
     nome: 1,

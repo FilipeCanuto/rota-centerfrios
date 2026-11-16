@@ -190,6 +190,20 @@
       "when": 1794674715375,
       "tag": "0026_setores_leitura_usuario_vinculado",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1794836624455,
+      "tag": "0027_carrinho_orcamento_shop9",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794837141336,
+      "tag": "0028_revogar_apagar_dados_demo_cliente",
+      "breakpoints": true
     }
   ]
 }
