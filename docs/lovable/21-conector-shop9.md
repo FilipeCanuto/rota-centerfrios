@@ -317,9 +317,10 @@ BEGIN
   ok := false; BEGIN PERFORM public.conector_registrar_pedido(con, 'nonce-teste-000000000', 'heartbeat'); EXCEPTION WHEN SQLSTATE 'P0409' THEN ok := true; END;
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 2b: repetição aceita'; END IF;
   ok := false;
-  FOR n IN 1..130 LOOP
-    BEGIN PERFORM public.conector_registrar_pedido(con, 'nonce-teste-' || lpad(n::text, 9, '0') || 'x', 'heartbeat');
-    EXCEPTION WHEN SQLSTATE 'P0429' THEN ok := true; EXIT; END;
+  n := 0;
+  FOR i IN 1..130 LOOP
+    BEGIN PERFORM public.conector_registrar_pedido(con, 'nonce-teste-' || lpad(i::text, 9, '0') || 'x', 'heartbeat');
+    EXCEPTION WHEN SQLSTATE 'P0429' THEN ok := true; n := i; EXIT; END;
   END LOOP;
   IF NOT ok OR n <> 120 THEN RAISE EXCEPTION 'FALHA 2c: limite não bateu no 121º pedido (parou em %)', n; END IF;
   EXECUTE 'reset role';
