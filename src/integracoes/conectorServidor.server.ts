@@ -3,8 +3,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { verificarAssinatura } from "@/regras/conector";
 
 /**
- * Entrada do conector Shop9 (POST /api/conector/<acao>). Ordem: cabeçalhos → chave do conector ativo →
- * HMAC + horário → nonce no banco (repetição e limite de taxa) → ação. Respostas de erro sem detalhe.
+ * Entrada do conector Shop9 (POST /api/conector/<acao>). Ordem: cabeçalhos → chave pública do conector ativo →
+ * assinatura Ed25519 + horário → nonce no banco (repetição e limite de taxa) → ação. Respostas de erro sem detalhe.
  * Funções do banco só para service_role: ver docs/lovable/21-conector-shop9.md.
  */
 const LIMITE_CORPO = 5 * 1024 * 1024;

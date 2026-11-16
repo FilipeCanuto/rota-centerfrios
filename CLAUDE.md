@@ -34,3 +34,12 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - Dado de cliente não vai para endereço (URL), log nem serviço externo.
 - Mascote: as telas só emitem eventos por `useMascote()` (`notificar`, `definirEstado`) e nunca importam o desenho. Contrato e como adicionar estado, mensagem e evento em [docs/mascote.md](docs/mascote.md).
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).
+
+## Banco e Lovable
+- O Lovable só aplica banco e publica. Nunca pedir a ele perguntas, conferências ou mudanças de tela.
+- Todo texto de banco (`docs/lovable/NN-*.md`) tem, nesta ordem:
+  1. a instrução: "Aplique exatamente o SQL abaixo como UMA migração nova. Não investigue o projeto, não reescreva nem otimize o SQL, não crie testes em Python. Depois rode o bloco de testes em SQL. Se algo falhar, PARE e copie o erro na resposta, sem tentar corrigir. Regenere os tipos.";
+  2. o SQL final completo, pronto para executar;
+  3. testes em SQL puro dentro de `BEGIN ... ROLLBACK` (usuários simulados com `set local role authenticated` e `request.jwt.claims`), com asserções que levantam erro se falharem, sem deixar dados.
+- Juntar as mudanças de banco num único texto sempre que possível.
+- Ao entregar, dizer "ENVIEI" ou "PRONTO PARA COLAR", nunca os dois.

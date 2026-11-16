@@ -59,14 +59,10 @@ function useAcao<A>(fn: string) {
 export const useConfigurarShop9 = () =>
   useAcao<{ _modo: ModoShop9; _ambiente: AmbienteShop9 }>("admin_shop9_configurar");
 
-/** Cria o conector (sem id) ou gira o token (com id). O token volta uma única vez. */
-export function useGerarToken() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (args: { _conector_id: string | null; _nome: string }) =>
-      chamar<{ conector_id: string; token: string }>("admin_conector_gerar_token", args),
-    onSettled: () => void qc.invalidateQueries({ queryKey: CHAVE }),
-  });
-}
+/** Cadastra o conector (sem id) ou troca a chave pública (com id). Devolve o id do conector. */
+export const useRegistrarChave = () =>
+  useAcao<{ _conector_id: string | null; _nome: string; _chave_publica: string }>(
+    "admin_conector_registrar_chave",
+  );
 
 export const useRevogarConector = () => useAcao<{ _conector_id: string }>("admin_conector_revogar");
