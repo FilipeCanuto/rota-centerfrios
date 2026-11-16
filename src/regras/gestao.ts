@@ -1,4 +1,4 @@
-import { orcamentoParado } from "./carteira";
+import { orcamentoParado, ultimaAtividadeOrcamento } from "./carteira";
 import type { ConfiguracaoRegras } from "./configuracoes";
 import { diasUteisDecorridos, diasUteisDoMes, type Feriados } from "./datas";
 
@@ -45,14 +45,8 @@ export function resumirVendedor(
     atingimento: meta > 0 ? Number(l.faturado_mes) / meta : null,
     esperado: meta > 0 && total > 0 ? diasUteisDecorridos(hoje, feriados) / total : null,
     cobertura: l.clientes_total > 0 ? l.clientes_cobertos / l.clientes_total : null,
-    // Mesmo critério do Início: último retorno (ou a data) e o último contato com o cliente.
     orcamentosParados: l.orcamentos_abertos.filter((o) =>
-      orcamentoParado(
-        [o.ultimo_followup ?? o.data, o.ultima_interacao ?? ""].sort().at(-1)!,
-        hoje,
-        cfg,
-        feriados,
-      ),
+      orcamentoParado(ultimaAtividadeOrcamento(o, o.ultima_interacao), hoje, cfg, feriados),
     ).length,
   };
 }

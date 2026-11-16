@@ -19,6 +19,10 @@ describe("situacaoOrcamento", () => {
   it("retorno de ontem tira o orçamento de parado", () => {
     expect(sit({ ultimo_followup: "2026-11-10" }).parado).toBe(false);
   });
+  it("contato de ontem com o cliente também tira de parado (mesmo critério do Início)", () => {
+    expect(situacaoOrcamento(o(), hojeISO, hoje, cfg, new Set(), "2026-11-10").parado).toBe(false);
+    expect(situacaoOrcamento(o(), hojeISO, hoje, cfg, new Set(), "2026-10-20").parado).toBe(true);
+  });
   it("próximo retorno vencido é retorno atrasado; de hoje não", () => {
     expect(sit({ proximo_followup: "2026-11-10" }).retornoAtrasado).toBe(true);
     expect(sit({ proximo_followup: hojeISO }).retornoAtrasado).toBe(false);

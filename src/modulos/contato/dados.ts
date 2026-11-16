@@ -33,6 +33,10 @@ export function useRegistrarContato() {
       }
       return { tarefaFalhou: false };
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["painel"] }),
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: ["painel"] });
+      // O contato conta como atividade dos orçamentos abertos do cliente.
+      void qc.invalidateQueries({ queryKey: ["orcamentos"] });
+    },
   });
 }
