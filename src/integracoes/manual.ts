@@ -1,11 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Json } from "@/integrations/supabase/types";
+import { csvParaLancamento, type OrcamentoParaEnvio } from "@/regras/carrinho";
 import type {
   CanalMensagens,
   Copiloto,
   FonteInstagram,
   FonteShop9,
   ResultadoImportacao,
+  Shop9Gateway,
   Voz,
 } from "./tipos";
 
@@ -24,6 +25,12 @@ export const whatsappManual: CanalMensagens = {
   },
 };
 
+// shortcut: importar_produtos e shop9_* ainda não estão nos tipos gerados; tirar o cast quando a mensagem 20 regenerar os tipos.
+const rpcLivre = supabase.rpc as unknown as (
+  fn: string,
+  args: Record<string, unknown>,
+) => Promise<{ data: unknown; error: { message: string } | null }>;
+
 const LOTE = 5000; // limite por chamada das funções importar_* no banco
 
 /** Planilha exportada do Shop9: grava pelas funções do banco (só diretoria), em lotes. */
@@ -38,10 +45,10 @@ export const shop9PorPlanilha: FonteShop9 = {
       erros: [],
     };
     for (let i = 0; i < linhas.length; i += LOTE) {
-      const { data, error } = await supabase.rpc(`importar_${tipo}`, {
+      const { data, error } = await rpcLivre(`importar_${tipo}`, {
         _empresa_id: empresaId,
         _arquivo: arquivo,
-        _linhas: linhas.slice(i, i + LOTE) as Json,
+        _linhas: linhas.slice(i, i + LOTE),
       });
       if (error) {
         total.falha =
@@ -58,6 +65,25 @@ export const shop9PorPlanilha: FonteShop9 = {
       total.erros.push(...r.erros);
     }
     return total;
+  },
+};
+
+/** Lançamento manual: exporta pendentes em CSV e registra o código que o Shop9 deu. */
+export const shop9EnvioManual: Shop9Gateway = {
+  nome: "Lançamento manual no Shop9",
+  automatico: false,
+  async pendentes(empresaId) {
+    const { data, error } = await rpcLivre("shop9_pendentes", { _empresa_id: empresaId });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as OrcamentoParaEnvio[];
+  },
+  exportar: csvParaLancamento,
+  async marcarEnviado(orcamentoId, codigoShop9) {
+    const { error } = await rpcLivre("shop9_marcar_enviado", {
+      _orcamento_id: orcamentoId,
+      _codigo_shop9: codigoShop9.trim(),
+    });
+    if (error) throw new Error(error.message);
   },
 };
 
