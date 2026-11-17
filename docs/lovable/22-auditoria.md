@@ -304,6 +304,34 @@ BEGIN
  PERFORM public.auditar('conclusao_carrinho','carrinhos',c.id,c.empresa_id,c.vendedor_id,jsonb_build_object('orcamento_id',orc,'total',c.total));
  RETURN orc;
 END $$;
+
+-- D2. Ficha do cliente: cada lançamento diz se é venda ou devolução; total de 12 meses já líquido; quantidade e ticket só de vendas.
+CREATE OR REPLACE FUNCTION public.ficha_cliente(_cliente_id uuid, _hoje date DEFAULT NULL) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path=public AS $$
+DECLARE h date:=coalesce(_hoje,(current_timestamp AT TIME ZONE 'America/Maceio')::date); c public.clientes; ini date;
+BEGIN
+ SELECT * INTO c FROM public.clientes WHERE id=_cliente_id;
+ IF NOT FOUND THEN RETURN NULL; END IF;
+ ini:=(h - interval '12 months')::date;
+ RETURN jsonb_build_object(
+  'cliente', jsonb_build_object('id',c.id,'empresa_id',c.empresa_id,'vendedor_id',c.vendedor_id,'nome',c.nome,'telefone',c.telefone,'email',c.email,'documento',c.documento,'segmento',c.segmento,'cidade',c.cidade,'codigo_shop9',c.codigo_shop9,'etiquetas',to_jsonb(c.etiquetas),'data_ultima_compra',c.data_ultima_compra),
+  'compras', coalesce((SELECT jsonb_agg(x ORDER BY x->>'data' DESC) FROM (
+     SELECT jsonb_build_object('id',v.id,'data',v.data_faturamento,'valor',v.valor,'tipo',v.tipo,'codigo_shop9',v.codigo_shop9,
+       'itens',coalesce((SELECT jsonb_agg(jsonb_build_object('produto',i.produto,'codigo_produto',i.codigo_produto,'quantidade',i.quantidade,'valor_total',i.valor_total) ORDER BY i.produto) FROM public.itens_venda i WHERE i.venda_id=v.id),'[]')) x
+     FROM public.vendas v WHERE v.cliente_id=c.id AND v.data_faturamento<=h ORDER BY v.data_faturamento DESC, v.created_at DESC LIMIT 24) s),'[]'),
+  'total_12m', (SELECT coalesce(sum(valor),0) FROM public.vendas WHERE cliente_id=c.id AND data_faturamento>ini AND data_faturamento<=h),
+  'qtd_12m', (SELECT count(*) FROM public.vendas WHERE cliente_id=c.id AND tipo='venda' AND data_faturamento>ini AND data_faturamento<=h),
+  'ticket_medio_12m', (SELECT coalesce(round(avg(valor),2),0) FROM public.vendas WHERE cliente_id=c.id AND tipo='venda' AND data_faturamento>ini AND data_faturamento<=h),
+  'itens_mais_comprados', coalesce((SELECT jsonb_agg(jsonb_build_object('produto',produto,'codigo_produto',codigo_produto,'quantidade',qtd,'valor_total',total) ORDER BY qtd DESC, produto) FROM (
+     SELECT i.produto, i.codigo_produto, sum(i.quantidade) qtd, sum(i.valor_total) total FROM public.itens_venda i JOIN public.vendas v ON v.id=i.venda_id
+     WHERE i.cliente_id=c.id AND v.data_faturamento>ini AND v.data_faturamento<=h GROUP BY i.produto, i.codigo_produto ORDER BY qtd DESC, i.produto LIMIT 10) t),'[]'),
+  'orcamentos', coalesce((SELECT jsonb_agg(jsonb_build_object('id',id,'status',status,'data',data,'valor',valor,'ultimo_followup',ultimo_followup,'proximo_followup',proximo_followup,'observacao',observacao,'codigo_shop9',codigo_shop9) ORDER BY data DESC) FROM public.orcamentos WHERE cliente_id=c.id),'[]'),
+  'interacoes', coalesce((SELECT jsonb_agg(x ORDER BY x->>'data' DESC) FROM (
+     SELECT jsonb_build_object('id',id,'tipo',tipo,'cliente_respondeu',cliente_respondeu,'resultado',resultado,'data',data,'dia_local',(data AT TIME ZONE 'America/Maceio')::date) x
+     FROM public.interacoes WHERE cliente_id=c.id ORDER BY data DESC LIMIT 30) s),'[]'),
+  'notas', coalesce((SELECT jsonb_agg(x ORDER BY x->>'created_at' DESC) FROM (
+     SELECT jsonb_build_object('id',n.id,'texto',n.texto,'autor_id',n.autor_id,'autor_nome',u.nome,'created_at',n.created_at) x
+     FROM public.notas_cliente n LEFT JOIN public.usuarios u ON u.id=n.autor_id WHERE n.cliente_id=c.id ORDER BY n.created_at DESC LIMIT 30) s),'[]'));
+END $$;
 ```
 
 ## Testes (SQL puro, nada fica gravado)
@@ -440,6 +468,14 @@ BEGIN
   IF NOT public.gam_vendas_batida(emp, v_id, '2026-11-12') THEN RAISE EXCEPTION 'FALHA 8a: parou de pontuar depois da meta'; END IF;
   IF public.gam_vendas_batida(emp, v_id, '2026-11-11') THEN RAISE EXCEPTION 'FALHA 8b: pontuou sem venda no dia'; END IF;
 
+  -- 10 (D2). A ficha marca a devolução e não a conta na quantidade de compras.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  r := public.ficha_cliente(c2, '2026-11-20');
+  IF NOT (r->'compras') @> '[{"tipo":"devolucao","valor":-200}]'::jsonb OR (r->>'qtd_12m')::int <> 1 OR (r->>'total_12m')::numeric <> 800 THEN
+    RAISE EXCEPTION 'FALHA 10: ficha sem a devolução marcada ou contando-a como compra (%)', r->'compras'; END IF;
+  EXECUTE 'reset role';
+
   -- 7e (D2). Nota cancelada sai do resultado.
   EXECUTE 'set local role authenticated';
   PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cancelada', true)));
@@ -471,7 +507,7 @@ BEGIN
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 9b: concluiu com produto fora de linha'; END IF;
   EXECUTE 'reset role';
 
-  RAISE NOTICE 'Texto 22: testes 1 a 9 passaram.';
+  RAISE NOTICE 'Texto 22: testes 1 a 10 passaram.';
 END $t$;
 ROLLBACK;
 ```
