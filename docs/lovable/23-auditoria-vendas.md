@@ -44,8 +44,9 @@ ALTER TABLE public.posts_instagram ADD CONSTRAINT posts_instagram_url_http CHECK
 DROP POLICY inserir ON public.posts_instagram;
 CREATE POLICY inserir ON public.posts_instagram FOR INSERT TO authenticated WITH CHECK (
  vendedor_id = (select public.meu_usuario_id()) AND (select public.tem_empresa(empresa_id)) AND status = 'pendente'
- AND data_post BETWEEN (now() AT TIME ZONE 'America/Maceio')::date - 7 AND (now() AT TIME ZONE 'America/Maceio')::date
- AND NOT EXISTS (SELECT 1 FROM public.posts_instagram p WHERE p.vendedor_id = posts_instagram.vendedor_id AND p.url = posts_instagram.url));
+ AND data_post BETWEEN (now() AT TIME ZONE 'America/Maceio')::date - 7 AND (now() AT TIME ZONE 'America/Maceio')::date);
+-- Sem repetir: índice único (uma consulta à própria tabela dentro da política daria recursão).
+CREATE UNIQUE INDEX posts_instagram_vendedor_url_uidx ON public.posts_instagram(vendedor_id, url);
 
 -- S5. Carga de demonstração só pelo servidor (como apagar_dados_demo).
 REVOKE EXECUTE ON FUNCTION public.carregar_dados_demo(uuid[]) FROM PUBLIC, anon, authenticated;
@@ -462,7 +463,7 @@ BEGIN
   INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
    VALUES (emp, v_id, 'https://instagram.com/p/teste22', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date);
   ok := false; BEGIN INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
-   VALUES (emp, v_id, 'https://instagram.com/p/teste22', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+   VALUES (emp, v_id, 'https://instagram.com/p/teste22', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date); EXCEPTION WHEN unique_violation THEN ok := true; END;
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 4a: post repetido'; END IF;
   ok := false; BEGIN INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
    VALUES (emp, v_id, 'javascript:alert(1)', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date); EXCEPTION WHEN check_violation THEN ok := true; END;
