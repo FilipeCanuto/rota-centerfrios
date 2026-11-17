@@ -5,7 +5,8 @@ Pré-requisito: mensagem 21 já aplicada (migração 0030).
 ## SQL
 
 ```sql
--- 22: correções da auditoria (docs/auditoria-fable.md: S1, S2, S3, S4, S5, R3).
+-- 22: correções da auditoria (docs/auditoria-fable.md: S1 a S5, R3) e decisões da diretoria de 17/11/2026
+-- (D1 venda compartilhada 50/50, D2 devolução e nota cancelada abatem, D3 pontos depois da meta, D4 carrinho com preço do dia).
 
 -- S1. Papéis, vínculos e pré-cadastro só por função checada; ninguém se dá um papel novo.
 REVOKE INSERT, UPDATE, DELETE ON public.user_roles, public.usuario_empresas, public.papeis_pre_cadastro FROM authenticated;
@@ -49,34 +50,259 @@ CREATE POLICY inserir ON public.posts_instagram FOR INSERT TO authenticated WITH
 REVOKE EXECUTE ON FUNCTION public.carregar_dados_demo(uuid[]) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.carregar_dados_demo(uuid[]) TO service_role;
 
--- R3. Reimportar uma venda não troca o vendedor dela (o faturamento fica com quem vendeu).
+-- D1. Venda compartilhada (vendedor 1 principal e vendedor 2: 50% para cada) e devolução (abate do resultado).
+ALTER TABLE public.vendas
+ ADD COLUMN vendedor_2_id uuid REFERENCES public.usuarios(id),
+ ADD COLUMN tipo text NOT NULL DEFAULT 'venda' CHECK (tipo IN ('venda','devolucao'));
+ALTER TABLE public.vendas ADD CONSTRAINT vendas_vendedor_2_diferente CHECK (vendedor_2_id IS DISTINCT FROM vendedor_id);
+ALTER TABLE public.vendas ADD CONSTRAINT vendas_sinal CHECK ((tipo = 'venda' AND valor >= 0) OR (tipo = 'devolucao' AND valor <= 0)) NOT VALID;
+CREATE INDEX vendas_vendedor_2_idx ON public.vendas(empresa_id, vendedor_2_id, data_faturamento) WHERE vendedor_2_id IS NOT NULL;
+
+-- Parte de um vendedor numa venda: inteira sem vendedor 2; metade para cada com vendedor 2.
+CREATE FUNCTION public.parte_venda(_valor numeric, _v1 uuid, _v2 uuid, _vendedor uuid) RETURNS numeric
+LANGUAGE sql IMMUTABLE SET search_path = public AS $$
+ SELECT CASE WHEN _v2 IS NULL THEN CASE WHEN _v1 = _vendedor THEN _valor ELSE 0 END
+             WHEN _vendedor IN (_v1, _v2) THEN _valor / 2 ELSE 0 END
+$$;
+REVOKE ALL ON FUNCTION public.parte_venda(numeric,uuid,uuid,uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.parte_venda(numeric,uuid,uuid,uuid) TO authenticated, service_role;
+
+-- O vendedor 2 (e o supervisor dele) também vê a venda.
+DROP POLICY leitura ON public.vendas;
+CREATE POLICY leitura ON public.vendas FOR SELECT TO authenticated USING (
+ public.tem_empresa(empresa_id) AND (public.pode_ver_vendedor(vendedor_id) OR (vendedor_2_id IS NOT NULL AND public.pode_ver_vendedor(vendedor_2_id))));
+
+-- R3 + D1. Importação de vendas: reimportar não troca o vendedor; vendedor 2 pelo e-mail; devolução gravada
+-- negativa (com os vendedores da nota de origem, se vier) e sem mexer na última compra; nota cancelada sai.
 CREATE OR REPLACE FUNCTION public.importar_vendas(_empresa_id uuid, _arquivo text, _linhas jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE l jsonb; n int; cod text; cli public.clientes; vid uuid; vend uuid; ins int:=0; upd int:=0; erros jsonb:='[]'; dt date;
+DECLARE l jsonb; n int; cod text; chave text; tp text; cli public.clientes; vid uuid; v1 uuid; v2 uuid; v2_arq uuid;
+ ins int:=0; upd int:=0; erros jsonb:='[]'; dt date; k int;
 BEGIN
  PERFORM public.importacao_validar(_empresa_id,_linhas);
  IF auth.uid() IS NOT NULL AND NOT public.tem_setor('comercial') THEN RAISE EXCEPTION 'Sem acesso ao setor Comercial.' USING ERRCODE = '42501'; END IF;
  FOR l IN SELECT * FROM jsonb_array_elements(_linhas) LOOP
-  n:=(l->>'linha')::int; cod:=nullif(btrim(l->>'codigo_shop9'),''); dt:=(l->>'data_faturamento')::date;
+  n:=(l->>'linha')::int; cod:=nullif(btrim(l->>'codigo_shop9'),''); tp:=coalesce(nullif(l->>'tipo',''),'venda');
   IF cod IS NULL THEN erros:=erros||jsonb_build_object('linha',n,'campo','codigo_shop9','mensagem','Número da nota vazio.'); CONTINUE; END IF;
+  IF tp NOT IN ('venda','devolucao') THEN erros:=erros||jsonb_build_object('linha',n,'campo','tipo','mensagem','Tipo deve ser venda ou devolução.'); CONTINUE; END IF;
+  chave:=CASE tp WHEN 'devolucao' THEN 'DEV:'||cod ELSE cod END;
+  IF coalesce((l->>'cancelada')::boolean,false) THEN
+   DELETE FROM public.vendas WHERE empresa_id=_empresa_id AND codigo_shop9=chave;
+   GET DIAGNOSTICS k=ROW_COUNT; upd:=upd+k; CONTINUE;
+  END IF;
+  dt:=(l->>'data_faturamento')::date;
   SELECT * INTO cli FROM public.clientes WHERE empresa_id=_empresa_id AND codigo_shop9=btrim(l->>'cliente_codigo');
   IF NOT FOUND THEN erros:=erros||jsonb_build_object('linha',n,'campo','cliente_codigo','mensagem','Cliente não encontrado.'); CONTINUE; END IF;
-  vid:=NULL; vend:=NULL;
-  SELECT id, vendedor_id INTO vid, vend FROM public.vendas WHERE empresa_id=_empresa_id AND codigo_shop9=cod;
+  v2_arq:=NULL;
+  IF nullif(btrim(l->>'vendedor_2_email'),'') IS NOT NULL THEN
+   SELECT u.id INTO v2_arq FROM public.usuarios u JOIN public.usuario_empresas ue ON ue.usuario_id=u.id AND ue.empresa_id=_empresa_id
+    WHERE lower(u.email)=lower(btrim(l->>'vendedor_2_email')) LIMIT 1;
+   IF v2_arq IS NULL THEN erros:=erros||jsonb_build_object('linha',n,'campo','vendedor_2_email','mensagem','Vendedor 2 não encontrado nesta empresa.'); CONTINUE; END IF;
+  END IF;
+  vid:=NULL; v1:=NULL; v2:=NULL;
+  SELECT id, vendedor_id, vendedor_2_id INTO vid, v1, v2 FROM public.vendas WHERE empresa_id=_empresa_id AND codigo_shop9=chave;
   IF vid IS NULL THEN
-   vend:=cli.vendedor_id;
-   INSERT INTO public.vendas(empresa_id,cliente_id,vendedor_id,codigo_shop9,data_faturamento,valor,origem,demo)
-   VALUES(_empresa_id,cli.id,vend,cod,dt,(l->>'valor')::numeric,'importacao',false) RETURNING id INTO vid; ins:=ins+1;
+   IF tp='devolucao' AND nullif(btrim(l->>'nota_origem'),'') IS NOT NULL THEN
+    SELECT vendedor_id, vendedor_2_id INTO v1, v2 FROM public.vendas WHERE empresa_id=_empresa_id AND codigo_shop9=btrim(l->>'nota_origem') AND tipo='venda';
+   END IF;
+   IF v1 IS NULL THEN v1:=cli.vendedor_id; v2:=v2_arq; END IF;
+   IF v2=v1 THEN v2:=NULL; END IF;
+   INSERT INTO public.vendas(empresa_id,cliente_id,vendedor_id,vendedor_2_id,tipo,codigo_shop9,data_faturamento,valor,origem,demo)
+   VALUES(_empresa_id,cli.id,v1,v2,tp,chave,dt,CASE tp WHEN 'devolucao' THEN -abs((l->>'valor')::numeric) ELSE (l->>'valor')::numeric END,'importacao',false)
+   RETURNING id INTO vid; ins:=ins+1;
   ELSE
-   UPDATE public.vendas SET cliente_id=cli.id,data_faturamento=dt,valor=(l->>'valor')::numeric,origem='importacao' WHERE id=vid;
+   v2:=coalesce(v2_arq,v2); IF v2=v1 THEN v2:=NULL; END IF;
+   UPDATE public.vendas SET cliente_id=cli.id,vendedor_2_id=v2,data_faturamento=dt,
+    valor=CASE tp WHEN 'devolucao' THEN -abs((l->>'valor')::numeric) ELSE (l->>'valor')::numeric END,origem='importacao' WHERE id=vid;
    DELETE FROM public.itens_venda WHERE venda_id=vid; upd:=upd+1;
   END IF;
-  INSERT INTO public.itens_venda(empresa_id,venda_id,cliente_id,vendedor_id,produto,codigo_produto,quantidade,valor_total,origem,demo)
-  SELECT _empresa_id,vid,cli.id,vend,i->>'produto',nullif(i->>'codigo_produto',''),coalesce((i->>'quantidade')::numeric,1),coalesce((i->>'valor_total')::numeric,0),'importacao',false
-  FROM jsonb_array_elements(coalesce(l->'itens','[]')) i WHERE nullif(btrim(i->>'produto'),'') IS NOT NULL;
-  UPDATE public.clientes SET data_ultima_compra=dt WHERE id=cli.id AND (data_ultima_compra IS NULL OR data_ultima_compra<dt);
+  IF tp='venda' THEN
+   INSERT INTO public.itens_venda(empresa_id,venda_id,cliente_id,vendedor_id,produto,codigo_produto,quantidade,valor_total,origem,demo)
+   SELECT _empresa_id,vid,cli.id,v1,i->>'produto',nullif(i->>'codigo_produto',''),coalesce((i->>'quantidade')::numeric,1),coalesce((i->>'valor_total')::numeric,0),'importacao',false
+   FROM jsonb_array_elements(coalesce(l->'itens','[]')) i WHERE nullif(btrim(i->>'produto'),'') IS NOT NULL;
+   UPDATE public.clientes SET data_ultima_compra=dt WHERE id=cli.id AND (data_ultima_compra IS NULL OR data_ultima_compra<dt);
+  END IF;
  END LOOP;
  RETURN public.importacao_registrar(_empresa_id,'vendas',_arquivo,jsonb_array_length(_linhas),ins,upd,erros);
+END $$;
+
+CREATE OR REPLACE FUNCTION public.painel_vendedor(_empresa_id uuid,_vendedor_id uuid,_hoje date) RETURNS jsonb LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $function$
+WITH periodo AS (
+ SELECT hoje,date_trunc('month',hoje)::date AS inicio FROM (SELECT coalesce(_hoje,(current_timestamp AT TIME ZONE 'America/Maceio')::date) AS hoje) d
+), carteira AS (
+ SELECT c.* FROM public.clientes c WHERE c.empresa_id=_empresa_id AND c.vendedor_id=_vendedor_id
+), interacoes_locais AS (
+ SELECT i.cliente_id,(i.data AT TIME ZONE 'America/Maceio')::date AS dia,
+ (i.cliente_respondeu OR (i.tipo IN ('visita','ligacao') AND nullif(btrim(i.resultado),'') IS NOT NULL)) AS qualificada
+ FROM public.interacoes i JOIN carteira c ON c.id=i.cliente_id WHERE i.empresa_id=_empresa_id
+), interacoes_resumo AS (
+ SELECT i.cliente_id,max(i.dia) AS ultima_interacao,max(i.dia) FILTER (WHERE i.qualificada) AS ultima_interacao_qualificada,
+ bool_or(i.qualificada AND i.dia=p.hoje) AS qualificada_hoje,
+ bool_or(i.qualificada AND i.dia BETWEEN p.inicio AND p.hoje) AS qualificada_no_mes
+ FROM interacoes_locais i CROSS JOIN periodo p GROUP BY i.cliente_id
+), clientes_json AS (
+ SELECT c.nome,c.id,jsonb_build_object(
+ 'id',c.id,'nome',c.nome,'telefone',c.telefone,'segmento',c.segmento,'cidade',c.cidade,'empresa_id',c.empresa_id,'data_ultima_compra',c.data_ultima_compra,
+ 'compras',coalesce((SELECT jsonb_agg(d.data_faturamento ORDER BY d.data_faturamento DESC) FROM (SELECT DISTINCT v.data_faturamento FROM public.vendas v WHERE v.cliente_id=c.id AND v.empresa_id=_empresa_id AND v.tipo='venda' ORDER BY v.data_faturamento DESC LIMIT 12) d),'[]'::jsonb),
+ 'comprou_no_mes',EXISTS(SELECT 1 FROM public.vendas v CROSS JOIN periodo p WHERE v.cliente_id=c.id AND v.empresa_id=_empresa_id AND v.tipo='venda' AND v.data_faturamento BETWEEN p.inicio AND p.hoje),
+ 'ultima_interacao',i.ultima_interacao,'ultima_interacao_qualificada',i.ultima_interacao_qualificada,
+ 'qualificada_hoje',coalesce(i.qualificada_hoje,false),'qualificada_no_mes',coalesce(i.qualificada_no_mes,false),
+ 'orcamentos_abertos',coalesce((SELECT jsonb_agg(jsonb_build_object('id',o.id,'valor',o.valor,'data',o.data,'ultimo_followup',o.ultimo_followup) ORDER BY o.data,o.id) FROM public.orcamentos o WHERE o.cliente_id=c.id AND o.empresa_id=_empresa_id AND o.status='aberto'),'[]'::jsonb)
+ ) AS dados FROM carteira c LEFT JOIN interacoes_resumo i ON i.cliente_id=c.id
+), vendas_resumo AS (
+ SELECT coalesce(sum(public.parte_venda(v.valor,v.vendedor_id,v.vendedor_2_id,_vendedor_id)),0) AS faturado_mes,coalesce(sum(public.parte_venda(v.valor,v.vendedor_id,v.vendedor_2_id,_vendedor_id)) FILTER(WHERE v.data_faturamento=p.hoje),0) AS faturado_hoje
+ FROM periodo p LEFT JOIN public.vendas v ON v.empresa_id=_empresa_id AND _vendedor_id IN (v.vendedor_id,v.vendedor_2_id) AND v.data_faturamento BETWEEN p.inicio AND p.hoje
+), orcamentos_resumo AS (
+ SELECT count(o.id) AS orcamentos_mes,count(o.id) FILTER(WHERE o.data=p.hoje) AS orcamentos_hoje
+ FROM periodo p LEFT JOIN public.orcamentos o ON o.empresa_id=_empresa_id AND o.vendedor_id=_vendedor_id AND o.data BETWEEN p.inicio AND p.hoje
+)
+SELECT jsonb_build_object(
+ 'faturado_mes',v.faturado_mes,'faturado_hoje',v.faturado_hoje,
+ 'meta',(SELECT jsonb_build_object('meta_vendas',m.meta_vendas,'meta_orcamentos',m.meta_orcamentos,'meta_cobertura',m.meta_cobertura,'meta_reativacao',m.meta_reativacao) FROM public.metas m CROSS JOIN periodo p WHERE m.empresa_id=_empresa_id AND m.vendedor_id=_vendedor_id AND m.mes=p.inicio LIMIT 1),
+ 'orcamentos_mes',o.orcamentos_mes,'orcamentos_hoje',o.orcamentos_hoje,
+ 'pontos_hoje',(SELECT coalesce(sum(pt.pontos),0) FROM public.pontos pt CROSS JOIN periodo p WHERE pt.empresa_id=_empresa_id AND pt.vendedor_id=_vendedor_id AND pt.data=p.hoje),
+ 'clientes',coalesce((SELECT jsonb_agg(c.dados ORDER BY c.nome,c.id) FROM clientes_json c),'[]'::jsonb)
+) FROM vendas_resumo v CROSS JOIN orcamentos_resumo o;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.cobertura_vendedor(_empresa_id uuid,_vendedor_id uuid,_hoje date) RETURNS jsonb LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $function$
+WITH periodo AS (
+ SELECT hoje,date_trunc('month',hoje)::date AS inicio FROM (SELECT coalesce(_hoje,(current_timestamp AT TIME ZONE 'America/Maceio')::date) AS hoje) d
+), carteira AS (
+ SELECT id FROM public.clientes WHERE empresa_id=_empresa_id AND vendedor_id=_vendedor_id
+)
+SELECT jsonb_build_object('total',count(*),'cobertos',count(*) FILTER(WHERE
+ EXISTS(SELECT 1 FROM public.vendas v WHERE v.cliente_id=c.id AND v.empresa_id=_empresa_id AND v.tipo='venda' AND v.data_faturamento BETWEEN p.inicio AND p.hoje)
+ OR EXISTS(SELECT 1 FROM public.interacoes i WHERE i.cliente_id=c.id AND i.empresa_id=_empresa_id AND (i.data AT TIME ZONE 'America/Maceio')::date BETWEEN p.inicio AND p.hoje AND (i.cliente_respondeu OR (i.tipo IN ('visita','ligacao') AND nullif(btrim(i.resultado),'') IS NOT NULL)))
+)) FROM carteira c CROSS JOIN periodo p;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.painel_gestao(_empresa_id uuid,_hoje date DEFAULT NULL) RETURNS jsonb LANGUAGE sql STABLE SECURITY INVOKER SET search_path=public AS $$
+WITH p AS (SELECT h AS hoje,date_trunc('month',h)::date AS inicio FROM (SELECT coalesce(_hoje,(current_timestamp AT TIME ZONE 'America/Maceio')::date) h) d),
+lim AS (SELECT coalesce((SELECT valor FROM public.configuracoes_regras WHERE empresa_id=_empresa_id AND chave='cliente_sem_compra_dias' LIMIT 1),90) sem_compra,
+ coalesce((SELECT valor FROM public.configuracoes_regras WHERE empresa_id=_empresa_id AND chave='cliente_esquecido_dias' LIMIT 1),30) esquecido),
+vend AS (SELECT u.id,u.nome,e.nome equipe FROM public.usuarios u LEFT JOIN public.equipes e ON e.id=u.equipe_id
+ WHERE public.pode_ver_vendedor(u.id) AND (EXISTS(SELECT 1 FROM public.clientes c WHERE c.empresa_id=_empresa_id AND c.vendedor_id=u.id)
+  OR (u.auth_user_id IS NOT NULL AND public.has_role(u.auth_user_id,'vendedor',_empresa_id)))),
+cli AS (SELECT c.id,c.vendedor_id,c.data_ultima_compra,
+ (SELECT max((i.data AT TIME ZONE 'America/Maceio')::date) FROM public.interacoes i WHERE i.cliente_id=c.id AND i.empresa_id=_empresa_id AND (i.cliente_respondeu OR (i.tipo IN ('visita','ligacao') AND nullif(btrim(i.resultado),'') IS NOT NULL))) ult_q,
+ (SELECT max(v.data_faturamento) FROM public.vendas v WHERE v.cliente_id=c.id AND v.empresa_id=_empresa_id AND v.tipo='venda') ult_v
+ FROM public.clientes c JOIN vend ON vend.id=c.vendedor_id WHERE c.empresa_id=_empresa_id)
+SELECT coalesce(jsonb_agg(jsonb_build_object(
+ 'vendedor_id',vd.id,'nome',vd.nome,'equipe',vd.equipe,
+ 'meta',(SELECT to_jsonb(m) FROM public.metas m WHERE m.empresa_id=_empresa_id AND m.vendedor_id=vd.id AND m.mes=p.inicio LIMIT 1),
+ 'faturado_mes',(SELECT coalesce(sum(public.parte_venda(valor,vendedor_id,vendedor_2_id,vd.id)),0) FROM public.vendas WHERE empresa_id=_empresa_id AND vd.id IN (vendedor_id,vendedor_2_id) AND data_faturamento BETWEEN p.inicio AND p.hoje),
+ 'faturado_hoje',(SELECT coalesce(sum(public.parte_venda(valor,vendedor_id,vendedor_2_id,vd.id)),0) FROM public.vendas WHERE empresa_id=_empresa_id AND vd.id IN (vendedor_id,vendedor_2_id) AND data_faturamento=p.hoje),
+ 'clientes_total',(SELECT count(*) FROM cli WHERE cli.vendedor_id=vd.id),
+ 'clientes_cobertos',(SELECT count(*) FROM cli WHERE cli.vendedor_id=vd.id AND (
+   EXISTS(SELECT 1 FROM public.vendas v WHERE v.cliente_id=cli.id AND v.empresa_id=_empresa_id AND v.tipo='venda' AND v.data_faturamento BETWEEN p.inicio AND p.hoje)
+   OR EXISTS(SELECT 1 FROM public.interacoes i WHERE i.cliente_id=cli.id AND i.empresa_id=_empresa_id AND (i.data AT TIME ZONE 'America/Maceio')::date BETWEEN p.inicio AND p.hoje AND (i.cliente_respondeu OR (i.tipo IN ('visita','ligacao') AND nullif(btrim(i.resultado),'') IS NOT NULL))))),
+ 'orcamentos_abertos',coalesce((SELECT jsonb_agg(jsonb_build_object('id',o.id,'cliente_id',o.cliente_id,'valor',o.valor,'data',o.data,'ultimo_followup',o.ultimo_followup,
+   'ultima_interacao',(SELECT max((i.data AT TIME ZONE 'America/Maceio')::date) FROM public.interacoes i WHERE i.cliente_id=o.cliente_id AND i.empresa_id=_empresa_id)) ORDER BY o.data,o.id)
+   FROM public.orcamentos o WHERE o.empresa_id=_empresa_id AND o.vendedor_id=vd.id AND o.status='aberto'),'[]'::jsonb),
+ 'clientes_sem_compra_90',(SELECT count(*) FROM cli WHERE cli.vendedor_id=vd.id AND (cli.data_ultima_compra IS NULL OR p.hoje-cli.data_ultima_compra>=l.sem_compra)),
+ 'esquecidos',(SELECT count(*) FROM cli WHERE cli.vendedor_id=vd.id AND coalesce(p.hoje-GREATEST(cli.ult_q,cli.ult_v,cli.data_ultima_compra),2147483647)>=l.esquecido)
+) ORDER BY vd.nome,vd.id),'[]'::jsonb) FROM vend vd CROSS JOIN p CROSS JOIN lim l;
+$$;
+
+CREATE OR REPLACE FUNCTION public.gam_vendas_batida(_empresa uuid,_vendedor uuid,_dia date) RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE meta numeric; antes numeric; hoje_v numeric; rest int; ini date:=date_trunc('month',_dia)::date;
+BEGIN
+ IF NOT public.gam_dia_util(_empresa,_dia) THEN RETURN false; END IF;
+ SELECT meta_vendas INTO meta FROM public.metas WHERE empresa_id=_empresa AND vendedor_id=_vendedor AND mes=ini LIMIT 1;
+ IF coalesce(meta,0)<=0 THEN RETURN false; END IF;
+ SELECT coalesce(sum(public.parte_venda(valor,vendedor_id,vendedor_2_id,_vendedor)) FILTER(WHERE data_faturamento<_dia),0),coalesce(sum(public.parte_venda(valor,vendedor_id,vendedor_2_id,_vendedor)) FILTER(WHERE data_faturamento=_dia),0) INTO antes,hoje_v
+  FROM public.vendas WHERE empresa_id=_empresa AND _vendedor IN (vendedor_id,vendedor_2_id) AND data_faturamento BETWEEN ini AND _dia;
+ rest:=public.gam_uteis_restantes(_empresa,_dia);
+ IF rest<=0 THEN RETURN false; END IF;
+ -- Meta do mês já batida: segue pontuando com a média diária do mês (decisão da diretoria, 17/11/2026).
+ IF meta-antes<=0 THEN
+  RETURN hoje_v>=meta/greatest(1,(SELECT count(*) FROM generate_series(ini,(ini+interval '1 month -1 day')::date,interval '1 day') g(d) WHERE public.gam_dia_util(_empresa,g.d::date)));
+ END IF;
+ RETURN hoje_v>=(meta-antes)/rest;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.calcular_pontos_dia(_empresa_id uuid,_vendedor_id uuid,_dia date) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE util boolean; ini date:=date_trunc('month',_dia)::date; rest int; m public.metas; n_hoje numeric; n_antes numeric; carteira int; alvo numeric; limite numeric;
+ p_v int:=0; p_o int:=0; p_c int:=0; p_r int:=0; p_i int:=0; res jsonb; eh_demo boolean;
+BEGIN
+ PERFORM public.gam_permitido(_empresa_id,_vendedor_id);
+ IF auth.uid() IS NOT NULL AND NOT public.tem_setor('comercial') THEN RAISE EXCEPTION 'Sem acesso ao setor Comercial.' USING ERRCODE = '42501'; END IF;
+ IF _dia IS NULL THEN RAISE EXCEPTION 'Informe o dia.' USING ERRCODE='22023'; END IF;
+ SELECT demo INTO eh_demo FROM public.usuarios WHERE id=_vendedor_id;
+ util:=public.gam_dia_util(_empresa_id,_dia); rest:=public.gam_uteis_restantes(_empresa_id,_dia);
+ SELECT * INTO m FROM public.metas WHERE empresa_id=_empresa_id AND vendedor_id=_vendedor_id AND mes=ini LIMIT 1;
+ IF public.gam_vendas_batida(_empresa_id,_vendedor_id,_dia) THEN p_v:=public.gam_regra(_empresa_id,'peso_vendas',30); END IF;
+ IF util AND rest>0 AND coalesce(m.meta_orcamentos,0)>0 THEN
+  SELECT count(*) FILTER(WHERE data=_dia),count(*) FILTER(WHERE data<_dia) INTO n_hoje,n_antes FROM public.orcamentos WHERE empresa_id=_empresa_id AND vendedor_id=_vendedor_id AND data BETWEEN ini AND _dia;
+  alvo:=ceil((m.meta_orcamentos-n_antes)/rest::numeric);
+  IF alvo>0 AND n_hoje>=alvo THEN p_o:=public.gam_regra(_empresa_id,'peso_orcamentos',10); END IF;
+ END IF;
+ IF util AND rest>0 AND coalesce(m.meta_cobertura,0)>0 THEN
+  SELECT count(*) INTO carteira FROM public.clientes WHERE empresa_id=_empresa_id AND vendedor_id=_vendedor_id;
+  WITH q AS (
+   SELECT i.cliente_id,(i.data AT TIME ZONE 'America/Maceio')::date dia FROM public.interacoes i JOIN public.clientes c ON c.id=i.cliente_id AND c.vendedor_id=_vendedor_id AND c.empresa_id=_empresa_id
+    WHERE i.empresa_id=_empresa_id AND (i.cliente_respondeu OR (i.tipo IN ('visita','ligacao') AND nullif(btrim(i.resultado),'') IS NOT NULL))
+    AND (i.data AT TIME ZONE 'America/Maceio')::date BETWEEN ini AND _dia
+   UNION
+   SELECT v.cliente_id,v.data_faturamento FROM public.vendas v JOIN public.clientes c ON c.id=v.cliente_id AND c.vendedor_id=_vendedor_id AND c.empresa_id=_empresa_id
+    WHERE v.empresa_id=_empresa_id AND v.tipo='venda' AND v.data_faturamento BETWEEN ini AND _dia)
+  SELECT count(DISTINCT cliente_id) FILTER(WHERE dia=_dia),count(DISTINCT cliente_id) FILTER(WHERE dia<_dia) INTO n_hoje,n_antes FROM q;
+  alvo:=ceil((m.meta_cobertura/100.0*carteira-n_antes)/rest);
+  IF alvo>0 AND n_hoje>=alvo THEN p_c:=public.gam_regra(_empresa_id,'peso_cobertura',20); END IF;
+ END IF;
+ limite:=public.gam_regra(_empresa_id,'cliente_sem_compra_dias',90);
+ SELECT count(*) INTO n_hoje FROM (SELECT DISTINCT v.cliente_id FROM public.vendas v WHERE v.empresa_id=_empresa_id AND _vendedor_id IN (v.vendedor_id,v.vendedor_2_id) AND v.tipo='venda' AND v.data_faturamento=_dia
+  AND _dia-(SELECT max(a.data_faturamento) FROM public.vendas a WHERE a.cliente_id=v.cliente_id AND a.empresa_id=_empresa_id AND a.tipo='venda' AND a.data_faturamento<_dia)>=limite) r;
+ p_r:=n_hoje*public.gam_regra(_empresa_id,'peso_reativacao',20);
+ SELECT count(*) INTO n_hoje FROM public.posts_instagram WHERE empresa_id=_empresa_id AND vendedor_id=_vendedor_id AND data_post=_dia AND status='aprovado';
+ p_i:=n_hoje*public.gam_regra(_empresa_id,'peso_instagram',5);
+ res:=jsonb_build_object('vendas',p_v,'orcamentos',p_o,'cobertura',p_c,'reativacao',p_r,'instagram',p_i);
+ INSERT INTO public.pontos(empresa_id,vendedor_id,data,indicador,pontos,demo)
+ SELECT _empresa_id,_vendedor_id,_dia,k,v::int,coalesce(eh_demo,false) FROM jsonb_each_text(res) x(k,v)
+ ON CONFLICT(empresa_id,vendedor_id,data,indicador) DO UPDATE SET pontos=EXCLUDED.pontos;
+ RETURN res;
+END $$;
+
+-- D4. Carrinho sempre com o preço de tabela do dia: o recálculo (a cada item e na conclusão) atualiza os preços.
+CREATE OR REPLACE FUNCTION public.carrinho_recalcular(_carrinho_id uuid) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+ UPDATE public.itens_carrinho i SET preco_unit=p.preco_tabela, total=round(p.preco_tabela*i.quantidade*(1-i.desconto_pct/100),2)
+  FROM public.produtos p WHERE i.carrinho_id=_carrinho_id AND p.id=i.produto_id AND i.preco_unit IS DISTINCT FROM p.preco_tabela;
+ UPDATE public.carrinhos SET total=coalesce((SELECT sum(total) FROM public.itens_carrinho WHERE carrinho_id=_carrinho_id),0), atualizado_em=now() WHERE id=_carrinho_id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.concluir_carrinho(_carrinho_id uuid)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE c public.carrinhos; it record; chave text:='rota:carrinho:'||_carrinho_id; orc uuid; hoje date:=(now() AT TIME ZONE 'America/Maceio')::date;
+BEGIN
+ IF auth.uid() IS NOT NULL AND NOT public.tem_setor('comercial') THEN RAISE EXCEPTION 'Sem acesso ao setor Comercial.' USING ERRCODE = '42501'; END IF;
+ SELECT * INTO c FROM public.carrinhos WHERE id=_carrinho_id FOR UPDATE;
+ IF NOT FOUND THEN RAISE EXCEPTION 'Carrinho não encontrado.' USING ERRCODE='P0001'; END IF;
+ IF c.vendedor_id IS DISTINCT FROM public.meu_usuario_id() THEN RAISE EXCEPTION 'Só o vendedor dono pode concluir este carrinho.' USING ERRCODE='42501'; END IF;
+ IF c.estado='concluido' THEN RETURN c.orcamento_id; END IF;
+ IF c.estado='cancelado' THEN RAISE EXCEPTION 'Este carrinho foi cancelado.' USING ERRCODE='P0001'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.itens_carrinho WHERE carrinho_id=c.id) THEN RAISE EXCEPTION 'Adicione pelo menos um item antes de concluir.' USING ERRCODE='P0001'; END IF;
+ IF EXISTS(SELECT 1 FROM public.itens_carrinho i JOIN public.produtos p ON p.id=i.produto_id WHERE i.carrinho_id=c.id AND NOT p.ativo) THEN
+  RAISE EXCEPTION 'Há produto fora de linha no carrinho: remova antes de concluir.' USING ERRCODE='P0001'; END IF;
+ PERFORM public.carrinho_recalcular(c.id);
+ FOR it IN SELECT * FROM public.itens_carrinho WHERE carrinho_id=c.id LOOP
+  IF NOT public.validar_desconto(c.vendedor_id,c.empresa_id,c.cliente_id,c.id,it.produto_id,it.desconto_pct) THEN
+   RAISE EXCEPTION 'Desconto acima do seu limite: peça liberação.' USING ERRCODE='P0001'; END IF;
+ END LOOP;
+ PERFORM public.carrinho_recalcular(c.id);
+ SELECT total INTO c.total FROM public.carrinhos WHERE id=c.id;
+ INSERT INTO public.orcamentos(empresa_id,cliente_id,vendedor_id,status,data,valor,origem,demo,origem_rota,chave_idempotencia,carrinho_id,envio_estado)
+ VALUES(c.empresa_id,c.cliente_id,c.vendedor_id,'aberto',hoje,c.total,'manual',false,true,chave,c.id,'pendente')
+ ON CONFLICT (chave_idempotencia) DO NOTHING RETURNING id INTO orc;
+ IF orc IS NULL THEN SELECT id INTO orc FROM public.orcamentos WHERE chave_idempotencia=chave;
+ ELSE
+  INSERT INTO public.itens_orcamento(empresa_id,orcamento_id,produto_id,codigo_shop9,descricao,unidade,preco_unit,quantidade,desconto_pct,total)
+  SELECT empresa_id,orc,produto_id,codigo_shop9,descricao,unidade,preco_unit,quantidade,desconto_pct,total FROM public.itens_carrinho WHERE carrinho_id=c.id;
+ END IF;
+ INSERT INTO public.shop9_envios(empresa_id,orcamento_id,chave_idempotencia) VALUES(c.empresa_id,orc,chave) ON CONFLICT DO NOTHING;
+ UPDATE public.carrinhos SET estado='concluido', orcamento_id=orc, concluido_em=now(), atualizado_em=now() WHERE id=c.id;
+ PERFORM public.auditar('conclusao_carrinho','carrinhos',c.id,c.empresa_id,c.vendedor_id,jsonb_build_object('orcamento_id',orc,'total',c.total));
+ RETURN orc;
 END $$;
 ```
 
