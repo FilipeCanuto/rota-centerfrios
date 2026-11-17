@@ -26,15 +26,15 @@ Conferido e correto: todas as funções `SECURITY DEFINER` têm `search_path` fi
 
 | Nº | Grav. | Achado | Arquivo e causa | Situação |
 | --- | --- | --- | --- | --- |
-| R1 | Alto | Venda compartilhada (vendedor 1 e 2) não existe. | `0014` `importar_vendas`: toda venda vai 100% para o dono atual do cliente (`cli.vendedor_id`); a planilha nem tem coluna de vendedor (`src/regras/importacao.ts`). `docs/estrategia.md` (linha 152) diz que o atingimento "já aplica a regra de vendas compartilhadas". A API do Shop9 traz `codigoVendedor_1` e `codigoVendedor_2`. Falta a diretoria definir a divisão. | Precisa de decisão |
-| R2 | Alto | Devolução e nota cancelada não descontam da meta. | `src/regras/importacao.ts`: valor negativo é recusado como erro. `vendas` não tem tipo, sinal nem situação; nada apaga ou zera uma nota cancelada. `faturado_mes` é a soma simples de `vendas.valor` (`0008`, `0018`, `gam_vendas_batida`). A API tem `/devolucao` e ativar/inativar saída. | Precisa de decisão |
+| R1 | Alto | Venda compartilhada (vendedor 1 e 2) não existe. | `0014` `importar_vendas`: toda venda vai 100% para o dono atual do cliente (`cli.vendedor_id`); a planilha nem tem coluna de vendedor (`src/regras/importacao.ts`). `docs/estrategia.md` (linha 152) diz que o atingimento "já aplica a regra de vendas compartilhadas". A API do Shop9 traz `codigoVendedor_1` e `codigoVendedor_2`. Falta a diretoria definir a divisão. | Decidido em 17/11 (50% para cada); texto 22 e planilha |
+| R2 | Alto | Devolução e nota cancelada não descontam da meta. | `src/regras/importacao.ts`: valor negativo é recusado como erro. `vendas` não tem tipo, sinal nem situação; nada apaga ou zera uma nota cancelada. `faturado_mes` é a soma simples de `vendas.valor` (`0008`, `0018`, `gam_vendas_batida`). A API tem `/devolucao` e ativar/inativar saída. | Decidido em 17/11 (abatem do resultado); texto 22 e planilha |
 | R3 | Alto | Reimportar uma venda antiga muda o vendedor dela. | `0014` `importar_vendas`, ramo de atualização: `UPDATE vendas SET vendedor_id=cli.vendedor_id`. Depois de um remanejamento, reimportar o histórico passa o faturamento passado para o novo dono: muda meta, ranking e pontos de meses fechados. || Corrigido no banco (texto 22) |
 | R4 | Médio | "Data de faturamento" pode receber a data de emissão. | `src/regras/importacao.ts`: o campo aceita os apelidos `data` e `emissao`. A meta deve usar a data de efetivação; na API é `tipodata=E` em `/saidas`. | Relatado (ver 5) |
 | R5 | Médio | Reativação: tela e pontos contam diferente. | `src/regras/painel.ts` `reativado`: exige 90 dias sem compra contados até o dia 1º do mês. `calcular_pontos_dia` (`0018`): 90 dias entre a compra anterior e a nova. Quem comprou em 15/09 e voltou em 20/12 ganha ponto, mas a tela mostra 0 reativados. || Corrigido no app |
 | R6 | Médio | "Orçamento parado" com dois critérios. | Início e Gestão (`src/regras/painel.ts`, `gestao.ts`) usam o mais recente entre o último retorno e o último contato com o cliente. A tela Orçamentos (`src/regras/orcamentos.ts`) ignora o contato. Os números divergem entre telas. || Corrigido no app |
 | R7 | Médio | Meta diária de cobertura: a tela pode mostrar "batida" sem ponto. | `src/regras/painel.ts`: o alvo desconta os clientes cobertos hoje e o "feito" não conta compra de hoje. `calcular_pontos_dia`: alvo pelos cobertos até ontem, feito = contato ou compra de hoje. Ex.: faltam 6 clientes, 2 dias úteis, 2 contatos hoje: tela 2 de 2, banco 2 de 3. Corrigir pede campo novo em `painel_vendedor`. | Relatado |
-| R8 | Médio | Quem bate a meta do mês cedo para de ganhar pontos de vendas. | `0017` `gam_vendas_batida`: devolve falso quando o que falta é zero ou negativo. | Precisa de decisão |
-| R9 | Médio | Carrinho conclui com preço antigo e produto inativo. | `0027` `concluir_carrinho`: usa o preço gravado quando o item entrou e não confere se o produto segue ativo; carrinho aberto não expira. | Precisa de decisão |
+| R8 | Médio | Quem bate a meta do mês cedo para de ganhar pontos de vendas. | `0017` `gam_vendas_batida`: devolve falso quando o que falta é zero ou negativo. | Decidido em 17/11 (segue pontuando, com a média diária do mês); texto 22 e app |
+| R9 | Médio | Carrinho conclui com preço antigo e produto inativo. | `0027` `concluir_carrinho`: usa o preço gravado quando o item entrou e não confere se o produto segue ativo; carrinho aberto não expira. | Decidido em 17/11 (preço sempre do dia; fora de linha impede concluir); texto 22 |
 | R10 | Baixo | Sábado: a venda conta no mês, mas o dia não é útil. | App e banco tratam só segunda a sexta como útil: no sábado a tela mostra meta do dia e o banco não dá ponto. | Relatado |
 | R11 | Baixo | Visão "ambas" usa a união dos feriados das empresas. | `src/regras/painel.ts` (`shortcut` documentado). | Relatado |
 | R12 | Baixo | Pontos de dias passados dependem de alguém abrir a tela. | `calcular_pontos_dia` aceita qualquer dia e regrava com a meta de hoje (documentado em `progresso.md`). | Relatado |
@@ -107,3 +107,14 @@ Outros pontos do PR: o relógio do computador do conector precisa estar certo (j
 | V4 | Médio | Preferências e silêncio das notificações. | `preferencias_notificacao` existe (`0018`) e o mascote já a lê (`src/modulos/mascote/dados.ts`); faltam a tela de preferências e o silêncio no sino fora do expediente. || Não feito (tela nova; próxima etapa) |
 | V5 | Médio | Botão "Apagar dados de demonstração". | Ver B4. || Corrigido (B4) |
 | V6 | Baixo | `docs/progresso.md` desatualizado. | Etapas "aguarda PR" que já estão no `main`; mensagens 17 a 19 como "não enviadas" com as migrações 0023 a 0026 aplicadas; carrinho "sem telas". || Corrigido |
+
+## 7. Decisões da diretoria (17/11/2026)
+
+| Tema | Decisão | Como ficou |
+| --- | --- | --- |
+| Venda compartilhada | Vendedor 1 é o principal, vendedor 2 o segundo; 50% para cada. | `vendas.vendedor_2_id`; `parte_venda()` dá a parte de cada um em `painel_vendedor`, `painel_gestao` e `gam_vendas_batida`. A planilha aceita "E-mail do vendedor 2". O vendedor 2 e o supervisor dele passam a ver a venda. |
+| Devolução e cancelamento | Abatidos do resultado. | Devolução gravada negativa (`vendas.tipo = 'devolucao'`, código `DEV:<nº>`) no mês em que acontece, com os vendedores da nota de origem; não conta como compra (recompra, cobertura, última compra, reativação). Nota cancelada é apagada na importação. |
+| Pontos depois da meta | Continua acumulando. | Meta do mês batida: a meta do dia vira a média diária (meta ÷ dias úteis do mês), no app (`metaDoDia`) e no banco (`gam_vendas_batida`). |
+| Carrinho | Valor sempre atualizado no dia. | Cada recálculo do carrinho (incluir, alterar, remover, concluir) usa o preço de tabela atual; produto fora de linha impede concluir. |
+
+Ainda não coberto: a ficha do cliente mostra a devolução no histórico de compras com valor negativo, e os itens da venda só aparecem para o vendedor 1.
