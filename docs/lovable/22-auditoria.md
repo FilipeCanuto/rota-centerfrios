@@ -332,6 +332,12 @@ BEGIN
      SELECT jsonb_build_object('id',n.id,'texto',n.texto,'autor_id',n.autor_id,'autor_nome',u.nome,'created_at',n.created_at) x
      FROM public.notas_cliente n LEFT JOIN public.usuarios u ON u.id=n.autor_id WHERE n.cliente_id=c.id ORDER BY n.created_at DESC LIMIT 30) s),'[]'));
 END $$;
+
+-- D1. Itens da venda compartilhada: o vendedor 2 (e o supervisor dele) também vê.
+DROP POLICY itens_venda_select ON public.itens_venda;
+CREATE POLICY itens_venda_select ON public.itens_venda FOR SELECT TO authenticated USING (
+ public.tem_empresa(empresa_id) AND (public.pode_ver_vendedor(vendedor_id)
+  OR EXISTS (SELECT 1 FROM public.vendas v WHERE v.id = venda_id AND v.vendedor_2_id IS NOT NULL AND public.pode_ver_vendedor(v.vendedor_2_id))));
 ```
 
 ## Testes (SQL puro, nada fica gravado)
@@ -451,7 +457,8 @@ BEGIN
   EXECUTE 'set local role authenticated';
   PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(
    jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cliente_codigo', 'T22C2', 'data_faturamento', '2026-11-12', 'valor', 1000,
-    'vendedor_2_email', 'teste22.vendedor@centerfrios.com', 'tipo', 'venda'),
+    'vendedor_2_email', 'teste22.vendedor@centerfrios.com', 'tipo', 'venda',
+    'itens', jsonb_build_array(jsonb_build_object('produto', 'Item compartilhado', 'quantidade', 1, 'valor_total', 1000))),
    jsonb_build_object('linha', 3, 'codigo_shop9', 'T22D1', 'cliente_codigo', 'T22C2', 'data_faturamento', '2026-11-13', 'valor', 200,
     'tipo', 'devolucao', 'nota_origem', 'T22N2')));
   r := public.painel_vendedor(emp, v_id, '2026-11-20');
@@ -474,6 +481,13 @@ BEGIN
   r := public.ficha_cliente(c2, '2026-11-20');
   IF NOT (r->'compras') @> '[{"tipo":"devolucao","valor":-200}]'::jsonb OR (r->>'qtd_12m')::int <> 1 OR (r->>'total_12m')::numeric <> 800 THEN
     RAISE EXCEPTION 'FALHA 10: ficha sem a devolução marcada ou contando-a como compra (%)', r->'compras'; END IF;
+  EXECUTE 'reset role';
+
+  -- 11 (D1). O vendedor 2 vê a venda compartilhada e os itens dela.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.empresa_id = emp AND v.codigo_shop9 = 'T22N2';
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 11: vendedor 2 não vê os itens da venda compartilhada (viu %)', n; END IF;
   EXECUTE 'reset role';
 
   -- 7e (D2). Nota cancelada sai do resultado.
@@ -507,7 +521,7 @@ BEGIN
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 9b: concluiu com produto fora de linha'; END IF;
   EXECUTE 'reset role';
 
-  RAISE NOTICE 'Texto 22: testes 1 a 10 passaram.';
+  RAISE NOTICE 'Texto 22: testes 1 a 11 passaram.';
 END $t$;
 ROLLBACK;
 ```
