@@ -42,7 +42,10 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).
 
 ## Banco e Lovable
-- O Lovable só aplica banco e publica. Nunca pedir a ele perguntas, conferências ou mudanças de tela.
+- **Fluxo (desde 17/11/2026):** o Claude Code escreve o texto de banco e abre o PR; **o usuário aplica o SQL no banco e faz o merge**. O Claude Code não aplica SQL no banco, não faz merge e não pede ao agente do Lovable (gasta crédito).
+- **Ordem:** quando o código do PR depende do banco, o SQL é aplicado antes do merge. O PR diz no topo: "Banco: aplicar o texto NN antes do merge" (ou "Sem banco").
+- **Numeração:** antes de criar `docs/lovable/NN-*.md`, conferir os PRs abertos (`gh api repos/FilipeCanuto/rota-centerfrios/pulls?state=open`) e as migrações do `main`; dois PRs nunca usam o mesmo NN, e o texto diz qual texto anterior precisa estar aplicado.
+- O Lovable fica só para publicar e para o que só ele faz. Nunca pedir a ele perguntas, conferências ou mudanças de tela.
 - Todo texto de banco (`docs/lovable/NN-*.md`) tem, nesta ordem:
   1. a instrução: "Aplique exatamente o SQL abaixo como UMA migração nova. Não investigue o projeto, não reescreva nem otimize o SQL, não crie testes em Python. Depois rode o bloco de testes em SQL. Se algo falhar, PARE e copie o erro na resposta, sem tentar corrigir. Regenere os tipos.";
   2. o SQL final completo, pronto para executar;
