@@ -1,6 +1,6 @@
 {
   "name": "conector-shop9",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Conector local entre o módulo Integrações do Shop9 e a Rota. Só conexões de saída HTTPS.",
   "type": "module",

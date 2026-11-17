@@ -13,6 +13,7 @@ export function iniciarRotaFalsa({
   modo = "conector",
   ambiente = "homologacao",
   limitePorMinuto = 120,
+  empresas = [],
 }) {
   const db = {
     conector: {
@@ -27,11 +28,12 @@ export function iniciarRotaFalsa({
     codigos: new Map(),
     cursores: new Map(),
     transicaoMs: 10 * 60_000,
-    config: { modo, ambiente },
+    config: { modo, ambiente, empresas },
     nonces: new Map(),
     envios: [],
     lotes: new Map(),
-    linhas: { clientes: new Map(), produtos: new Map(), vendas: new Map(), orcamentos: new Map() },
+    /** tipo → (codigo_shop9 → última linha recebida). */
+    linhas: new Proxy({}, { get: (o, k) => (o[k] ??= new Map()) }),
     eventos: [],
     falharProximas: 0,
   };
@@ -78,9 +80,11 @@ export function iniciarRotaFalsa({
       let inseridas = 0;
       let atualizadas = 0;
       for (const l of d.linhas) {
-        const k = d.tipo === "vendas" ? `${l.codigo_shop9}:${l.codigo_produto}` : l.codigo_shop9;
+        const k = l.codigo_shop9;
         db.linhas[d.tipo].has(k) ? atualizadas++ : inseridas++;
-        db.linhas[d.tipo].set(k, l);
+        const antes = db.linhas[d.tipo].get(k);
+        // como o banco: a passada por alteração (data nula) não apaga a data de faturamento já gravada
+        db.linhas[d.tipo].set(k, { ...l, data_faturamento: l.data_faturamento ?? antes?.data_faturamento });
       }
       const r = { inseridas, atualizadas, ignoradas: 0, erros: [] };
       db.lotes.set(chave, r);
