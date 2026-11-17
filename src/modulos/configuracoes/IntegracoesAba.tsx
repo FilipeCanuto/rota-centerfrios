@@ -17,6 +17,7 @@ import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { SeloStatus } from "@/design-system/SeloStatus";
 import { conectorOnline } from "@/regras/conector";
+import { EmpresaShop9 } from "./EmpresaShop9";
 import {
   useConfigurarShop9,
   useGerarCodigo,
@@ -205,6 +206,18 @@ export default function IntegracoesAba() {
           <KeyRound aria-hidden="true" /> Parear conector
         </Button>
       )}
+
+      <section aria-labelledby={`${id}-empresas`} className="flex flex-col gap-3">
+        <h3 id={`${id}-empresas`} className="font-semibold">
+          Códigos por empresa
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Só códigos. Série, senha e endereço do Shop9 ficam no computador do conector.
+        </p>
+        {(s.empresas ?? []).map((e) => (
+          <EmpresaShop9 key={e.empresa_id} empresa={e} />
+        ))}
+      </section>
 
       <section aria-labelledby={`${id}-eventos`} className="flex flex-col gap-2">
         <h3 id={`${id}-eventos`} className="font-semibold">

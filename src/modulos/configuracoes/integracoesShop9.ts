@@ -25,11 +25,34 @@ export interface EventoConector {
   mensagem: string | null;
 }
 
+export interface VendedorShop9 {
+  codigo: string;
+  nome: string;
+  ativo: boolean;
+  usuario_id: string | null;
+  manual: boolean;
+}
+
+/** Só códigos não sensíveis; série, senha e endereço ficam no computador do conector. */
+export interface EmpresaShop9 {
+  empresa_id: string;
+  nome: string;
+  codfilial: string | null;
+  codigo_operacao_orcamento: string | null;
+  tipo_operacao_orcamento: string;
+  tipos_venda: string;
+  tabela_preco: string | null;
+  codigo_caixa: string | null;
+  vendedores: VendedorShop9[];
+  usuarios: { id: string; nome: string }[];
+}
+
 export interface StatusShop9 {
   modo: ModoShop9;
   ambiente: AmbienteShop9;
   conectores: ConectorStatus[];
   eventos: EventoConector[];
+  empresas: EmpresaShop9[];
 }
 
 const CHAVE = ["shop9-integracao"];
@@ -68,5 +91,21 @@ export function useGerarCodigo() {
     onSettled: () => void qc.invalidateQueries({ queryKey: CHAVE }),
   });
 }
+
+export const useSalvarEmpresaShop9 = () =>
+  useAcao<{
+    _empresa_id: string;
+    _codfilial: string;
+    _codigo_operacao_orcamento: string;
+    _tipo_operacao_orcamento: string;
+    _tipos_venda: string;
+    _tabela_preco: string;
+    _codigo_caixa: string;
+  }>("admin_shop9_empresa_salvar");
+
+export const useMapearVendedor = () =>
+  useAcao<{ _empresa_id: string; _codigo: string; _usuario_id: string | null }>(
+    "admin_shop9_vendedor_mapear",
+  );
 
 export const useRevogarConector = () => useAcao<{ _conector_id: string }>("admin_conector_revogar");
