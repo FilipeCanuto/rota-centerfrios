@@ -338,6 +338,28 @@ DROP POLICY itens_venda_select ON public.itens_venda;
 CREATE POLICY itens_venda_select ON public.itens_venda FOR SELECT TO authenticated USING (
  public.tem_empresa(empresa_id) AND (public.pode_ver_vendedor(vendedor_id)
   OR EXISTS (SELECT 1 FROM public.vendas v WHERE v.id = venda_id AND v.vendedor_2_id IS NOT NULL AND public.pode_ver_vendedor(v.vendedor_2_id))));
+
+-- D1. Lista do vendedor: só as vendas compartilhadas de quem chama (como vendedor 1 ou 2), com cliente, outro vendedor, sua parte e itens.
+CREATE FUNCTION public.minhas_vendas_compartilhadas(_empresa_id uuid, _desde date DEFAULT NULL) RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public AS $$
+DECLARE eu uuid := public.meu_usuario_id();
+BEGIN
+ IF eu IS NULL OR NOT public.tem_empresa(_empresa_id) THEN RAISE EXCEPTION 'Sem acesso a esta empresa.' USING ERRCODE = '42501'; END IF;
+ IF NOT public.tem_setor('comercial') THEN RAISE EXCEPTION 'Sem acesso ao setor Comercial.' USING ERRCODE = '42501'; END IF;
+ RETURN coalesce((SELECT jsonb_agg(x ORDER BY x->>'data' DESC, x->>'codigo_shop9') FROM (
+  SELECT jsonb_build_object('id', v.id, 'codigo_shop9', v.codigo_shop9, 'data', v.data_faturamento, 'tipo', v.tipo, 'valor', v.valor,
+   'minha_parte', public.parte_venda(v.valor, v.vendedor_id, v.vendedor_2_id, eu),
+   'papel', CASE WHEN v.vendedor_id = eu THEN 1 ELSE 2 END, 'cliente', c.nome, 'outro_vendedor', o.nome,
+   'itens', coalesce((SELECT jsonb_agg(jsonb_build_object('produto', i.produto, 'quantidade', i.quantidade, 'valor_total', i.valor_total) ORDER BY i.produto)
+     FROM public.itens_venda i WHERE i.venda_id = v.id), '[]')) x
+  FROM public.vendas v JOIN public.clientes c ON c.id = v.cliente_id
+  LEFT JOIN public.usuarios o ON o.id = CASE WHEN v.vendedor_id = eu THEN v.vendedor_2_id ELSE v.vendedor_id END
+  WHERE v.empresa_id = _empresa_id AND v.vendedor_2_id IS NOT NULL AND eu IN (v.vendedor_id, v.vendedor_2_id)
+    AND v.data_faturamento >= coalesce(_desde, (now() AT TIME ZONE 'America/Maceio')::date - 365)
+  ORDER BY v.data_faturamento DESC LIMIT 200) s), '[]'::jsonb);
+END $$;
+REVOKE ALL ON FUNCTION public.minhas_vendas_compartilhadas(uuid, date) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.minhas_vendas_compartilhadas(uuid, date) TO authenticated;
 ```
 
 ## Testes (SQL puro, nada fica gravado)
@@ -488,6 +510,17 @@ BEGIN
   EXECUTE 'set local role authenticated';
   SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.empresa_id = emp AND v.codigo_shop9 = 'T22N2';
   IF n <> 1 THEN RAISE EXCEPTION 'FALHA 11: vendedor 2 não vê os itens da venda compartilhada (viu %)', n; END IF;
+  -- 12 (D1). A lista do vendedor traz as vendas compartilhadas dele, com a parte e os itens; sem o setor, recusa.
+  r := public.minhas_vendas_compartilhadas(emp, '2026-01-01');
+  IF NOT r @> '[{"codigo_shop9":"T22N2","minha_parte":500,"papel":2,"cliente":"Cliente 2 teste 22"}]'::jsonb
+     OR NOT r @> '[{"codigo_shop9":"DEV:T22D1","minha_parte":-100}]'::jsonb
+     OR jsonb_array_length((SELECT e->'itens' FROM jsonb_array_elements(r) e WHERE e->>'codigo_shop9' = 'T22N2')) <> 1 THEN
+    RAISE EXCEPTION 'FALHA 12a: lista do vendedor 2 incompleta (%)', r; END IF;
+  EXECUTE 'reset role';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', x_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  ok := false; BEGIN PERFORM public.minhas_vendas_compartilhadas(emp, NULL); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 12b: sem o setor Comercial leu a lista'; END IF;
   EXECUTE 'reset role';
 
   -- 7e (D2). Nota cancelada sai do resultado.
@@ -521,7 +554,7 @@ BEGIN
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 9b: concluiu com produto fora de linha'; END IF;
   EXECUTE 'reset role';
 
-  RAISE NOTICE 'Texto 22: testes 1 a 11 passaram.';
+  RAISE NOTICE 'Texto 22: testes 1 a 12 passaram.';
 END $t$;
 ROLLBACK;
 ```
