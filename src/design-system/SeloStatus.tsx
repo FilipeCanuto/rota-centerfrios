@@ -8,7 +8,7 @@ const tons: Record<TomStatus, { classe: string; Icone: typeof Info }> = {
   atencao: { classe: "text-atencao border-atencao/40", Icone: AlertTriangle },
   perigo: { classe: "text-perigo border-perigo/40", Icone: CircleAlert },
   info: { classe: "text-primary border-primary/30", Icone: Info },
-  conquista: { classe: "bg-ouro text-ouro-foreground border-transparent", Icone: Star },
+  conquista: { classe: "reflexo bg-ouro text-ouro-foreground border-transparent", Icone: Star },
 };
 
 /** Status sempre com ícone + palavra, nunca só cor. */

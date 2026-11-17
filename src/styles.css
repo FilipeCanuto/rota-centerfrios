@@ -171,6 +171,8 @@
   --cor-campo: var(--polar-cinza-500);
   --cor-divisoria: var(--polar-cinza-300);
   --cor-trilha: var(--polar-cinza-200);
+  --cor-sombra: var(--polar-marinho);
+  --luz-topo-forca: 70%;
   color-scheme: light;
 }
 
@@ -193,6 +195,8 @@
   --cor-campo: var(--polar-cinza-400);
   --cor-divisoria: var(--polar-noite-500);
   --cor-trilha: var(--polar-noite-650);
+  --cor-sombra: black;
+  --luz-topo-forca: 7%;
   color-scheme: dark;
 }
 
@@ -204,7 +208,14 @@
   --botao-primario-texto: var(--cor-sobre-primaria);
   --cartao-fundo: var(--cor-superficie);
   --cartao-borda: var(--cor-divisoria);
-  --sombra-cartao: 0 1px 2px color-mix(in oklab, var(--cor-texto) 5%, transparent);
+  /* Profundidade em camadas (estática, nunca animada): fio de luz no topo + sombra curta + sombra larga. */
+  --luz-topo: inset 0 1px 0 color-mix(in oklab, white var(--luz-topo-forca, 70%), transparent);
+  --sombra-cartao:
+    var(--luz-topo), 0 1px 2px color-mix(in oklab, var(--cor-sombra) 6%, transparent),
+    0 8px 24px -12px color-mix(in oklab, var(--cor-sombra) 14%, transparent);
+  --sombra-flutuante:
+    var(--luz-topo), 0 2px 6px color-mix(in oklab, var(--cor-sombra) 10%, transparent),
+    0 18px 40px -16px color-mix(in oklab, var(--cor-sombra) 32%, transparent);
   /* Nomes do shadcn/ui, ligados aos semânticos */
   --background: var(--cor-fundo);
   --foreground: var(--cor-texto);
@@ -260,6 +271,19 @@
     scroll-padding-bottom: 5rem;
   }
   body {
+    /* Brilho polar parado atrás de tudo (≤5% de cor: não muda o contraste do texto). */
+    background-image:
+      radial-gradient(
+        60rem 28rem at 85% -8rem,
+        color-mix(in oklab, var(--primary) 5%, transparent),
+        transparent
+      ),
+      radial-gradient(
+        40rem 24rem at -10% 0,
+        color-mix(in oklab, var(--ouro) 3%, transparent),
+        transparent
+      );
+    background-repeat: no-repeat;
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
@@ -464,6 +488,12 @@
   animation-duration: var(--duracao-media);
   animation-timing-function: var(--ease-polar);
 }
+/* Tudo que flutua (menus, popovers, diálogos) usa a mesma sombra em camadas. */
+[data-radix-popper-content-wrapper] > *,
+[role="dialog"],
+[role="alertdialog"] {
+  box-shadow: var(--sombra-flutuante);
+}
 /* Aparelho realmente fraco (movimento.tsx): sem escalonar, sem escala e com transições mais curtas. */
 :root[data-movimento="leve"] {
   --duracao-lenta: 220ms;
@@ -474,13 +504,153 @@
   --distancia-curta: 6px;
   --distancia-media: 8px;
 }
-/* Skeleton: pulso só de opacidade. */
+/* Skeleton: faixa de luz que atravessa (só transform). Aparelho fraco fica no pulso de opacidade. */
 @utility esqueleto {
-  animation: esqueleto 1.4s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklab, var(--cor-superficie) 75%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: esqueleto-luz 1.6s var(--ease-polar) infinite;
+  }
+}
+@keyframes esqueleto-luz {
+  to {
+    transform: translateX(100%);
+  }
 }
 @keyframes esqueleto {
   50% {
     opacity: 0.45;
+  }
+}
+:root[data-movimento="leve"] .esqueleto {
+  animation: esqueleto 1.4s ease-in-out infinite;
+  &::after {
+    display: none;
+  }
+}
+
+/* ---- Vida e conquista: brilho que atravessa (só transform e opacity, num ::after) ---- */
+/* Botão principal: fio de luz no topo e um véu claro no hover (opacidade). */
+@utility brilho-botao {
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    var(--luz-topo),
+    0 1px 2px color-mix(in oklab, var(--cor-sombra) 18%, transparent),
+    0 6px 16px -8px color-mix(in oklab, var(--primary) 55%, transparent);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, white 14%, transparent),
+      transparent 60%
+    );
+    opacity: 0.45;
+    pointer-events: none;
+    transition: opacity var(--duracao-media) var(--ease-polar);
+  }
+  @media (hover: hover) {
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+}
+/* Reflexo que cruza o elemento: uma vez (conquista) ou de tempos em tempos (indicador vivo). */
+@utility reflexo {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 35%,
+      rgb(255 255 255 / 0.55) 50%,
+      transparent 65%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+    animation: reflexo 900ms var(--ease-polar) 500ms 1 both;
+  }
+}
+@utility reflexo-vivo {
+  &::after {
+    animation: reflexo-vivo 6s var(--ease-polar) 1.2s infinite both;
+  }
+  &[data-viva="false"]::after {
+    animation-play-state: paused;
+  }
+}
+@keyframes reflexo {
+  to {
+    transform: translateX(120%);
+  }
+}
+@keyframes reflexo-vivo {
+  0%,
+  78% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+/* Conquista: o ícone salta uma vez. */
+@utility celebrar {
+  animation: barra-festa 1.1s var(--ease-polar) 200ms both;
+}
+/* Item ativo da navegação: marca que desliza para o lugar (só transform e opacity). */
+@utility marca-ativa {
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2rem;
+    height: 3px;
+    margin-left: -1rem;
+    border-radius: 0 0 3px 3px;
+    background: var(--primary);
+    transform: scaleX(0);
+    opacity: 0;
+    transition:
+      transform var(--duracao-lenta) var(--mola),
+      opacity var(--duracao-media) var(--ease-polar);
+  }
+  &[aria-current="page"]::before {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* Aba oculta: toda animação contínua para (o mascote marca `data-aba-oculta` na raiz). */
+html[data-aba-oculta] *,
+html[data-aba-oculta] *::before,
+html[data-aba-oculta] *::after {
+  animation-play-state: paused !important;
+}
+/* Aparelho fraco ou movimento reduzido: sem brilhos contínuos. */
+:root[data-movimento="leve"] .reflexo-vivo::after {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reflexo::after,
+  .esqueleto::after {
+    display: none;
   }
 }
 /* Transições de visão (troca de tela, filtro, card que expande): fade + leve subida. */
@@ -503,7 +673,7 @@
 @keyframes vt-entrar {
   from {
     opacity: 0;
-    transform: translateY(var(--distancia-media));
+    transform: translateY(var(--distancia-media)) scale(var(--escala-entrada));
   }
 }
 
@@ -976,6 +1146,21 @@ html[data-aba-oculta] .m-piscar {
     --mf-base: var(--mf-margem);
   }
 }
+/* Desktop com o menu lateral recolhido em ícones (3rem): no canto esquerdo, o mascote encolhe e
+   cabe na trilha, sem cobrir o começo das linhas. Menu e balão seguem iguais; o toque fica em 44 px. */
+@media (min-width: 768px) {
+  html:has([data-collapsible="icon"][data-side="left"]) .mascote-flutuante[data-canto$="esquerdo"] {
+    --mf-margem: 2px;
+    --mf-base: 12px;
+  }
+  html:has([data-collapsible="icon"][data-side="left"])
+    .mascote-flutuante[data-canto$="esquerdo"]
+    .mascote-botao
+    > svg {
+    width: 44px;
+    height: 44px;
+  }
+}
 .mascote-flutuante[data-canto^="inferior"] {
   bottom: calc(env(safe-area-inset-bottom) + var(--mf-base));
 }
@@ -1132,7 +1317,8 @@ html[data-aba-oculta] .m-piscar {
 .barra-meta__reflexo {
   animation: barra-reflexo 9s ease-in-out infinite;
 }
-.barra-meta[data-viva="false"] :is(.barra-meta__respira, .barra-meta__listras, .barra-meta__reflexo, .barra-meta__festa) {
+.barra-meta[data-viva="false"]
+  :is(.barra-meta__respira, .barra-meta__listras, .barra-meta__reflexo, .barra-meta__festa) {
   animation-play-state: paused;
 }
 .barra-meta__tabela {
@@ -1142,28 +1328,72 @@ html[data-aba-oculta] .m-piscar {
   animation: barra-festa 1.6s var(--curva-barra) both;
 }
 @keyframes barra-respira {
-  0%, 100% { opacity: 0.45; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1.15); }
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 @keyframes barra-listras {
-  to { transform: translateX(28px); }
+  to {
+    transform: translateX(28px);
+  }
 }
 @keyframes barra-reflexo {
-  0%, 70% { transform: translateX(-120%); opacity: 0; }
-  75% { opacity: 0.55; }
-  100% { transform: translateX(520%); opacity: 0; }
+  0%,
+  70% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(520%);
+    opacity: 0;
+  }
 }
 @keyframes barra-tabela {
-  from { opacity: 0; transform: translateY(8px); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 @keyframes barra-festa {
-  0% { opacity: 0; transform: scale(0.4) rotate(-20deg); }
-  40% { opacity: 1; transform: scale(1.25) rotate(8deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-20deg);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.25) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .barra-meta__mov { transition: none; }
-  .barra-meta__respira, .barra-meta__listras, .barra-meta__reflexo, .barra-meta__festa,
-  .barra-meta__tabela { animation: none; }
-  .barra-meta__reflexo { opacity: 0; }
+  .barra-meta__mov {
+    transition: none;
+  }
+  .barra-meta__respira,
+  .barra-meta__listras,
+  .barra-meta__reflexo,
+  .barra-meta__festa,
+  .barra-meta__tabela {
+    animation: none;
+  }
+  .barra-meta__reflexo {
+    opacity: 0;
+  }
+}
+/* Aparelho fraco: mascote parado também fora do canto (estados vazios). */
+:root[data-movimento="leve"] .mascote,
+:root[data-movimento="leve"] .m-piscar {
+  animation: none !important;
 }

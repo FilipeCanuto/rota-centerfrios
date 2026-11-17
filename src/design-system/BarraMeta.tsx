@@ -173,7 +173,7 @@ function TrilhoMeta(p: {
       >
         Meta · {mil(p.meta)}
       </span>
-      <div className="relative h-5 overflow-hidden rounded-full bg-muted">
+      <div className="relative h-5 overflow-hidden rounded-full bg-muted [box-shadow:inset_0_1px_2px_color-mix(in_oklab,var(--cor-sombra)_22%,transparent)]">
         <div
           className="absolute inset-y-0 overflow-hidden opacity-60 transition-opacity duration-700"
           style={{ left: `${p.fFat * 100}%`, width: `${Math.max(0, p.fProj - p.fFat) * 100}%` }}

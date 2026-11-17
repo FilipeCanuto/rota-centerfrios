@@ -105,7 +105,12 @@ export function usePreferenciasMascote(usuarioId: string | undefined) {
     try {
       const salvo = JSON.parse(localStorage.getItem(chave) ?? "{}");
       setPrefs({
-        canto: cantoValido(salvo.canto),
+        // Sem escolha salva: no desktop fica à esquerda, sobre o rodapé vazio do menu lateral,
+        // para não cobrir as ações à direita das listas (ex.: "Agendar" no Início).
+        canto: cantoValido(
+          salvo.canto ??
+            (matchMedia("(min-width: 768px)").matches ? "inferior-esquerdo" : PADRAO.canto),
+        ),
         minimizado: salvo.minimizado === true,
         baloesOcultos: salvo.baloesOcultos === true,
         somMudo: salvo.somMudo === true,
