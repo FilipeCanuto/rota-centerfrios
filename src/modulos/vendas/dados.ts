@@ -7,7 +7,7 @@ export interface VendaCompartilhada {
   data: string;
   tipo: "venda" | "devolucao";
   valor: number;
-  /** 50% do valor (negativa na devolução); calculada no banco por `parte_venda`. */
+  /** A linha deste vendedor na nota: 50% do valor (negativa na devolução). */
   minha_parte: number;
   papel: 1 | 2;
   cliente: string;
@@ -15,7 +15,7 @@ export interface VendaCompartilhada {
   itens: { produto: string; quantidade: number; valor_total: number }[];
 }
 
-// shortcut: `minhas_vendas_compartilhadas` vem do texto 22 do Lovable e ainda não está nos tipos gerados; tirar o cast depois.
+// shortcut: `minhas_vendas_compartilhadas` vem do texto 23 do banco e ainda não está nos tipos gerados; tirar o cast depois.
 const rpc = supabase.rpc as unknown as (
   f: "minhas_vendas_compartilhadas",
   a: { _empresa_id: string },
