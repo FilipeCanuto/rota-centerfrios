@@ -62,4 +62,4 @@ O LCP do teste é do servidor de desenvolvimento com CPU 4× lenta e compila na 
 
 - Medir LCP/INP no app publicado (campo), não só no servidor de desenvolvimento.
 - Teste de arrastar do mascote instável (já na `main`).
-- Mascote flutuante cobre o "Agendar" da primeira linha do Início no desktop; dá para arrastar, mas vale rever o canto padrão.
+- ~~Mascote flutuante cobre o "Agendar" no Início no desktop.~~ Resolvido: sem canto salvo, o padrão no desktop (≥ 768 px) passou a ser o inferior esquerdo, sobre o rodapé vazio do menu lateral (`modulos/mascote/dados.ts`; a regra `cantoValido` não mudou). No celular segue o inferior direito, porque à esquerda ficam os botões "Abrir WhatsApp". Quem já arrastou continua onde deixou.

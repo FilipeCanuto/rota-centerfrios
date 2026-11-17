@@ -56,7 +56,9 @@ test("arrastar encaixa no canto mais próximo, sem sair da tela, e lembra a posi
   page,
 }) => {
   await abrir(page);
-  await expect(caixa(page)).toHaveAttribute("data-canto", "inferior-direito");
+  // Padrão: à esquerda no desktop (não cobre as ações das listas), à direita no celular.
+  const padrao = page.viewportSize()!.width >= 768 ? "inferior-esquerdo" : "inferior-direito";
+  await expect(caixa(page)).toHaveAttribute("data-canto", padrao);
   const b = (await mascote(page).boundingBox())!;
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await page.mouse.down();
