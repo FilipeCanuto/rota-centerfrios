@@ -24,6 +24,7 @@ import { Route as AuthenticatedLinksRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMaisRouteImport } from './routes/_authenticated/mais'
 import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authenticated/notificacoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
+import { Route as AuthenticatedVendasCompartilhadasRouteImport } from './routes/_authenticated/vendas-compartilhadas'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes.index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes.$id'
 import { Route as AuthenticatedConfiguracoesIndexRouteImport } from './routes/_authenticated/configuracoes.index'
@@ -107,6 +108,12 @@ const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   path: '/orcamentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVendasCompartilhadasRoute =
+  AuthenticatedVendasCompartilhadasRouteImport.update({
+    id: '/vendas-compartilhadas',
+    path: '/vendas-compartilhadas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClientesIndexRoute =
   AuthenticatedClientesIndexRouteImport.update({
     id: '/clientes/',
@@ -157,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/mais': typeof AuthenticatedMaisRoute
   '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
+  '/vendas-compartilhadas': typeof AuthenticatedVendasCompartilhadasRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -179,6 +187,7 @@ export interface FileRoutesByTo {
   '/mais': typeof AuthenticatedMaisRoute
   '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
+  '/vendas-compartilhadas': typeof AuthenticatedVendasCompartilhadasRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -203,6 +212,7 @@ export interface FileRoutesById {
   '/_authenticated/mais': typeof AuthenticatedMaisRoute
   '/_authenticated/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
+  '/_authenticated/vendas-compartilhadas': typeof AuthenticatedVendasCompartilhadasRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/configuracoes/feriados': typeof AuthenticatedConfiguracoesFeriadosRoute
   '/_authenticated/configuracoes/importacao': typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/mais'
     | '/notificacoes'
     | '/orcamentos'
+    | '/vendas-compartilhadas'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/mais'
     | '/notificacoes'
     | '/orcamentos'
+    | '/vendas-compartilhadas'
     | '/clientes/$id'
     | '/configuracoes/feriados'
     | '/configuracoes/importacao'
@@ -272,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mais'
     | '/_authenticated/notificacoes'
     | '/_authenticated/orcamentos'
+    | '/_authenticated/vendas-compartilhadas'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/configuracoes/feriados'
     | '/_authenticated/configuracoes/importacao'
@@ -397,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/vendas-compartilhadas': {
+      id: '/_authenticated/vendas-compartilhadas'
+      path: '/vendas-compartilhadas'
+      fullPath: '/vendas-compartilhadas'
+      preLoaderRoute: typeof AuthenticatedVendasCompartilhadasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/clientes/': {
       id: '/_authenticated/clientes/'
       path: '/clientes'
@@ -452,6 +472,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMaisRoute: typeof AuthenticatedMaisRoute
   AuthenticatedNotificacoesRoute: typeof AuthenticatedNotificacoesRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
+  AuthenticatedVendasCompartilhadasRoute: typeof AuthenticatedVendasCompartilhadasRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedConfiguracoesFeriadosRoute: typeof AuthenticatedConfiguracoesFeriadosRoute
   AuthenticatedConfiguracoesImportacaoRoute: typeof AuthenticatedConfiguracoesImportacaoRoute
@@ -469,6 +490,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMaisRoute: AuthenticatedMaisRoute,
   AuthenticatedNotificacoesRoute: AuthenticatedNotificacoesRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
+  AuthenticatedVendasCompartilhadasRoute:
+    AuthenticatedVendasCompartilhadasRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedConfiguracoesFeriadosRoute:
     AuthenticatedConfiguracoesFeriadosRoute,

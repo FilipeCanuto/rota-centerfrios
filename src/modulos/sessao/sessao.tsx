@@ -38,23 +38,26 @@ async function carregarSetores(): Promise<string[]> {
 }
 
 async function carregarSessao(): Promise<Sessao | null> {
-  const { data: u } = await supabase.auth.getUser();
-  if (!u.user) return null;
-  const [{ data: usuario }, { data: papeis }, { data: empresas }, setores] = await Promise.all([
+  const { data: s } = await supabase.auth.getSession();
+  const authId = s.session?.user.id;
+  if (!authId) return null;
+  const [usuario, papeis, empresas, setores] = await Promise.all([
     supabase
       .from("usuarios")
       .select("id,nome,apelido_copiloto,pinguim_versao,copiloto_minimizado,tema,demo")
-      .eq("auth_user_id", u.user.id)
+      .eq("auth_user_id", authId)
       .maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", u.user.id),
+    supabase.from("user_roles").select("role").eq("user_id", authId),
     supabase.from("empresas").select("id,nome").order("created_at"),
     carregarSetores(),
   ]);
+  // Falha de rede não pode virar "usuário sem papéis e sem empresas" guardado em cache.
+  for (const r of [usuario, papeis, empresas]) if (r.error) throw r.error;
   return {
-    authId: u.user.id,
-    usuario: (usuario as Sessao["usuario"]) ?? null,
-    papeis: (papeis ?? []).map((p) => p.role as Perfil),
-    empresas: empresas ?? [],
+    authId,
+    usuario: (usuario.data as Sessao["usuario"]) ?? null,
+    papeis: (papeis.data ?? []).map((p) => p.role as Perfil),
+    empresas: empresas.data ?? [],
     setores,
   };
 }

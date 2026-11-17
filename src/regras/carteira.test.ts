@@ -150,6 +150,12 @@ describe("plano do dia e painel", () => {
     expect(avaliarCliente(c, d("2026-11-23"), cfg, NACIONAIS).orcamentosParados).toBe(0);
     expect(avaliarCliente(c, d("2026-11-23"), cfg, new Set()).orcamentosParados).toBe(1);
   });
+  it("reativado: os 90 dias contam até a compra do mês, como nos pontos do banco", () => {
+    // 15/08 → 20/11 = 97 dias (até 01/11 seriam só 78).
+    expect(
+      reativado({ compras: ["2026-11-20", "2026-08-15"], comprou_no_mes: true }, hoje, cfg),
+    ).toBe(true);
+  });
   it("reativado: comprou no mês depois de 90 dias ou mais sem comprar", () => {
     expect(
       reativado({ compras: ["2026-11-05", "2026-07-01"], comprou_no_mes: true }, hoje, cfg),

@@ -10,8 +10,9 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ context, location }) => {
     levarLinkDeRecuperacao("/_authenticated");
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    // Sessão local (sem ida ao servidor): ficar sem rede não pode parecer "sem login". Os dados são do banco (RLS).
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/auth" });
     // Guarda única por setor. É só navegação: quem decide o acesso aos dados é o banco (tem_setor).
     const setor = setorDaRota(location.pathname, ROTAS_POR_SETOR);
     if (!setor) return;

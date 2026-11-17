@@ -2,10 +2,17 @@
 
 Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada etapa.
 
+## Situação em 17/11/2026
+
+- **Auditoria geral** no ramo `audit/fable`: relatório em [auditoria-fable.md](auditoria-fable.md) (segurança, regras, robustez, desempenho, conexões, dívidas). Corrigido no app: sessão local na guarda de rota (sem rede não manda mais para o login), erro de sessão aparece como erro, cache com 30 s de validade e sem repetir erro de permissão, "orçamento parado" com um critério só nas três telas, reativação igual à dos pontos, botão de apagar demonstração removido (a função é só do servidor). Esqueleto de WhatsApp (Evolution), e-mail e Instagram: contrato em `src/integracoes`, modo simulado e seção na aba Integrações.
+- **Banco:** mensagem [22](lovable/22-auditoria.md) **pronta para colar** (papéis só por função e sem se dar papel novo, contato só da carteira e com data de agora, auditoria comercial com setor, post do Instagram validado, carga de demonstração só no servidor, reimportação de venda mantém o vendedor).
+- **Decisões da diretoria (17/11/2026), já no texto 22 e no app:** venda com vendedor 2 dá 50% a cada um; devolução e nota cancelada abatem do resultado; pontos de vendas continuam depois de bater a meta (meta do dia = média diária do mês); carrinho sempre com o preço de tabela do dia. Detalhes na seção 7 do relatório. Tela nova `/vendas-compartilhadas` (atalho no "Mais"): vendas com vendedor 2 de quem está logado, com a parte de 50% e os itens; depende do texto 22.
+- **Shop9:** a documentação pública da Idealsoft já responde autenticação, paginação e filtros; o adaptador do conector ainda é suposição e precisa ser refeito antes do modo conector (seção 5.1 do relatório). Chave de idempotência continua sem resposta.
+
 ## Situação em 16/11/2026
 
 - Conector Shop9 no ramo `feat/shop9-conector`: programa local `conector-shop9/` (Node 22, sem dependências, só saída HTTPS, simulador do Shop9, 10 testes `node --test`), rota de servidor `/api/conector/$acao` com assinatura Ed25519 (a Rota guarda só a chave pública), janela de 5 min e nonce (`src/integracoes/conectorServidor.server.ts`, regra em `src/regras/conector.ts`), gateway "via conector" (`envioShop9DoModo`) e aba Configurações → Integrações. Banco na mensagem 21 (`docs/lovable/21-conector-shop9.md`, SQL completo + testes SQL), **aplicada em 16/11/2026 como migração 0030** (a 0029 ficou vazia, só comentário, por engano do Lovable); testes SQL 1 a 5 passaram. Guia de TI: [guia-conector-shop9-cit.md](guia-conector-shop9-cit.md).
-- Falta no conector: autenticação real do Shop9 e nomes de campo (quando a Idealsoft mandar a documentação). A aba Integrações já está no axe (`e2e/acessibilidade.spec.ts`).
+- 17/11/2026, conector 0.2.0 (mesmo ramo, worktree próprio): adaptador real pela documentação oficial ([shop9-api-referencia.md](shop9-api-referencia.md)): token por filial, Signature HMAC, envelope, paginação, sincronização incremental de funcionários, clientes, produtos, preços, estoque, crédito, motivos de desconto, saídas e devoluções; venda compartilhada dividida em centavos; orçamento sem duplicar (marca `ROTA:<id>`). Pareamento por código de uso único, troca de chave com transição de 10 min, cortes antes do banco. Tela: códigos por empresa e vendedores do Shop9. 28 testes `node --test`; axe da aba Integrações nos 4 cenários. **Banco na mensagem 22 (`docs/lovable/22-conector-shop9-adaptador.md`), PRONTO PARA COLAR**; até ela ser aplicada, `/api/conector` não funciona (usa `conector_chaves` e `conector_parear`). Perguntas à Idealsoft em [shop9-mapeamento.md](shop9-mapeamento.md).
 - Base do carrinho no ramo `feat/carrinho-base` (sem telas): regras em `src/regras/carrinho.ts` (limite de carrinhos, corrida, totais em centavos, desconto, idempotência, CSV), `Shop9Gateway` manual e esqueleto da API em `src/integracoes`, importação de produtos. Banco na mensagem 20 (`docs/lovable/20-carrinho-orcamento-shop9.md`): enviada ao Lovable em 16/11/2026 pelo Claude Code, em 3 partes (texto igual ao arquivo) e aplicada na migração 0027; os 12 itens da conferência passaram (`tests/test_carrinho_shop9.py`). Diferenças: regras novas e motivos de cancelamento gravados como dados só nas duas empresas atuais (empresa nova precisa cadastrar os motivos); `importar_produtos` só para diretoria (como `importar_clientes`); a planilha só confirma orçamento já marcado como enviado. Pedido à Idealsoft: [shop9-mapeamento.md](shop9-mapeamento.md).
 - Falta: telas do catálogo, carrinho, liberação de desconto e fila de envio (depois da mensagem 20 aplicada e dos tipos regenerados).
 
@@ -34,17 +41,17 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 3 | Login (passo 5, parcial) | `fase1/login` / PR #4 | Concluída |
 | 4 | PWA e acabamento (passos 6 e 7) | `fase1/pwa-acabamento` / PR #5 | Concluída |
 | 5 | Clientes e ficha 360 | `fase1/clientes` / PR #6 | Concluída |
-| 6 | Importação do Shop9 | `fase1/importacao` | Concluída (aguarda PR) |
-| 7 | Agenda | `fase1/agenda` | Concluída (aguarda PR) |
-| 8 | Orçamentos | `fase1/restante` | Concluída (aguarda PR) |
-| 9 | Central de links e arquivos | `fase1/restante` | Concluída (aguarda PR) |
-| 10 | Gamificação | `fase1/restante` | Concluída e revisada (aguarda PR) |
-| 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
-| 12 | Gestão | `fase1/restante` | Concluída e revisada (aguarda PR) |
-| 13 | Notificações | `fase1/restante` | Concluída, versão mínima (aguarda PR) |
-| — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída (aguarda PR); contrato em `docs/mascote.md`. Falta comparar a arte com a imagem de referência |
-| — | Setores de acesso: seletor depois do login, guarda de rota única, aba Usuários e acessos, Configurações no menu lateral e no avatar | `feat/setores-acesso` | Concluída no app (aguarda PR e a mensagem 18) |
-| — | Login em duas colunas (palco de mídia) e Configurações com abas (Mídia do login) | `feat/login-configuracoes` | Concluída (aguarda PR); relatório em [relatorio-login-configuracoes.md](relatorio-login-configuracoes.md). Próxima aba: Avisos (uma linha em `src/modulos/configuracoes/abas.tsx`) |
+| 6 | Importação do Shop9 | `fase1/importacao` | Concluída, no `main` |
+| 7 | Agenda | `fase1/agenda` | Concluída, no `main` |
+| 8 | Orçamentos | `fase1/restante` | Concluída, no `main` |
+| 9 | Central de links e arquivos | `fase1/restante` | Concluída, no `main` |
+| 10 | Gamificação | `fase1/restante` | Concluída e revisada, no `main` |
+| 11 | Copiloto e mascote | `fase1/restante` | Concluída, versão mínima, no `main` |
+| 12 | Gestão | `fase1/restante` | Concluída e revisada, no `main` |
+| 13 | Notificações | `fase1/restante` | Concluída, versão mínima, no `main` |
+| — | Mascote flutuante (arte em SVG, API `useMascote`, balões, sino, áudio) | `feat/mascote` | Concluída, no `main` |
+| — | Setores de acesso: seletor depois do login, guarda de rota única, aba Usuários e acessos, Configurações no menu lateral e no avatar | `feat/setores-acesso` | Concluída, no `main` (mensagem 18 aplicada) |
+| — | Login em duas colunas (palco de mídia) e Configurações com abas (Mídia do login) | `feat/login-configuracoes` | Concluída, no `main` |
 
 ## Mensagens de banco da Fase 1 (`docs/lovable/`)
 | Nº | Assunto | Situação |
@@ -57,7 +64,11 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 | 15 | Gestão, copiloto, notificações e demonstração completa | Aplicada (0018) |
 | 16 | Avisos, mídia do login e permissão "Pode publicar avisos" | Aplicada (0021, 0022). A permissão já pode ser ligada na aba Usuários e acessos |
 | 17 | Mascote (4 chaves `mascote_*` em `configuracoes_regras`) | **Texto pronto, ainda não enviado ao Lovable.** Sem a migração o app usa a reserva de `REGRAS_PADRAO` |
-| 18 | Setores e acesso (`usuario_setores`, `tem_setor`, `meus_setores`, políticas RESTRICTIVE do Comercial, `usuarios.ativo`, `admin_pre_cadastrar`, `admin_salvar_acessos`) | **Texto pronto, ainda não enviado.** Antes dela todos seguem no Comercial e a aba Usuários e acessos mostra erro ao carregar |
+| 18 | Setores e acesso (`usuario_setores`, `tem_setor`, `meus_setores`, políticas RESTRICTIVE do Comercial, `usuarios.ativo`, `admin_pre_cadastrar`, `admin_salvar_acessos`) | Aplicada (0023, 0025, 0026) |
+| 19 | Setores editáveis e enquadramento da mídia | Aplicada (0024) |
+| 20 | Carrinho, orçamento da Rota e fila Shop9 | Aplicada (0027, 0028) |
+| 21 | Conector local do Shop9 | Aplicada (0030) |
+| 22 | Correções da auditoria | **Pronta para colar** |
 
 ## Decisões tomadas nesta fase
 
@@ -118,7 +129,7 @@ Fonte única para uma nova sessão continuar de onde parou. Atualizado a cada et
 ## Pendências abertas
 
 - Medir INP e CLS em aparelho real depois do movimento novo (a medição atual é de laboratório: `DESEMPENHO=1 bun x playwright test e2e/desempenho.spec.ts`).
-- **Notificações — pendentes:** tela de preferências (tipos desligados, horário de expediente por pessoa) e o silêncio fora do expediente, aos domingos e feriados (horário padrão aprovado: seg–sex 8h–18h, sábado 8h–12h). A tabela `preferencias_notificacao` já existe no banco; falta a tela e a regra de exibição.
+- **Notificações — pendentes (confirmado na auditoria de 17/11):** tela de preferências (tipos desligados, horário de expediente por pessoa) e o silêncio fora do expediente, aos domingos e feriados (horário padrão aprovado: seg–sex 8h–18h, sábado 8h–12h). A tabela `preferencias_notificacao` já existe no banco; falta a tela e a regra de exibição.
 - Refinamento visual do Pinguim e animações (revisão geral).
 - Ficha 360 sem situação financeira (limite, títulos em aberto): o Shop9 ainda não envia esse dado. Conversas na ficha são só os contatos registrados até o WhatsApp (Fase 2).
 - Teclado testado só no Início (link "Pular para o conteúdo"); cada módulo novo ganha o seu teste.

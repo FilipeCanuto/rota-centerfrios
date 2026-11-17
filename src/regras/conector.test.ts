@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  chavePublicaValida,
   codigoPareamentoValido,
   conectorOnline,
   criarLimitador,
@@ -54,13 +53,6 @@ describe("assinatura Ed25519 do conector", () => {
     expect(await verificarAssinatura(PUBLICA, { ...base, assinatura: null }, agora)).toBe(
       "cabecalhos",
     );
-  });
-
-  it("valida o formato da chave pública colada na tela", () => {
-    expect(chavePublicaValida(PUBLICA)).toBe(true);
-    expect(chavePublicaValida(` ${PUBLICA}\n`)).toBe(true);
-    expect(chavePublicaValida("abc")).toBe(false);
-    expect(chavePublicaValida("-----BEGIN PUBLIC KEY-----")).toBe(false);
   });
 
   it("online só com contato nos últimos 3 minutos", () => {

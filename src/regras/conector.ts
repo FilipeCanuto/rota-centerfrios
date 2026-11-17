@@ -25,9 +25,6 @@ function deBase64url(s: string): Uint8Array<ArrayBuffer> | null {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
-/** Chave pública Ed25519 crua (32 bytes) em base64url: 43 caracteres. */
-export const chavePublicaValida = (s: string) => deBase64url(s.trim())?.length === 32;
-
 export async function textoCanonico(
   ts: string,
   nonce: string,

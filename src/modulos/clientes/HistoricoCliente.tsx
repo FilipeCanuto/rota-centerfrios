@@ -80,16 +80,19 @@ export function ItensMaisComprados({ ficha }: { ficha: Ficha }) {
 
 export function Compras({ ficha }: { ficha: Ficha }) {
   return (
-    <Secao titulo="Últimas compras">
+    <Secao titulo="Últimas compras e devoluções">
       {ficha.compras.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma compra faturada ainda.</p>
       ) : (
         <ol className="cascata divide-y">
           {ficha.compras.map((c) => (
             <li key={c.id} className="py-3">
-              <p className="flex flex-wrap justify-between gap-2">
+              <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {c.tipo === "devolucao" && <SeloStatus tom="atencao">Devolução</SeloStatus>}
                 <span className="font-semibold">{data(c.data)}</span>
-                <span className="numeros font-semibold">{formatarMoeda(Number(c.valor))}</span>
+                <span className="numeros ml-auto font-semibold">
+                  {formatarMoeda(Number(c.valor))}
+                </span>
               </p>
               {c.itens.length > 0 && (
                 <p className="text-sm text-muted-foreground">

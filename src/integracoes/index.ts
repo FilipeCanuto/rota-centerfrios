@@ -6,8 +6,10 @@ import {
   vozDoAparelho,
   whatsappManual,
 } from "./manual";
+import { canalSimulado } from "./conexoes";
 import { shop9EnvioApi } from "./shop9Api";
 export * from "./tipos";
+export { CONEXOES, type Conexao } from "./conexoes";
 export { normalizarTelefone } from "./manual";
 
 /** Ponto único de troca: substitua aqui pelas implementações reais quando houver integração. */
@@ -18,6 +20,9 @@ export const integracoes = {
   envioShop9: shop9EnvioManual,
   copiloto: copilotoPorRegras,
   instagram: instagramManual,
+  /** Simulados até as conexões reais (docs/auditoria-fable.md, seção 5.2). */
+  whatsapp: canalSimulado("WhatsApp (simulado)"),
+  email: canalSimulado("E-mail (simulado)"),
   voz: vozDoAparelho,
 };
 

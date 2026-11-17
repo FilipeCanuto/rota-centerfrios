@@ -3,6 +3,7 @@ import {
   clienteSemCompra,
   cobertura,
   orcamentoParado,
+  ultimaAtividadeOrcamento,
   dataPrevistaRecompra,
   statusRecompra,
   ultimaInteracaoQualificada,
@@ -14,6 +15,7 @@ import {
   diasUteisRestantes,
   formatarISO,
   inicioDoMes,
+  paraData,
   type Feriados,
 } from "./datas";
 import { atingimento, metaDiariaCobertura, metaDoDia, projecao } from "./metas";
@@ -87,7 +89,10 @@ export const PESO: Record<MotivoTipo, number> = {
   sem_compra: 50,
 };
 
-/** Reativado: comprou no mês depois de ficar N dias ou mais sem comprar (contados até o início do mês). */
+/**
+ * Reativado: comprou no mês depois de ficar N dias ou mais sem comprar, contados até a primeira compra
+ * do mês (a mesma conta de `calcular_pontos_dia`, para a tela e os pontos mostrarem o mesmo número).
+ */
 export function reativado(
   c: Pick<ClienteBanco, "compras" | "comprou_no_mes">,
   hoje: Date,
@@ -95,11 +100,10 @@ export function reativado(
 ): boolean {
   if (!c.comprou_no_mes) return false;
   const inicio = formatarISO(inicioDoMes(hoje));
-  const anterior = c.compras
-    .filter((d) => d < inicio)
-    .sort()
-    .at(-1);
-  return !!anterior && clienteSemCompra(anterior, inicioDoMes(hoje), cfg);
+  const datas = [...c.compras].sort();
+  const anterior = datas.filter((d) => d < inicio).at(-1);
+  const primeira = datas.find((d) => d >= inicio);
+  return !!anterior && !!primeira && clienteSemCompra(anterior, paraData(primeira), cfg);
 }
 
 /** Classifica um cliente: motivo do plano do dia (ou nenhum) e alertas. */
@@ -117,10 +121,9 @@ export function avaliarCliente(
     hoje,
     cfg,
   );
-  const parados = c.orcamentos_abertos.filter((o) => {
-    const ultima = [o.ultimo_followup ?? o.data, c.ultima_interacao ?? ""].sort().at(-1)!;
-    return orcamentoParado(ultima, hoje, cfg, feriados);
-  });
+  const parados = c.orcamentos_abertos.filter((o) =>
+    orcamentoParado(ultimaAtividadeOrcamento(o, c.ultima_interacao), hoje, cfg, feriados),
+  );
 
   let tipo: MotivoTipo | null = null;
   let motivo = "";
