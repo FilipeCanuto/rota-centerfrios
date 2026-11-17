@@ -317,7 +317,8 @@ DECLARE
   d_id uuid := gen_random_uuid(); d_auth uuid := gen_random_uuid();  -- diretoria, começa sem setor
   v_id uuid := gen_random_uuid(); v_auth uuid := gen_random_uuid();  -- vendedor com setor Comercial
   v2_id uuid := gen_random_uuid();                                  -- outro vendedor (sem login)
-  c1 uuid := gen_random_uuid(); c2 uuid := gen_random_uuid();
+  c1 uuid := gen_random_uuid(); c2 uuid := gen_random_uuid(); c3 uuid := gen_random_uuid();
+  p1 uuid; p2 uuid; car uuid; orc uuid; r jsonb; x numeric;
 BEGIN
   SELECT id INTO emp FROM public.empresas WHERE nome = 'CENTERFRIOS';
   IF emp IS NULL THEN RAISE EXCEPTION 'FALHA 0: empresa não encontrada'; END IF;
@@ -417,7 +418,60 @@ BEGIN
   SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.codigo_shop9 = 'T22N1' AND v.empresa_id = emp AND i.vendedor_id = v_id;
   IF n <> 1 THEN RAISE EXCEPTION 'FALHA 6b: itens com outro vendedor'; END IF;
 
-  RAISE NOTICE 'Texto 22: testes 1 a 6 passaram.';
+  -- 7 (D1, D2). Venda com vendedor 2 dá 50% a cada um; devolução abate dos dois; não conta como compra.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(
+   jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cliente_codigo', 'T22C2', 'data_faturamento', '2026-11-12', 'valor', 1000,
+    'vendedor_2_email', 'teste22.vendedor@centerfrios.com', 'tipo', 'venda'),
+   jsonb_build_object('linha', 3, 'codigo_shop9', 'T22D1', 'cliente_codigo', 'T22C2', 'data_faturamento', '2026-11-13', 'valor', 200,
+    'tipo', 'devolucao', 'nota_origem', 'T22N2')));
+  r := public.painel_vendedor(emp, v_id, '2026-11-20');
+  IF (r->>'faturado_mes')::numeric <> 520 THEN RAISE EXCEPTION 'FALHA 7a: vendedor 2 esperado 520 (120 + 500 - 100), veio %', r->>'faturado_mes'; END IF;
+  r := public.painel_vendedor(emp, v2_id, '2026-11-20');
+  IF (r->>'faturado_mes')::numeric <> 400 THEN RAISE EXCEPTION 'FALHA 7b: vendedor 1 esperado 400 (500 - 100), veio %', r->>'faturado_mes'; END IF;
+  SELECT count(*) INTO n FROM jsonb_array_elements(r->'clientes') c WHERE c->>'id' = c2::text AND c->'compras' = '["2026-11-12"]'::jsonb;
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 7c: devolução apareceu como compra'; END IF;
+  EXECUTE 'reset role';
+  IF (SELECT data_ultima_compra FROM public.clientes WHERE id = c2) <> '2026-11-12' THEN RAISE EXCEPTION 'FALHA 7d: devolução mudou a última compra'; END IF;
+
+  -- 8 (D3). Meta do mês já batida: segue pontuando no dia com venda; sem venda, não.
+  INSERT INTO public.metas(empresa_id, vendedor_id, mes, meta_vendas, meta_orcamentos, meta_cobertura, meta_reativacao) VALUES (emp, v_id, '2026-11-01', 100, 0, 0, 0);
+  IF NOT public.gam_vendas_batida(emp, v_id, '2026-11-12') THEN RAISE EXCEPTION 'FALHA 8a: parou de pontuar depois da meta'; END IF;
+  IF public.gam_vendas_batida(emp, v_id, '2026-11-11') THEN RAISE EXCEPTION 'FALHA 8b: pontuou sem venda no dia'; END IF;
+
+  -- 7e (D2). Nota cancelada sai do resultado.
+  EXECUTE 'set local role authenticated';
+  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cancelada', true)));
+  EXECUTE 'reset role';
+  IF EXISTS (SELECT 1 FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 = 'T22N2') THEN RAISE EXCEPTION 'FALHA 7e: nota cancelada continuou'; END IF;
+
+  -- 9 (D4). Carrinho conclui com o preço de tabela do dia e recusa produto fora de linha.
+  INSERT INTO public.clientes(id, empresa_id, vendedor_id, nome, codigo_shop9) VALUES (c3, emp, v_id, 'Cliente 3 teste 22', 'T22C3');
+  INSERT INTO public.produtos(empresa_id, codigo_shop9, descricao, preco_tabela) VALUES (emp, 'T22P1', 'Produto 1 teste 22', 10) RETURNING id INTO p1;
+  INSERT INTO public.produtos(empresa_id, codigo_shop9, descricao, preco_tabela) VALUES (emp, 'T22P2', 'Produto 2 teste 22', 10) RETURNING id INTO p2;
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  car := public.abrir_carrinho(c3);
+  PERFORM public.adicionar_item_carrinho(car, p1, 2, 0);
+  EXECUTE 'reset role';
+  UPDATE public.produtos SET preco_tabela = 12 WHERE id = p1;
+  EXECUTE 'set local role authenticated';
+  orc := public.concluir_carrinho(car);
+  EXECUTE 'reset role';
+  SELECT valor INTO x FROM public.orcamentos WHERE id = orc;
+  IF x <> 24 THEN RAISE EXCEPTION 'FALHA 9a: orçamento com preço antigo (esperado 24, veio %)', x; END IF;
+  EXECUTE 'set local role authenticated';
+  car := public.abrir_carrinho(c3);
+  PERFORM public.adicionar_item_carrinho(car, p2, 1, 0);
+  EXECUTE 'reset role';
+  UPDATE public.produtos SET ativo = false WHERE id = p2;
+  EXECUTE 'set local role authenticated';
+  ok := false; BEGIN PERFORM public.concluir_carrinho(car); EXCEPTION WHEN raise_exception THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 9b: concluiu com produto fora de linha'; END IF;
+  EXECUTE 'reset role';
+
+  RAISE NOTICE 'Texto 22: testes 1 a 9 passaram.';
 END $t$;
 ROLLBACK;
 ```
