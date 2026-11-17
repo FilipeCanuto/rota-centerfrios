@@ -1146,6 +1146,21 @@ html[data-aba-oculta] .m-piscar {
     --mf-base: var(--mf-margem);
   }
 }
+/* Desktop com o menu lateral recolhido em ícones (3rem): no canto esquerdo, o mascote encolhe e
+   cabe na trilha, sem cobrir o começo das linhas. Menu e balão seguem iguais; o toque fica em 44 px. */
+@media (min-width: 768px) {
+  html:has([data-collapsible="icon"][data-side="left"]) .mascote-flutuante[data-canto$="esquerdo"] {
+    --mf-margem: 2px;
+    --mf-base: 12px;
+  }
+  html:has([data-collapsible="icon"][data-side="left"])
+    .mascote-flutuante[data-canto$="esquerdo"]
+    .mascote-botao
+    > svg {
+    width: 44px;
+    height: 44px;
+  }
+}
 .mascote-flutuante[data-canto^="inferior"] {
   bottom: calc(env(safe-area-inset-bottom) + var(--mf-base));
 }
