@@ -1,5 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarOff, FileText, FileUp, Link2, Settings, Trophy, Users } from "lucide-react";
+import {
+  CalendarOff,
+  FileText,
+  FileUp,
+  Handshake,
+  Link2,
+  Settings,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSessao } from "@/modulos/sessao/sessao";
 
@@ -50,6 +59,11 @@ function Mais() {
               </Link>
             </Button>
           )}
+          <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
+            <Link to="/vendas-compartilhadas">
+              <Handshake aria-hidden="true" /> Vendas compartilhadas
+            </Link>
+          </Button>
           <Button asChild variant="outline" className="h-auto min-h-11 whitespace-normal text-left">
             <Link to="/gamificacao">
               <Trophy aria-hidden="true" /> Pontos e selos

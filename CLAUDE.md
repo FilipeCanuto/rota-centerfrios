@@ -37,7 +37,7 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - "Orçamento parado": um critério só, `ultimaAtividadeOrcamento` em `src/regras/carteira.ts` (último retorno ou data do orçamento, ou o último contato com o cliente). Início, Gestão e Orçamentos usam a mesma conta.
 - Rede e sessão: a guarda de rota usa a sessão local (`getSession`); o padrão das consultas fica no `QueryClient` de `src/router.tsx` (30 s de validade, erro com código do banco não é repetido).
 - WhatsApp (Evolution), e-mail e Instagram: contrato em `src/integracoes/tipos.ts` (`CanalConversa`), modo simulado e lista do que falta em `src/integracoes/conexoes.ts`. Segredos só nos Secrets do servidor; a tela mostra só o nome deles.
-- Meta por venda faturada: venda com vendedor 2 vale 50% para cada (`parte_venda()` no banco); devolução entra negativa e não conta como compra; nota cancelada sai; depois de bater a meta, a meta do dia é a média diária do mês. Carrinho sempre com o preço de tabela do dia.
+- Meta por venda faturada: venda com vendedor 2 vale 50% para cada (`parte_venda()` no banco); devolução entra negativa e não conta como compra; nota cancelada sai; depois de bater a meta, a meta do dia é a média diária do mês. Carrinho sempre com o preço de tabela do dia. O vendedor 2 vê as vendas dele em `/vendas-compartilhadas` (função `minhas_vendas_compartilhadas`), sem abrir a ficha do cliente.
 - Auditoria geral e decisões: [docs/auditoria-fable.md](docs/auditoria-fable.md).
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).
 

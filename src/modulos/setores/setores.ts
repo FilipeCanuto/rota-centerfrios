@@ -64,6 +64,7 @@ export const MODULOS: Record<string, ModuloSetor> = {
       "/agenda",
       "/mais",
       "/orcamentos",
+      "/vendas-compartilhadas",
       "/gestao",
       "/gamificacao",
       "/links",
