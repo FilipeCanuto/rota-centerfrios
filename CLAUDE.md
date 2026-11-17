@@ -33,6 +33,11 @@ Plataforma interna de carteira, agenda e metas das vendedoras e vendedores da CE
 - Contas com `usuarios.acesso_total` têm todos os setores: política de setor usa sempre `tem_setor()`, nunca a lista de setores.
 - Dado de cliente não vai para endereço (URL), log nem serviço externo.
 - Mascote: as telas só emitem eventos por `useMascote()` (`notificar`, `definirEstado`) e nunca importam o desenho. Contrato e como adicionar estado, mensagem e evento em [docs/mascote.md](docs/mascote.md).
+- Papéis, vínculos de empresa e pré-cadastro só mudam pelas funções `admin_*` (texto 22); ninguém se dá papel novo, só quem tem `acesso_total`.
+- "Orçamento parado": um critério só, `ultimaAtividadeOrcamento` em `src/regras/carteira.ts` (último retorno ou data do orçamento, ou o último contato com o cliente). Início, Gestão e Orçamentos usam a mesma conta.
+- Rede e sessão: a guarda de rota usa a sessão local (`getSession`); o padrão das consultas fica no `QueryClient` de `src/router.tsx` (30 s de validade, erro com código do banco não é repetido).
+- WhatsApp (Evolution), e-mail e Instagram: contrato em `src/integracoes/tipos.ts` (`CanalConversa`), modo simulado e lista do que falta em `src/integracoes/conexoes.ts`. Segredos só nos Secrets do servidor; a tela mostra só o nome deles.
+- Auditoria geral e decisões pendentes: [docs/auditoria-fable.md](docs/auditoria-fable.md).
 - Não reescreva histórico já publicado no git (projeto ligado ao Lovable).
 
 ## Banco e Lovable
