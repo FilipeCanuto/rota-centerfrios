@@ -16,7 +16,7 @@ export const assinar = (chavePrivada, canonico) =>
 export const chavePublicaDe = (chavePrivada) =>
   createPublicKey(chavePrivada).export({ format: "jwk" }).x;
 
-/** Cabeçalhos de uma requisição assinada. Um nonce novo por chamada (inclusive em reenvio). */
+/** Cabeçalhos de uma requisição assinada. Um nonce novo por chamada (inclusive em reenvio). Sem conectorId = pareamento. */
 export function cabecalhosAssinados({
   conectorId,
   chavePrivada,
@@ -29,7 +29,7 @@ export function cabecalhosAssinados({
   const nonce = randomBytes(18).toString("base64url");
   return {
     "content-type": "application/json",
-    "x-conector-id": conectorId,
+    ...(conectorId ? { "x-conector-id": conectorId } : {}),
     "x-conector-ts": ts,
     "x-conector-nonce": nonce,
     "x-conector-assinatura": assinar(

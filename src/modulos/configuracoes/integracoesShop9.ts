@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// shortcut: funções admin_shop9_* e admin_conector_* vêm da mensagem 21 do Lovable e ainda não estão
+// shortcut: funções admin_shop9_* e admin_conector_* vêm das mensagens 21 e 22 do Lovable e ainda não estão
 // nos tipos gerados; depois de regenerar, trocar `bd` por `supabase`.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const bd = supabase as any;
@@ -25,11 +25,34 @@ export interface EventoConector {
   mensagem: string | null;
 }
 
+export interface VendedorShop9 {
+  codigo: string;
+  nome: string;
+  ativo: boolean;
+  usuario_id: string | null;
+  manual: boolean;
+}
+
+/** Só códigos não sensíveis; série, senha e endereço ficam no computador do conector. */
+export interface EmpresaShop9 {
+  empresa_id: string;
+  nome: string;
+  codfilial: string | null;
+  codigo_operacao_orcamento: string | null;
+  tipo_operacao_orcamento: string;
+  tipos_venda: string;
+  tabela_preco: string | null;
+  codigo_caixa: string | null;
+  vendedores: VendedorShop9[];
+  usuarios: { id: string; nome: string }[];
+}
+
 export interface StatusShop9 {
   modo: ModoShop9;
   ambiente: AmbienteShop9;
   conectores: ConectorStatus[];
   eventos: EventoConector[];
+  empresas: EmpresaShop9[];
 }
 
 const CHAVE = ["shop9-integracao"];
@@ -59,10 +82,30 @@ function useAcao<A>(fn: string) {
 export const useConfigurarShop9 = () =>
   useAcao<{ _modo: ModoShop9; _ambiente: AmbienteShop9 }>("admin_shop9_configurar");
 
-/** Cadastra o conector (sem id) ou troca a chave pública (com id). Devolve o id do conector. */
-export const useRegistrarChave = () =>
-  useAcao<{ _conector_id: string | null; _nome: string; _chave_publica: string }>(
-    "admin_conector_registrar_chave",
+/** Código de pareamento de uso único (10 min). Com id, repareia aquele conector. */
+export function useGerarCodigo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (args: { _conector_id: string | null; _nome: string }) =>
+      chamar<{ codigo: string; expira_em: string }>("admin_conector_gerar_codigo", args),
+    onSettled: () => void qc.invalidateQueries({ queryKey: CHAVE }),
+  });
+}
+
+export const useSalvarEmpresaShop9 = () =>
+  useAcao<{
+    _empresa_id: string;
+    _codfilial: string;
+    _codigo_operacao_orcamento: string;
+    _tipo_operacao_orcamento: string;
+    _tipos_venda: string;
+    _tabela_preco: string;
+    _codigo_caixa: string;
+  }>("admin_shop9_empresa_salvar");
+
+export const useMapearVendedor = () =>
+  useAcao<{ _empresa_id: string; _codigo: string; _usuario_id: string | null }>(
+    "admin_shop9_vendedor_mapear",
   );
 
 export const useRevogarConector = () => useAcao<{ _conector_id: string }>("admin_conector_revogar");

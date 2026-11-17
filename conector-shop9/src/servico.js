@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { CAMINHO_PADRAO, lerConfig } from "./config.js";
 import { criarLog } from "./log.js";
-import { ciclo, criarEstado, VERSAO } from "./principal.js";
+import { ciclo, VERSAO } from "./principal.js";
 import { criarClienteRota, ErroRota } from "./rota.js";
 
 /** Ponto de entrada do serviço do Windows (ver docs/guia-conector-shop9-cit.md). */
@@ -13,7 +13,6 @@ const ctx = {
   cfg,
   log,
   chamar: criarClienteRota(cfg, { log }),
-  estado: criarEstado(join(pasta, "estado.json")),
 };
 
 let parar = false;

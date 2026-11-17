@@ -1,15 +1,20 @@
 {
   "rota_url": "https://ENDERECO-DA-ROTA",
-  "conector_id": "ID-MOSTRADO-NA-ROTA",
+  "conector_id": "(preenchido por npm run parear)",
   "chave_privada": "C:\\ProgramData\\ConectorShop9\\chave-privada.pem",
   "intervalo_s": 60,
-  "lote": 500,
-  "filiais": {
-    "ID-DA-EMPRESA-CENTERFRIOS-NA-ROTA": "CODIGO-FILIAL-SHOP9",
-    "ID-DA-EMPRESA-381-NA-ROTA": "CODIGO-FILIAL-SHOP9"
-  },
   "shop9": {
-    "homologacao": { "url": "http://ENDERECO-LOCAL-DO-INTEGRACOES:PORTA", "serie": "SERIE", "senha": "SENHA (ou SHOP9_SENHA)" },
-    "producao": { "url": "http://ENDERECO-LOCAL-DO-INTEGRACOES:PORTA", "serie": "SERIE", "senha": "SENHA (ou SHOP9_SENHA)" }
-  }
+    "homologacao": {
+      "url": "http://idealsoftexportaweb.eastus.cloudapp.azure.com:60500",
+      "serie": "SERIE-DE-TESTE",
+      "senha": "SENHA-DE-TESTE (ou SHOP9_SENHA)"
+    },
+    "producao": {
+      "url": "http://IP-DO-MODULO-NA-REDE-LOCAL:PORTA",
+      "serie": "SERIE",
+      "senha": "SENHA (ou SHOP9_SENHA)"
+    }
+  },
+  "intervalo_sincronizacao_s": 300,
+  "inicio_sincronizacao": "2025-01-01 00:00:00"
 }

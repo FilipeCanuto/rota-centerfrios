@@ -213,7 +213,24 @@ export async function simularBackend(
           nome: "Computador do Integrações",
           ativo: true,
           ultimo_contato: new Date().toISOString(),
-          versao: "0.1.0",
+          versao: "0.2.0",
+        },
+      ],
+      empresas: [
+        {
+          empresa_id: EMPRESA_CF,
+          nome: "CENTERFRIOS",
+          codfilial: "1",
+          codigo_operacao_orcamento: null,
+          tipo_operacao_orcamento: "ORC",
+          tipos_venda: "VND",
+          tabela_preco: "VAREJISTA",
+          codigo_caixa: "1",
+          vendedores: [
+            { codigo: "6", nome: "Ana", ativo: true, usuario_id: USUARIO_ID, manual: false },
+            { codigo: "9", nome: "Bruno", ativo: true, usuario_id: null, manual: false },
+          ],
+          usuarios: [{ id: USUARIO_ID, nome: "Ana Vendedora" }],
         },
       ],
       eventos: [

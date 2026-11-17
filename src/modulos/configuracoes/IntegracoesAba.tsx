@@ -16,10 +16,11 @@ import { useAnunciar } from "@/design-system/Anunciador";
 import { EstadoErro } from "@/design-system/EstadoErro";
 import { EstadoVazio } from "@/design-system/EstadoVazio";
 import { SeloStatus } from "@/design-system/SeloStatus";
-import { chavePublicaValida, conectorOnline } from "@/regras/conector";
+import { conectorOnline } from "@/regras/conector";
+import { EmpresaShop9 } from "./EmpresaShop9";
 import {
   useConfigurarShop9,
-  useRegistrarChave,
+  useGerarCodigo,
   useRevogarConector,
   useStatusShop9,
   type AmbienteShop9,
@@ -32,41 +33,43 @@ const quando = (iso: string | null) =>
 
 const campo = "min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm";
 
-/** Cadastro (conector = null) ou troca da chave pública. A chave privada nunca sai do computador do conector. */
-function FormChave({
-  conector,
-  aoTerminar,
-}: {
-  conector: ConectorStatus | null;
-  aoTerminar: () => void;
-}) {
+/**
+ * Pareamento: o banco gera um código curto de uso único (vale 10 min); o conector cria a própria chave
+ * e a apresenta com esse código. Com um conector escolhido, o código repareia aquele conector (chave perdida
+ * ou revogada). A troca de rotina é feita no próprio conector: npm run trocar-chave.
+ */
+function CodigoPareamento({ conector }: { conector: ConectorStatus | null }) {
   const id = useId();
-  const registrar = useRegistrarChave();
+  const gerar = useGerarCodigo();
   const anunciar = useAnunciar();
-  const [nome, setNome] = useState(conector?.nome ?? "Computador do Integrações");
-  const [chave, setChave] = useState("");
-  const [erro, setErro] = useState<string | null>(null);
+  const [nome, setNome] = useState("Computador do Integrações");
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
-    if (!nome.trim()) return setErro("Informe um nome.");
-    if (!chavePublicaValida(chave))
-      return setErro("Chave pública inválida: cole a linha mostrada por npm run gerar-chave.");
-    setErro(null);
     try {
-      await registrar.mutateAsync({
+      await gerar.mutateAsync({
         _conector_id: conector?.id ?? null,
-        _nome: nome.trim(),
-        _chave_publica: chave.trim(),
+        _nome: nome.trim() || "Conector",
       });
+      anunciar("Código de pareamento gerado. Vale por 10 minutos.");
     } catch {
-      return setErro("Não foi possível salvar. Essa chave já está em uso?");
+      toast.error("Não foi possível gerar o código.");
     }
-    const texto = conector ? "Chave trocada: a anterior deixou de valer." : "Conector cadastrado.";
-    toast.success(texto);
-    anunciar(texto);
-    aoTerminar();
   }
+
+  if (gerar.data)
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-sm">Código de uso único, vale até {quando(gerar.data.expira_em)}:</p>
+        <p className="font-mono text-3xl font-semibold tracking-widest" aria-live="polite">
+          {gerar.data.codigo.slice(0, 4)}-{gerar.data.codigo.slice(4)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          No computador do módulo Integrações, rode:{" "}
+          <code className="break-all font-mono">npm run parear -- {gerar.data.codigo}</code>
+        </p>
+      </div>
+    );
 
   return (
     <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
@@ -82,26 +85,8 @@ function FormChave({
           />
         </div>
       )}
-      <div className="grid gap-1.5">
-        <Label htmlFor={`${id}-chave`}>Chave pública do conector</Label>
-        <Input
-          id={`${id}-chave`}
-          className="min-h-11 font-mono"
-          value={chave}
-          autoComplete="off"
-          spellCheck={false}
-          onChange={(e) => setChave(e.target.value)}
-          aria-invalid={!!erro}
-          aria-describedby={erro ? `${id}-erro` : undefined}
-        />
-      </div>
-      {erro && (
-        <p id={`${id}-erro`} role="alert" className="text-sm text-destructive">
-          {erro}
-        </p>
-      )}
-      <Button type="submit" className="min-h-11" disabled={registrar.isPending}>
-        <KeyRound aria-hidden="true" /> {conector ? "Trocar chave" : "Cadastrar conector"}
+      <Button type="submit" className="min-h-11" disabled={gerar.isPending}>
+        <KeyRound aria-hidden="true" /> Gerar código de pareamento
       </Button>
     </form>
   );
@@ -173,8 +158,8 @@ export default function IntegracoesAba() {
 
       {s.conectores.length === 0 ? (
         <EstadoVazio icone={PlugZap} titulo="Nenhum conector cadastrado">
-          No computador do módulo Integrações, rode npm run gerar-chave e cadastre a chave pública
-          mostrada.
+          Gere um código de pareamento e digite-o no computador do módulo Integrações com npm run
+          parear.
         </EstadoVazio>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -193,13 +178,10 @@ export default function IntegracoesAba() {
               <p className="text-sm text-muted-foreground">
                 Último contato: {quando(c.ultimo_contato)} · Versão: {c.versao ?? "—"}
               </p>
-              <p className="break-all text-sm">
-                Id para o config.json: <code className="font-mono">{c.id}</code>
-              </p>
               <div className="flex flex-wrap gap-2">
                 <Button className="min-h-11" variant="outline" onClick={() => setEditando(c)}>
                   <KeyRound aria-hidden="true" />{" "}
-                  {c.ativo ? "Trocar chave" : "Reativar com nova chave"}
+                  {c.ativo ? "Parear de novo" : "Reativar com novo pareamento"}
                 </Button>
                 {c.ativo && (
                   <Button
@@ -221,9 +203,21 @@ export default function IntegracoesAba() {
 
       {s.conectores.length === 0 && (
         <Button className="min-h-11 self-start" onClick={() => setEditando(null)}>
-          <KeyRound aria-hidden="true" /> Cadastrar conector
+          <KeyRound aria-hidden="true" /> Parear conector
         </Button>
       )}
+
+      <section aria-labelledby={`${id}-empresas`} className="flex flex-col gap-3">
+        <h3 id={`${id}-empresas`} className="font-semibold">
+          Códigos por empresa
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Só códigos. Série, senha e endereço do Shop9 ficam no computador do conector.
+        </p>
+        {(s.empresas ?? []).map((e) => (
+          <EmpresaShop9 key={e.empresa_id} empresa={e} />
+        ))}
+      </section>
 
       <section aria-labelledby={`${id}-eventos`} className="flex flex-col gap-2">
         <h3 id={`${id}-eventos`} className="font-semibold">
@@ -254,16 +248,14 @@ export default function IntegracoesAba() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editando ? "Trocar chave do conector" : "Cadastrar conector"}
+              {editando ? `Parear de novo: ${editando.nome}` : "Parear conector"}
             </DialogTitle>
             <DialogDescription>
-              Cole a chave pública mostrada pelo conector. Ela não é segredo; a chave privada fica
-              só naquele computador.
+              A chave privada nasce e fica só no computador do conector; a Rota guarda só a pública.
+              Para trocar a chave de rotina, rode npm run trocar-chave no conector.
             </DialogDescription>
           </DialogHeader>
-          {editando !== undefined && (
-            <FormChave conector={editando} aoTerminar={() => setEditando(undefined)} />
-          )}
+          {editando !== undefined && <CodigoPareamento conector={editando} />}
         </DialogContent>
       </Dialog>
     </section>
