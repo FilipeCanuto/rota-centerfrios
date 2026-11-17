@@ -30,8 +30,12 @@ export function transicaoDeVisao(atualizar: () => void) {
  * contador não conta. Antes o corte era 4 núcleos / 2 GB, que pegava notebooks e celulares comuns.
  */
 const leve = () => {
-  const n = navigator as Navigator & { deviceMemory?: number };
-  return (n.hardwareConcurrency ?? 8) <= 2 || (n.deviceMemory ?? 8) <= 1;
+  try {
+    const n = navigator as Navigator & { deviceMemory?: number };
+    return (n.hardwareConcurrency ?? 8) <= 2 || (n.deviceMemory ?? 8) <= 1;
+  } catch {
+    return false; // navegador que bloqueia o dado: segue no movimento normal, sem derrubar o app
+  }
 };
 if (typeof document !== "undefined") {
   if (leve()) document.documentElement.setAttribute("data-movimento", "leve");
