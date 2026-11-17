@@ -84,7 +84,10 @@ export function iniciarRotaFalsa({
         db.linhas[d.tipo].has(k) ? atualizadas++ : inseridas++;
         const antes = db.linhas[d.tipo].get(k);
         // como o banco: a passada por alteração (data nula) não apaga a data de faturamento já gravada
-        db.linhas[d.tipo].set(k, { ...l, data_faturamento: l.data_faturamento ?? antes?.data_faturamento });
+        db.linhas[d.tipo].set(k, {
+          ...l,
+          data_faturamento: l.data_faturamento ?? antes?.data_faturamento,
+        });
       }
       const r = { inseridas, atualizadas, ignoradas: 0, erros: [] };
       db.lotes.set(chave, r);
@@ -118,7 +121,11 @@ export function iniciarRotaFalsa({
       const c = db.codigos.get(String(d.codigo).toUpperCase().replace(/[\s-]/g, ""));
       if (!confere(d.chave_publica) || !c || c.usado) return responder(401, { erro: "codigo" });
       c.usado = true;
-      Object.assign(db.conector, { chave_publica: d.chave_publica, ativo: true, chave_anterior: null });
+      Object.assign(db.conector, {
+        chave_publica: d.chave_publica,
+        ativo: true,
+        chave_anterior: null,
+      });
       return responder(200, { conector_id: conectorId });
     }
     if (h["x-conector-id"] !== conectorId || !db.conector.ativo)

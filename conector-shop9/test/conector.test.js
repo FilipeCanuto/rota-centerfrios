@@ -73,7 +73,10 @@ describe("segurança local", () => {
   });
   it("produção só na rede local; teste só no servidor da Idealsoft", () => {
     const com = (shop9) => () =>
-      validarConfig({ rota_url: "https://r", conector_id: CONECTOR_ID, chavePrivada: CHAVE, shop9 }, {});
+      validarConfig(
+        { rota_url: "https://r", conector_id: CONECTOR_ID, chavePrivada: CHAVE, shop9 },
+        {},
+      );
     const cred = (url) => ({ url, serie: "s", senha: "p" });
     assert.throws(com({ producao: cred("http://meu-shop9.exemplo.com.br:8080") }), /rede local/);
     assert.doesNotThrow(com({ producao: cred("http://192.168.0.20:60500") }));
@@ -84,7 +87,6 @@ describe("segurança local", () => {
     );
   });
 });
-
 
 describe("ponta a ponta com o simulador", () => {
   let shop9, rota, ctx, cfg;
@@ -109,7 +111,11 @@ describe("ponta a ponta com o simulador", () => {
   });
   before(async () => {
     shop9 = await iniciarSimulador();
-    rota = await iniciarRotaFalsa({ conectorId: CONECTOR_ID, chavePublica: PUBLICA, empresas: [empresa] });
+    rota = await iniciarRotaFalsa({
+      conectorId: CONECTOR_ID,
+      chavePublica: PUBLICA,
+      empresas: [empresa],
+    });
     cfg = validarConfig(
       {
         rota_url: rota.url,
@@ -125,16 +131,41 @@ describe("ponta a ponta com o simulador", () => {
     shop9.dados.saidas.push(
       shop9.marca(
         {
-          ordem: 500, tipo_Operacao: "VND", codigoOperacao: 500, codigo_Cliente: 5175,
-          codigo_Vendedor_1: 6, codigo_Vendedor_2: 9, data: "2026-11-16T10:00:00", total_Com_Desconto: 1000,
-          efetivadoFinanceiro: true, desefetivadoFinanceiro: false,
-          produtos: [{ codigo: "20098", quantidade: 1, preco_Final_Com_Desconto: 1000, codigo_Vendedor_1: 6, codigo_Vendedor_2: 9 }],
+          ordem: 500,
+          tipo_Operacao: "VND",
+          codigoOperacao: 500,
+          codigo_Cliente: 5175,
+          codigo_Vendedor_1: 6,
+          codigo_Vendedor_2: 9,
+          data: "2026-11-16T10:00:00",
+          total_Com_Desconto: 1000,
+          efetivadoFinanceiro: true,
+          desefetivadoFinanceiro: false,
+          produtos: [
+            {
+              codigo: "20098",
+              quantidade: 1,
+              preco_Final_Com_Desconto: 1000,
+              codigo_Vendedor_1: 6,
+              codigo_Vendedor_2: 9,
+            },
+          ],
         },
         true,
       ),
     );
     shop9.dados.devolucao.push(
-      shop9.marca({ ordem: 70, codigo_Cliente: 5175, codigo_Vendedor_1: 6, total_Com_Desconto: 100, ordem_Saida: 500, produtos: [] }, true),
+      shop9.marca(
+        {
+          ordem: 70,
+          codigo_Cliente: 5175,
+          codigo_Vendedor_1: 6,
+          total_Com_Desconto: 100,
+          ordem_Saida: 500,
+          produtos: [],
+        },
+        true,
+      ),
     );
     // dados de 1 h atrás: fora da sobreposição de 2 min, para o teste incremental ver só o que mudar depois
     const umaHora = dataHora(new Date(Date.now() - 3_600_000));
@@ -167,7 +198,11 @@ describe("ponta a ponta com o simulador", () => {
     assert.equal(l.estoque.get("20098").quantidade, 7);
     const v = l.vendas.get("500");
     assert.equal(v.faturada, true);
-    assert.match(v.data_faturamento, /^\d{4}-\d{2}-\d{2}$/, "data da passada por efetivação foi mantida");
+    assert.match(
+      v.data_faturamento,
+      /^\d{4}-\d{2}-\d{2}$/,
+      "data da passada por efetivação foi mantida",
+    );
     assert.deepEqual(v.partes, [
       { vendedor_codigo: "6", valor_centavos: 50000 },
       { vendedor_codigo: "9", valor_centavos: 50000 },
@@ -189,7 +224,13 @@ describe("ponta a ponta com o simulador", () => {
   });
 
   it("lote repetido é idempotente", async () => {
-    const lote = { tipo: "produtos", empresa_id: EMPRESA, lote_id: "produtos:teste:0:1", linhas: [{ codigo_shop9: "P9" }], cursor: null };
+    const lote = {
+      tipo: "produtos",
+      empresa_id: EMPRESA,
+      lote_id: "produtos:teste:0:1",
+      linhas: [{ codigo_shop9: "P9" }],
+      cursor: null,
+    };
     assert.deepEqual(await ctx.chamar("sincronizar", lote), await ctx.chamar("sincronizar", lote));
   });
 
@@ -206,14 +247,30 @@ describe("ponta a ponta com o simulador", () => {
     const corpo = JSON.stringify({ versao: "x", shop9_ok: true });
     const caminho = "/api/conector/heartbeat";
     const assinar = (chavePrivada, extra = {}) =>
-      cabecalhosAssinados({ conectorId: CONECTOR_ID, chavePrivada, metodo: "POST", caminho, corpo, ...extra });
-    const enviar = (headers, body = corpo) => fetch(rota.url + caminho, { method: "POST", headers, body });
+      cabecalhosAssinados({
+        conectorId: CONECTOR_ID,
+        chavePrivada,
+        metodo: "POST",
+        caminho,
+        corpo,
+        ...extra,
+      });
+    const enviar = (headers, body = corpo) =>
+      fetch(rota.url + caminho, { method: "POST", headers, body });
     const h = assinar(CHAVE);
     assert.equal((await enviar(h)).status, 200);
     assert.equal((await enviar(h)).status, 409, "repetição bloqueada");
     assert.equal((await enviar(assinar(OUTRA))).status, 401, "assinada com outra chave");
-    assert.equal((await enviar(assinar(CHAVE), corpo.replace("x", "y"))).status, 401, "corpo alterado");
-    assert.equal((await enviar(assinar(CHAVE, { agora: Date.now() - 10 * 60_000 }))).status, 401, "fora da janela");
+    assert.equal(
+      (await enviar(assinar(CHAVE), corpo.replace("x", "y"))).status,
+      401,
+      "corpo alterado",
+    );
+    assert.equal(
+      (await enviar(assinar(CHAVE, { agora: Date.now() - 10 * 60_000 }))).status,
+      401,
+      "fora da janela",
+    );
   });
 
   it("reenvia com espera progressiva em 5xx", async () => {

@@ -12,7 +12,12 @@ describe("assinatura do Shop9 (vetores calculados em Python, hmac + base64)", ()
       "hVxA0OChg/Wd5t0lReIaJL15jtZclTBUF7KMGNe9AxU=",
     );
     assert.equal(
-      assinarShop9("senha-do-modulo", "POST", "1763300000", '  {"codigoCliente":"8599","produtos":[]}\n'),
+      assinarShop9(
+        "senha-do-modulo",
+        "POST",
+        "1763300000",
+        '  {"codigoCliente":"8599","produtos":[]}\n',
+      ),
       "e68oRv0kLfzoLJq/91IZcyIU7mgOatUUpHZCH2UyofY=",
     );
     assert.equal(
@@ -66,21 +71,52 @@ describe("venda compartilhada e devolução", () => {
     ]);
   });
   it("sem itens com valor, divide a saída entre vendedor_1 e vendedor_2", () => {
-    const p = dividirVenda({ total_Com_Desconto: 0.03, codigo_Vendedor_1: 1, codigo_Vendedor_2: 2, produtos: [] });
-    assert.deepEqual(p.map((x) => x.valor_centavos), [2, 1]);
+    const p = dividirVenda({
+      total_Com_Desconto: 0.03,
+      codigo_Vendedor_1: 1,
+      codigo_Vendedor_2: 2,
+      produtos: [],
+    });
+    assert.deepEqual(
+      p.map((x) => x.valor_centavos),
+      [2, 1],
+    );
   });
   it("só conta faturada: efetivada no financeiro e não desfeita; data só da passada por efetivação", () => {
-    const base = { ordem: 1, codigo_Cliente: 5, total_Com_Desconto: 10, codigo_Vendedor_1: 6, produtos: [] };
+    const base = {
+      ordem: 1,
+      codigo_Cliente: 5,
+      total_Com_Desconto: 10,
+      codigo_Vendedor_1: 6,
+      produtos: [],
+    };
     assert.equal(venda({ ...base, efetivadoFinanceiro: true }, "2026-11-16").faturada, true);
-    assert.equal(venda({ ...base, efetivadoFinanceiro: true, desefetivadoFinanceiro: true }).faturada, false);
+    assert.equal(
+      venda({ ...base, efetivadoFinanceiro: true, desefetivadoFinanceiro: true }).faturada,
+      false,
+    );
     assert.equal(venda({ ...base, efetivadoFinanceiro: false }).faturada, false);
     assert.equal(venda(base).data_faturamento, null);
   });
   it("devolução leva os vendedores e a saída de origem para descontar da meta", () => {
-    const d = devolucao({ ordem: 77, codigo_Cliente: 5, total_Com_Desconto: 50, codigo_Vendedor_1: 6, codigo_Vendedor_2: 9, ordem_Saida: 21945, produtos: [] }, "2026-11-16");
+    const d = devolucao(
+      {
+        ordem: 77,
+        codigo_Cliente: 5,
+        total_Com_Desconto: 50,
+        codigo_Vendedor_1: 6,
+        codigo_Vendedor_2: 9,
+        ordem_Saida: 21945,
+        produtos: [],
+      },
+      "2026-11-16",
+    );
     assert.equal(d.faturada, true);
     assert.equal(d.saida_origem, "21945");
-    assert.deepEqual(d.partes.map((x) => x.valor_centavos), [2500, 2500]);
+    assert.deepEqual(
+      d.partes.map((x) => x.valor_centavos),
+      [2500, 2500],
+    );
   });
 });
 
@@ -115,22 +151,31 @@ describe("cliente e adaptador contra o simulador", () => {
 
   it("token é por filial e a senha errada vira AUTENTICACAO_INVALIDA sem laço", async () => {
     const c = criarClienteShop9({ ...cred, senha: "errada" });
-    await assert.rejects(c.pedir("get", "/clientes/1", "1"), (e) => e.tipo === "AUTENTICACAO_INVALIDA");
+    await assert.rejects(
+      c.pedir("get", "/clientes/1", "1"),
+      (e) => e.tipo === "AUTENTICACAO_INVALIDA",
+    );
     await assert.rejects(criarClienteShop9(cred).token("2"), (e) => e instanceof ErroShop9);
   });
 
   it("pagina de 20 em 20 até FIM_DE_PAGINA", async () => {
     for (let i = 0; i < 44; i++)
-      sim.dados.clientes.push(sim.marca({ codigo: 9000 + i, nome: `Cliente ${i}`, vendedor1: { codigo: 6 } }));
+      sim.dados.clientes.push(
+        sim.marca({ codigo: 9000 + i, nome: `Cliente ${i}`, vendedor1: { codigo: 6 } }),
+      );
     const paginas = [];
-    for await (const pg of criarClienteShop9(cred).paginar("clientes", "1")) paginas.push(pg.registros.length);
+    for await (const pg of criarClienteShop9(cred).paginar("clientes", "1"))
+      paginas.push(pg.registros.length);
     assert.deepEqual(paginas, [20, 20, 5]);
   });
 
   it("licença inválida é erro definitivo", async () => {
     sim.ganchos.licencaInvalida = true;
     sim.expirarTokens();
-    await assert.rejects(criarClienteShop9(cred).token("1"), (e) => e.tipo === "LICENCA_EXPIRADA_OU_INVALIDA" && e.definitivo);
+    await assert.rejects(
+      criarClienteShop9(cred).token("1"),
+      (e) => e.tipo === "LICENCA_EXPIRADA_OU_INVALIDA" && e.definitivo,
+    );
     sim.ganchos.licencaInvalida = false;
   });
 
@@ -159,7 +204,12 @@ describe("cliente e adaptador contra o simulador", () => {
     const shop9 = criarAdaptadorShop9(cred);
     const antes = sim.dados.saidas.length;
     await assert.rejects(
-      shop9.enviarOrcamento(empresa, { envio_id: "x1", cliente_codigo: "404", data: "2026-11-16", itens: [{ codigo_produto: "1", quantidade: 1, preco_unit: 1 }] }),
+      shop9.enviarOrcamento(empresa, {
+        envio_id: "x1",
+        cliente_codigo: "404",
+        data: "2026-11-16",
+        itens: [{ codigo_produto: "1", quantidade: 1, preco_unit: 1 }],
+      }),
       (e) => e.tipo === "CAMPO_INVALIDO" && e.definitivo,
     );
     assert.equal(sim.dados.saidas.length, antes);

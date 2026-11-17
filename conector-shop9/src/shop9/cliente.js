@@ -39,7 +39,10 @@ const RENOVAR_ANTES_MS = 2 * 60_000;
 const MAX_PAGINAS = 5000;
 
 /** s = { url, serie, senha }. `fetch` e `agora` injetáveis para teste. */
-export function criarClienteShop9(s, { fetch: f = fetch, agora = Date.now, timeoutMs = 30_000 } = {}) {
+export function criarClienteShop9(
+  s,
+  { fetch: f = fetch, agora = Date.now, timeoutMs = 30_000 } = {},
+) {
   const base = s.url.replace(/\/$/, "");
   const tokens = new Map(); // codfilial → { token, expira }
 
@@ -53,7 +56,10 @@ export function criarClienteShop9(s, { fetch: f = fetch, agora = Date.now, timeo
         signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (e) {
-      throw new ErroShop9(e.name === "TimeoutError" ? "TEMPO_ESGOTADO" : "REDE", `Shop9 indisponível: ${e.message}`);
+      throw new ErroShop9(
+        e.name === "TimeoutError" ? "TEMPO_ESGOTADO" : "REDE",
+        `Shop9 indisponível: ${e.message}`,
+      );
     }
     const env = await r.json().catch(() => null);
     if (!env || typeof env.sucesso !== "boolean")
@@ -67,7 +73,11 @@ export function criarClienteShop9(s, { fetch: f = fetch, agora = Date.now, timeo
     const q = new URLSearchParams({ serie: s.serie, codfilial: String(codfilial) });
     const env = await http("get", `/auth/?${q}`, {});
     if (!env.sucesso || !env.dados?.token)
-      throw new ErroShop9(env.tipo || "AUTENTICACAO_INVALIDA", env.mensagem || "Falha ao gerar token", env.statusCode);
+      throw new ErroShop9(
+        env.tipo || "AUTENTICACAO_INVALIDA",
+        env.mensagem || "Falha ao gerar token",
+        env.statusCode,
+      );
     const expira = Date.parse(env.dados.expireAt) || agora() + 10 * 60_000;
     tokens.set(codfilial, { token: env.dados.token, expira });
     return env.dados.token;
@@ -78,18 +88,27 @@ export function criarClienteShop9(s, { fetch: f = fetch, agora = Date.now, timeo
     const corpo = dados === undefined ? "" : JSON.stringify(dados);
     for (let tentativa = 0; ; tentativa++) {
       const ts = timestampShop9(agora());
-      const env = await http(metodo, caminho, {
-        Authorization: `Token ${await token(codfilial)}`,
-        CodFilial: String(codfilial),
-        Timestamp: ts,
-        Signature: assinarShop9(s.senha, metodo, ts, corpo),
-      }, corpo);
+      const env = await http(
+        metodo,
+        caminho,
+        {
+          Authorization: `Token ${await token(codfilial)}`,
+          CodFilial: String(codfilial),
+          Timestamp: ts,
+          Signature: assinarShop9(s.senha, metodo, ts, corpo),
+        },
+        corpo,
+      );
       if (env.sucesso || env.tipo === "FIM_DE_PAGINA") return env;
       if (env.tipo === "AUTENTICACAO_INVALIDA" && tentativa === 0) {
         tokens.delete(codfilial); // token vencido antes da hora: renova e repete uma vez
         continue;
       }
-      throw new ErroShop9(env.tipo || "EXCECAO_SERVIDOR", env.mensagem || "Erro do Shop9", env.statusCode);
+      throw new ErroShop9(
+        env.tipo || "EXCECAO_SERVIDOR",
+        env.mensagem || "Erro do Shop9",
+        env.statusCode,
+      );
     }
   }
 

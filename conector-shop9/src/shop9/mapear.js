@@ -98,7 +98,12 @@ export function dividirVenda(s, totalCentavos = centavos(s.total_Com_Desconto)) 
   const soma = [...pesos.values()].reduce((x, y) => x + y, 0);
   const partes = [...pesos].map(([vendedor, p], ordem) => {
     const exato = (totalCentavos * p) / soma;
-    return { vendedor_codigo: vendedor, valor_centavos: Math.floor(exato), resto: exato % 1, ordem };
+    return {
+      vendedor_codigo: vendedor,
+      valor_centavos: Math.floor(exato),
+      resto: exato % 1,
+      ordem,
+    };
   });
   let falta = totalCentavos - partes.reduce((x, p) => x + p.valor_centavos, 0);
   for (const p of [...partes].sort((a, b) => b.resto - a.resto || a.ordem - b.ordem)) {

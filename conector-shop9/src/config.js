@@ -57,9 +57,13 @@ export function validarConfig(c, env = process.env) {
       continue;
     }
     if (amb === "producao" && !redeLocal(u))
-      erros.push("shop9.producao.url precisa ser o módulo na rede local (credencial de produção não sai da rede)");
+      erros.push(
+        "shop9.producao.url precisa ser o módulo na rede local (credencial de produção não sai da rede)",
+      );
     if (amb === "homologacao" && !local(u) && u.hostname !== SERVIDOR_TESTE_IDEALSOFT)
-      erros.push(`shop9.homologacao.url precisa ser o servidor de teste da Idealsoft (${SERVIDOR_TESTE_IDEALSOFT})`);
+      erros.push(
+        `shop9.homologacao.url precisa ser o servidor de teste da Idealsoft (${SERVIDOR_TESTE_IDEALSOFT})`,
+      );
   }
   if (!cfg.shop9?.homologacao && !cfg.shop9?.producao) erros.push("shop9 sem ambiente");
   if (erros.length) throw new Error(`Configuração inválida: ${erros.join("; ")}`);

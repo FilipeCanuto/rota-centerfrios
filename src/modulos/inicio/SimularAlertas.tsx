@@ -34,7 +34,9 @@ export function SimularAlertas() {
             variant="outline"
             className="min-h-11"
             onClick={() =>
-              mascote.notificar(mensagem(o.chave, `simulacao:${o.chave}:${Date.now()}`, apelido, o.n))
+              mascote.notificar(
+                mensagem(o.chave, `simulacao:${o.chave}:${Date.now()}`, apelido, o.n),
+              )
             }
           >
             {o.rotulo}

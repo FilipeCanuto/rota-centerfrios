@@ -27,7 +27,12 @@ describe("Ed25519: pareamento, troca e revogação", () => {
   it("pareia com código de uso único e recusa reuso ou código errado", async () => {
     rota.db.codigos.set("K7QXM2PA", { usado: false });
     const k = nova();
-    const id = await parear({ rotaUrl: rota.url, codigo: "k7qx-m2pa", nome: "CIT", chavePrivada: k });
+    const id = await parear({
+      rotaUrl: rota.url,
+      codigo: "k7qx-m2pa",
+      nome: "CIT",
+      chavePrivada: k,
+    });
     assert.equal(id, ID);
     assert.equal(rota.db.conector.chave_publica, chavePublicaDe(k));
     await assert.rejects(

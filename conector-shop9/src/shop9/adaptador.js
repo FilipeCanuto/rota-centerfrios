@@ -89,7 +89,11 @@ export function criarAdaptadorShop9(s, opcoes) {
     if (r.precisa && !r.precisa(empresa)) return;
     const datas = r.datas ? r.datas(janela) : { datade: janela[0], dataate: janela[1] };
     for (const passada of r.passadas ?? [null]) {
-      const filtros = { ...(passada ? { tipodata: passada } : {}), ...datas, ...r.filtros?.(empresa) };
+      const filtros = {
+        ...(passada ? { tipodata: passada } : {}),
+        ...datas,
+        ...r.filtros?.(empresa),
+      };
       const efetivacao = passada === "E" ? dia(janela[1]) : null;
       const mapear = (x) => [r.mapa(x, empresa, efetivacao)].flat();
       if (r.paginado === false) {
@@ -129,7 +133,10 @@ export function criarAdaptadorShop9(s, opcoes) {
    */
   async function enviarOrcamento(empresa, t) {
     if (!empresa.codigo_operacao_orcamento)
-      throw new ErroShop9("CONFIGURACAO", "Código de operação do orçamento não configurado na Rota");
+      throw new ErroShop9(
+        "CONFIGURACAO",
+        "Código de operação do orçamento não configurado na Rota",
+      );
     const marca = `ROTA:${t.envio_id}`;
     const ontem = new Date(Date.parse(`${t.data}T00:00:00`) - 86_400_000);
     const desde = `${dia(dataHora(ontem))} 00:00:00`;

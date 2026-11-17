@@ -11,23 +11,76 @@ import { dataHora } from "./adaptador.js";
  * Ganchos de teste: `expirarTokens()`, `licencaInvalida`, `perderRespostaDoProximoPost`.
  */
 const POR_PAGINA = 20;
-const env = (dados) => ({ sucesso: true, mensagem: null, tipo: null, complementoTipo: null, statusCode: 200, dados });
-const erro = (tipo, statusCode, mensagem) => ({ sucesso: false, mensagem, tipo, complementoTipo: "", statusCode, dados: null });
+const env = (dados) => ({
+  sucesso: true,
+  mensagem: null,
+  tipo: null,
+  complementoTipo: null,
+  statusCode: 200,
+  dados,
+});
+const erro = (tipo, statusCode, mensagem) => ({
+  sucesso: false,
+  mensagem,
+  tipo,
+  complementoTipo: "",
+  statusCode,
+  dados: null,
+});
 const brParaIso = (s) => (/^\d{2}-\d{2}-\d{4}$/.test(s) ? s.split("-").reverse().join("-") : s);
 
-export function iniciarSimulador({ serie = "SIM-0001", senha = "senha-simulador", filiais = ["1"], porta = 0 } = {}) {
+export function iniciarSimulador({
+  serie = "SIM-0001",
+  senha = "senha-simulador",
+  filiais = ["1"],
+  porta = 0,
+} = {}) {
   const agoraTxt = () => dataHora(new Date());
   /** Cada registro guarda datas internas: _cri (criação), _alt (alteração), _efe (efetivação). */
   const marca = (r, efetivado = false) => {
     const t = agoraTxt();
-    return Object.assign(r, { _cri: r._cri ?? t, _alt: t, _efe: efetivado ? t : r._efe ?? null });
+    return Object.assign(r, { _cri: r._cri ?? t, _alt: t, _efe: efetivado ? t : (r._efe ?? null) });
   };
   const dados = {
-    funcionarios: [marca({ codigo: 6, nome: "Vendedora Um", apelido: "Ana", email: "ana@exemplo.test", vendedor: true, inativo: false, codigoFilial: 1 })],
-    clientes: [marca({ codigo: 5175, nome: "Padaria Exemplo", fantasia: "", cpfCnpj: "12.345.678/0001-95", cidade: "Maceió", uf: "AL", telefone1: "(82) 99999-0000", vendedor1: { codigo: 6 }, limiteCredito: 600, inativo: false })],
-    produtos: [marca({ codigo: "20098", nome: "Freezer horizontal 400 L", nomeUnidadeVendas: "un", inativo: false, bloquearVenda: false, precos: [{ tabela: "VAREJISTA", preco: 3500, promocional: false }] })],
+    funcionarios: [
+      marca({
+        codigo: 6,
+        nome: "Vendedora Um",
+        apelido: "Ana",
+        email: "ana@exemplo.test",
+        vendedor: true,
+        inativo: false,
+        codigoFilial: 1,
+      }),
+    ],
+    clientes: [
+      marca({
+        codigo: 5175,
+        nome: "Padaria Exemplo",
+        fantasia: "",
+        cpfCnpj: "12.345.678/0001-95",
+        cidade: "Maceió",
+        uf: "AL",
+        telefone1: "(82) 99999-0000",
+        vendedor1: { codigo: 6 },
+        limiteCredito: 600,
+        inativo: false,
+      }),
+    ],
+    produtos: [
+      marca({
+        codigo: "20098",
+        nome: "Freezer horizontal 400 L",
+        nomeUnidadeVendas: "un",
+        inativo: false,
+        bloquearVenda: false,
+        precos: [{ tabela: "VAREJISTA", preco: 3500, promocional: false }],
+      }),
+    ],
     "v3/precos": [],
-    "v2/estoque": [marca({ codigo: "20098", estoqueFiliais: [{ codigoFilial: 1, estoqueAtual: 7 }] })],
+    "v2/estoque": [
+      marca({ codigo: "20098", estoqueFiliais: [{ codigoFilial: 1, estoqueAtual: 7 }] }),
+    ],
     saidas: [],
     devolucao: [],
     "credito/cliente/saldos": [],
@@ -42,31 +95,72 @@ export function iniciarSimulador({ serie = "SIM-0001", senha = "senha-simulador"
     const ate = brParaIso(q.get("dataate") ?? q.get("dataAte") ?? "");
     const campo = { C: "_cri", E: "_efe" }[q.get("tipodata")] ?? "_alt";
     const ops = q.get("tiposoperacao")?.split(",");
-    const noDia = (v, lim, fim) => (lim.length === 10 ? (fim ? v.slice(0, 10) <= lim : v.slice(0, 10) >= lim) : fim ? v <= lim : v >= lim);
-    return lista.filter((r) => (!de || (r[campo] && noDia(r[campo], de, false))) && (!ate || (r[campo] && noDia(r[campo], ate, true))) && (!ops || ops.includes(r.tipo_Operacao)));
+    const noDia = (v, lim, fim) =>
+      lim.length === 10
+        ? fim
+          ? v.slice(0, 10) <= lim
+          : v.slice(0, 10) >= lim
+        : fim
+          ? v <= lim
+          : v >= lim;
+    return lista.filter(
+      (r) =>
+        (!de || (r[campo] && noDia(r[campo], de, false))) &&
+        (!ate || (r[campo] && noDia(r[campo], ate, true))) &&
+        (!ops || ops.includes(r.tipo_Operacao)),
+    );
   }
   const publico = (r) => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith("_")));
 
   function autenticar(req, corpo) {
     const t = tokens.get(String(req.headers.authorization ?? "").replace(/^Token /, ""));
     if (!t || t.expira < Date.now() || t.filial !== String(req.headers.codfilial)) return false;
-    const esperada = Buffer.from(assinarShop9(senha, req.method, String(req.headers.timestamp ?? ""), corpo));
+    const esperada = Buffer.from(
+      assinarShop9(senha, req.method, String(req.headers.timestamp ?? ""), corpo),
+    );
     const recebida = Buffer.from(String(req.headers.signature ?? ""));
     return recebida.length === esperada.length && timingSafeEqual(recebida, esperada);
   }
 
   function criarSaida(o) {
     if (!dados.clientes.some((c) => String(c.codigo) === String(o.codigoCliente)))
-      return erro("CAMPO_INVALIDO", 400, "O parâmetro 'codigoCliente' é inválido. Para mais informações consulte o manual de integração.");
-    if (!Array.isArray(o.produtos) || !o.produtos.length) return erro("BODY_INVALIDO", 400, "Corpo inválido.");
-    const produtos = o.produtos.map((p, i) => ({ ordem: ++ordem * 10 + i, codigo: p.codigo, quantidade: p.quantidade, preco_Unitario: p.precoUnitario, preco_Final: p.quantidade * p.precoUnitario, preco_Final_Com_Desconto: p.quantidade * (p.precoUnitario - p.descontoUnitario), codigo_Vendedor_1: o.codigoVendedor_1, codigo_Vendedor_2: 0 }));
-    dados.saidas.push(marca({
-      ordem: ++ordem, tipo_Operacao: "ORC", codigoOperacao: Number(o.codigoOperacao), codigo_Cliente: Number(o.codigoCliente),
-      codigo_Vendedor_1: o.codigoVendedor_1, codigo_Vendedor_2: 0, data: o.data, observacao: o.observacao ?? "",
-      referenciaInterna: o.ReferenciaInterna ?? "", produtos,
-      total_Com_Desconto: Math.round(produtos.reduce((s, p) => s + p.preco_Final_Com_Desconto, 0) * 100) / 100,
-      efetivadoEstoque: false, efetivadoFinanceiro: false, desefetivadoEstoque: false, desefetivadoFinanceiro: false,
+      return erro(
+        "CAMPO_INVALIDO",
+        400,
+        "O parâmetro 'codigoCliente' é inválido. Para mais informações consulte o manual de integração.",
+      );
+    if (!Array.isArray(o.produtos) || !o.produtos.length)
+      return erro("BODY_INVALIDO", 400, "Corpo inválido.");
+    const produtos = o.produtos.map((p, i) => ({
+      ordem: ++ordem * 10 + i,
+      codigo: p.codigo,
+      quantidade: p.quantidade,
+      preco_Unitario: p.precoUnitario,
+      preco_Final: p.quantidade * p.precoUnitario,
+      preco_Final_Com_Desconto: p.quantidade * (p.precoUnitario - p.descontoUnitario),
+      codigo_Vendedor_1: o.codigoVendedor_1,
+      codigo_Vendedor_2: 0,
     }));
+    dados.saidas.push(
+      marca({
+        ordem: ++ordem,
+        tipo_Operacao: "ORC",
+        codigoOperacao: Number(o.codigoOperacao),
+        codigo_Cliente: Number(o.codigoCliente),
+        codigo_Vendedor_1: o.codigoVendedor_1,
+        codigo_Vendedor_2: 0,
+        data: o.data,
+        observacao: o.observacao ?? "",
+        referenciaInterna: o.ReferenciaInterna ?? "",
+        produtos,
+        total_Com_Desconto:
+          Math.round(produtos.reduce((s, p) => s + p.preco_Final_Com_Desconto, 0) * 100) / 100,
+        efetivadoEstoque: false,
+        efetivadoFinanceiro: false,
+        desefetivadoEstoque: false,
+        desefetivadoFinanceiro: false,
+      }),
+    );
     return env("Registro criado com sucesso.");
   }
 
@@ -82,13 +176,17 @@ export function iniciarSimulador({ serie = "SIM-0001", senha = "senha-simulador"
       const filial = url.searchParams.get("codfilial");
       if (url.searchParams.get("serie") !== serie || !filiais.includes(filial))
         return responder(erro("AUTENTICACAO_INVALIDA", 401, "Série ou filial inválida."));
-      if (ganchos.licencaInvalida) return responder(erro("LICENCA_EXPIRADA_OU_INVALIDA", 401, "Licença expirada."));
+      if (ganchos.licencaInvalida)
+        return responder(erro("LICENCA_EXPIRADA_OU_INVALIDA", 401, "Licença expirada."));
       const token = randomBytes(16).toString("hex");
       const expira = Date.now() + 60 * 60_000;
       tokens.set(token, { filial, expira });
-      return responder(env({ token, expireAt: new Date(expira).toISOString().replace("Z", "0000+00:00") }));
+      return responder(
+        env({ token, expireAt: new Date(expira).toISOString().replace("Z", "0000+00:00") }),
+      );
     }
-    if (!autenticar(req, corpo)) return responder(erro("AUTENTICACAO_INVALIDA", 401, "Token ou assinatura inválidos."));
+    if (!autenticar(req, corpo))
+      return responder(erro("AUTENTICACAO_INVALIDA", 401, "Token ou assinatura inválidos."));
 
     if (req.method === "POST" && url.pathname === "/saidas") {
       let o;

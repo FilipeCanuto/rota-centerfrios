@@ -15,7 +15,8 @@ async function enviarOrcamentos({ chamar, shop9, log }, empresas) {
     let resultado;
     try {
       const empresa = empresas.get(t.empresa_id);
-      if (!empresa?.codfilial) throw new ErroShop9("CONFIGURACAO", "Filial desta empresa não configurada na Rota");
+      if (!empresa?.codfilial)
+        throw new ErroShop9("CONFIGURACAO", "Filial desta empresa não configurada na Rota");
       resultado = { ok: true, codigo_shop9: await shop9.enviarOrcamento(empresa, t), erro: null };
     } catch (e) {
       resultado = {
@@ -25,7 +26,11 @@ async function enviarOrcamentos({ chamar, shop9, log }, empresas) {
       };
     }
     await chamar("resultado", { envio_id: t.envio_id, ...resultado });
-    log(resultado.ok ? "info" : "aviso", "orcamento_enviado", { envio_id: t.envio_id, ok: resultado.ok, erro: resultado.erro });
+    log(resultado.ok ? "info" : "aviso", "orcamento_enviado", {
+      envio_id: t.envio_id,
+      ok: resultado.ok,
+      erro: resultado.erro,
+    });
   }
   return trabalhos.length;
 }
@@ -50,7 +55,12 @@ async function sincronizar({ cfg, chamar, log }, shop9, empresas, cursores, agor
         // id = hash do conteúdo: o reenvio idêntico é reconhecido; conteúdo novo nunca é tomado por repetição
         const id = `${tipo}:${sha256Hex(JSON.stringify(dados)).slice(0, 32)}`;
         await chamar("sincronizar", { ...dados, lote_id: id });
-        if (buffer.length) log("info", "lote_sincronizado", { tipo, empresa_id: empresa.empresa_id, linhas: buffer.length });
+        if (buffer.length)
+          log("info", "lote_sincronizado", {
+            tipo,
+            empresa_id: empresa.empresa_id,
+            linhas: buffer.length,
+          });
         total += buffer.length;
         buffer = [];
       };
@@ -75,8 +85,11 @@ export async function ciclo(ctx, agora = Date.now()) {
   const r = await chamar("heartbeat", { versao: VERSAO, shop9_ok: ctx.shop9Ok ?? false });
   const credenciais = cfg.shop9[r.ambiente];
   if (!credenciais) throw new Error(`Ambiente ${r.ambiente} sem credenciais neste computador`);
-  const empresas = new Map((r.empresas ?? []).filter((e) => e.codfilial).map((e) => [e.empresa_id, e]));
-  if (ctx.ambiente !== r.ambiente || !ctx.shop9) ctx.shop9 = ctx.criarShop9?.(credenciais) ?? criarAdaptadorShop9(credenciais);
+  const empresas = new Map(
+    (r.empresas ?? []).filter((e) => e.codfilial).map((e) => [e.empresa_id, e]),
+  );
+  if (ctx.ambiente !== r.ambiente || !ctx.shop9)
+    ctx.shop9 = ctx.criarShop9?.(credenciais) ?? criarAdaptadorShop9(credenciais);
   ctx.ambiente = r.ambiente;
   try {
     for (const e of empresas.values()) await ctx.shop9.ping(e.codfilial);

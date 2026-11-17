@@ -26,7 +26,9 @@ export async function parear({ rotaUrl, codigo, nome, chavePrivada, agora }) {
   });
   const dados = await r.json().catch(() => ({}));
   if (!r.ok || !dados.conector_id)
-    throw new Error(r.status === 401 ? "Código inválido, vencido ou já usado." : `Rota respondeu ${r.status}`);
+    throw new Error(
+      r.status === 401 ? "Código inválido, vencido ou já usado." : `Rota respondeu ${r.status}`,
+    );
   return dados.conector_id;
 }
 
@@ -55,7 +57,9 @@ async function principal() {
     const nova = await trocarChave(lerConfig(config));
     renameSync(arquivo, `${arquivo}.anterior`);
     writeFileSync(arquivo, pem(nova), { mode: 0o600 });
-    console.log("Chave trocada. Reinicie o serviço em até 10 minutos; depois apague chave-privada.pem.anterior.");
+    console.log(
+      "Chave trocada. Reinicie o serviço em até 10 minutos; depois apague chave-privada.pem.anterior.",
+    );
   } else throw new Error("Comandos: parear CODIGO [nome] | trocar-chave");
 }
 
