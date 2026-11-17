@@ -164,6 +164,8 @@ export interface Ficha {
   compras: {
     id: string;
     data: string;
+    /** Devolução vem com valor negativo e abate do resultado (texto 22). Sem o campo = venda. */
+    tipo?: "venda" | "devolucao";
     valor: number;
     codigo_shop9: string | null;
     itens: { produto: string; quantidade: number; valor_total: number }[];
