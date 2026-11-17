@@ -102,7 +102,7 @@ Outros pontos do PR: o relógio do computador do conector precisa estar certo (j
 | Nº | Grav. | Achado | Arquivo e causa | Situação |
 | --- | --- | --- | --- | --- |
 | V1 | Baixo | Casts marcados `shortcut` que já podem sair. | Os tipos gerados já têm `setores`, `usuario_setores`, `avisos`, `midia_login`, `meus_setores` e as funções `admin_*`; os `supabase as any` de `avisos/dados.ts`, `configuracoes/midiaLogin.ts`, `setoresAdmin.ts`, `usuarios.ts`, `setores/setores.ts` e `sessao/sessao.tsx` ficaram. (`configuracoes/integracoesShop9.ts` é de outra sessão.) || Não feito (baixo; tirar com calma, um arquivo por vez) |
-| V2 | Médio | Teste instável do Início no celular escuro. | `e2e/acessibilidade.spec.ts` (axe); `playwright.config.ts` com `retries: 0`. || Não reproduzido nesta sessão (e2e não rodado) |
+| V2 | Médio | Teste instável do Início no celular escuro. | `e2e/acessibilidade.spec.ts` (axe); `playwright.config.ts` com `retries: 0`. || Não corrigido. Em 17/11 o axe passou em 102 de 104; falharam às vezes, e passaram ao repetir, `/links` (largura 1.307 px no desktop durante a animação de entrada) e `/auth` (elemento não visível a tempo com o servidor de testes lento). Telas não mexidas nesta auditoria |
 | V3 | Baixo | Prettier em `SimularAlertas.tsx`. | Único erro do `eslint` (linha 37, mais de 100 colunas); os outros 26 itens são avisos `react-refresh`. || Corrigido |
 | V4 | Médio | Preferências e silêncio das notificações. | `preferencias_notificacao` existe (`0018`) e o mascote já a lê (`src/modulos/mascote/dados.ts`); faltam a tela de preferências e o silêncio no sino fora do expediente. || Não feito (tela nova; próxima etapa) |
 | V5 | Médio | Botão "Apagar dados de demonstração". | Ver B4. || Corrigido (B4) |
