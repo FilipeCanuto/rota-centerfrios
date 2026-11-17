@@ -129,6 +129,30 @@ export const CAMPOS: Record<TipoImportacao, CampoImportacao[]> = {
       obrigatorio: false,
       apelidos: ["valoritem", "totalitem", "subtotal"],
     },
+    {
+      chave: "vendedor_2_email",
+      rotulo: "E-mail do vendedor 2 (venda compartilhada)",
+      obrigatorio: false,
+      apelidos: ["vendedor2email", "emailvendedor2", "vendedor2"],
+    },
+    {
+      chave: "tipo",
+      rotulo: "Tipo (venda ou devolução)",
+      obrigatorio: false,
+      apelidos: ["tipo", "tipooperacao", "operacao"],
+    },
+    {
+      chave: "nota_origem",
+      rotulo: "Nota de origem (da devolução)",
+      obrigatorio: false,
+      apelidos: ["notaorigem", "notadevolvida", "documentoorigem"],
+    },
+    {
+      chave: "situacao",
+      rotulo: "Situação (cancelada)",
+      obrigatorio: false,
+      apelidos: ["situacao", "status", "cancelada"],
+    },
   ],
   orcamentos: [
     {
@@ -324,6 +348,14 @@ export function montarLinhas(
     const valorItem = valor(l, "valor_item") ? lerNumero(valor(l, "valor_item")) : null;
     if (valor(l, "valor_item") && (valorItem === null || valorItem < 0))
       return erroNota("valor_item", "Valor do item inválido.");
+    const tipoTexto = valor(l, "tipo").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const devolucao = /^(devolucao|dev|dvf)/.test(tipoTexto);
+    if (tipoTexto && !devolucao && !/^(venda|vnd)/.test(tipoTexto))
+      return erroNota("tipo", "Tipo deve ser venda ou devolução.");
+    const cancelada = /^(cancelad|inativ)/.test(valor(l, "situacao").toLowerCase());
+    const vendedor2 = valor(l, "vendedor_2_email").toLowerCase();
+    if (vendedor2 && !EMAIL.test(vendedor2))
+      return erroNota("vendedor_2_email", "E-mail do vendedor 2 inválido.");
     const produto = valor(l, "produto");
     const item = produto
       ? {
@@ -343,7 +375,7 @@ export function montarLinhas(
       if (item) (existente["itens"] as unknown[]).push(item);
       return;
     }
-    if (valorNota === null && valorItem === null)
+    if (valorNota === null && valorItem === null && !cancelada)
       return erroNota("valor", "Informe o valor da nota ou o valor de cada item.");
     const nova: LinhaImportacao = {
       linha: n,
@@ -352,6 +384,11 @@ export function montarLinhas(
       data_faturamento: data,
       valor: valorNota,
       itens: item ? [item] : [],
+      // Devolução vai com valor positivo; o banco grava negativa e abate do resultado.
+      tipo: devolucao ? "devolucao" : "venda",
+      vendedor_2_email: vendedor2,
+      nota_origem: valor(l, "nota_origem"),
+      cancelada,
     };
     vistos.set(codigo, nova);
     linhas.push(nova);

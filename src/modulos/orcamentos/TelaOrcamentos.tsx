@@ -48,6 +48,7 @@ export function TelaOrcamentos() {
       hojeData,
       q.data!.regras(o.empresa_id),
       q.data!.feriados(o.empresa_id),
+      q.data!.ultimoContato(o.cliente_id),
     ),
   }));
   const total = lista.reduce((s, { o }) => s + Number(o.valor), 0);

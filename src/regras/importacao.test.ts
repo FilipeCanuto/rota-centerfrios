@@ -200,6 +200,43 @@ describe("montar linhas", () => {
       montarLinhas("vendas", dados(["NF9", "10", "09/11/2026", "Freezer"]), mapa).erros[0]!.campo,
     ).toBe("valor");
   });
+  it("vendas: vendedor 2, devolução e nota cancelada", () => {
+    const mapa = {
+      codigo_shop9: 0,
+      cliente_codigo: 1,
+      data_faturamento: 2,
+      valor: 3,
+      vendedor_2_email: 4,
+      tipo: 5,
+      nota_origem: 6,
+      situacao: 7,
+    };
+    const r = montarLinhas(
+      "vendas",
+      dados(
+        ["NF1", "10", "09/11/2026", "1000", "Ana@CenterFrios.com", "Venda", "", ""],
+        ["DV1", "10", "12/11/2026", "200", "", "Devolução", "NF1", ""],
+        ["NF2", "10", "09/11/2026", "", "", "", "", "Cancelada"],
+        ["NF3", "10", "09/11/2026", "50", "nome", "", "", ""],
+        ["NF4", "10", "09/11/2026", "50", "", "troca", "", ""],
+      ),
+      mapa,
+    );
+    expect(
+      r.linhas.map((l) => [l["codigo_shop9"], l["tipo"], l["vendedor_2_email"], l["cancelada"]]),
+    ).toEqual([
+      ["NF1", "venda", "ana@centerfrios.com", false],
+      ["DV1", "devolucao", "", false],
+      ["NF2", "venda", "", true],
+    ]);
+    expect(r.linhas[1]).toMatchObject({ valor: 200, nota_origem: "NF1" });
+    expect(
+      r.erros.filter((e) => e.campo !== "codigo_shop9").map((e) => [e.linha, e.campo]),
+    ).toEqual([
+      [5, "vendedor_2_email"],
+      [6, "tipo"],
+    ]);
+  });
   it("orçamentos: situação reconhecida e valor obrigatório", () => {
     const mapa = { codigo_shop9: 0, cliente_codigo: 1, data: 2, valor: 3, status: 4 };
     const r = montarLinhas(

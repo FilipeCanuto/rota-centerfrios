@@ -80,3 +80,26 @@ export interface Shop9Gateway {
   /** Registra que foi lançado no Shop9 com este código; a próxima importação de orçamentos confirma. */
   marcarEnviado(orcamentoId: string, codigoShop9: string): Promise<void>;
 }
+
+/** Mensagem recebida de um canal (WhatsApp, e-mail, Instagram). Nunca vai para log nem endereço. */
+export interface MensagemRecebida {
+  id: string;
+  /** Telefone com DDI, e-mail ou usuário do Instagram de quem mandou. */
+  de: string;
+  texto: string;
+  /** Instante em ISO (UTC). */
+  em: string;
+}
+
+/**
+ * Canal de conversa com o cliente que envia e recebe (WhatsApp pela Evolution API, e-mail por SMTP/IMAP).
+ * Os segredos ficam só nos Secrets do servidor; a tela nunca recebe nem mostra valores.
+ */
+export interface CanalConversa {
+  nome: string;
+  /** "simulado" guarda em memória e não sai da Rota; "real" chama o serviço pelo servidor. */
+  modo: "simulado" | "real";
+  enviar(para: string, texto: string, assunto?: string): Promise<{ id: string }>;
+  /** Mensagens recebidas depois do instante informado (ISO). */
+  recebidas(desde: string): Promise<MensagemRecebida[]>;
+}

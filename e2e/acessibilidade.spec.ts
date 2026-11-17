@@ -15,6 +15,7 @@ const ROTAS: { url: string; titulo: string; logado: boolean; extras?: Record<str
     { url: `/clientes/${CLIENTE_ID}`, titulo: "Cliente Teste 1", logado: true },
     { url: "/agenda", titulo: "Agenda", logado: true },
     { url: "/orcamentos", titulo: "Orçamentos", logado: true },
+    { url: "/vendas-compartilhadas", titulo: "Vendas compartilhadas", logado: true },
     { url: "/links", titulo: "Links e arquivos", logado: true },
     { url: "/gamificacao", titulo: "Pontos e selos", logado: true },
     { url: "/gestao", titulo: "Gestão", logado: true },

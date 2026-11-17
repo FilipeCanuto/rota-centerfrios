@@ -12,12 +12,15 @@ test("lista de clientes abre a ficha 360 com todas as seções", async ({ page }
     "Notas",
     "Itens mais comprados (12 meses)",
     "Orçamentos (1)",
-    "Últimas compras",
+    "Últimas compras e devoluções",
     "Contatos recentes",
     "Mudar de carteira",
   ])
     await expect(page.getByRole("heading", { level: 2, name: secao })).toBeVisible();
   await expect(page.getByText("Prefere entrega pela manhã.")).toBeVisible();
+  // Devolução aparece marcada, com ícone e palavra, e com valor negativo.
+  await expect(page.getByText("Devolução", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^-\s?R\$\s?300$/)).toBeVisible();
 });
 
 test("remanejar pede vendedor e motivo antes de chamar o banco", async ({ page }) => {

@@ -1,6 +1,7 @@
 import { Building2, ImageIcon, PlugZap, UserCog, type LucideIcon } from "lucide-react";
 import type { ComponentType } from "react";
 import IntegracoesAba from "./IntegracoesAba";
+import OutrasConexoes from "./OutrasConexoes";
 import MidiaLoginAba from "./MidiaLoginAba";
 import SetoresAba from "./SetoresAba";
 import UsuariosAba from "./UsuariosAba";
@@ -39,7 +40,12 @@ export const ABAS_CONFIGURACAO: AbaConfiguracao[] = [
     id: "integracoes",
     rotulo: "Integrações",
     icone: PlugZap,
-    Componente: IntegracoesAba,
+    Componente: () => (
+      <div className="flex flex-col gap-10">
+        <IntegracoesAba />
+        <OutrasConexoes />
+      </div>
+    ),
   },
 ];
 

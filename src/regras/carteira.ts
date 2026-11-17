@@ -104,6 +104,17 @@ export function clienteSemCompra(
   return diasEntre(paraData(ultimaCompra), hoje) >= cfg.cliente_sem_compra_dias;
 }
 
+/**
+ * Última atividade de um orçamento: o último retorno (ou a data dele) ou o último contato com o cliente,
+ * o que for mais recente. Critério único do Início, da Gestão e da tela Orçamentos.
+ */
+export function ultimaAtividadeOrcamento(
+  o: { data: string; ultimo_followup: string | null },
+  ultimoContato: string | null,
+): string {
+  return [o.ultimo_followup ?? o.data, ultimoContato ?? ""].sort().at(-1)!;
+}
+
 /** Orçamento parado: N dias úteis completos sem interação. */
 export function orcamentoParado(
   ultimaAtividade: string,
