@@ -396,7 +396,7 @@ DECLARE
   v_id uuid := gen_random_uuid(); v_auth uuid := gen_random_uuid();  -- vendedor com setor Comercial
   v2_id uuid := gen_random_uuid();                                  -- outro vendedor (sem login)
   c1 uuid := gen_random_uuid(); c2 uuid := gen_random_uuid(); c3 uuid := gen_random_uuid();
-  p1 uuid; p2 uuid; car uuid; orc uuid; r jsonb; x numeric;
+  p1 uuid; p2 uuid; n2 uuid; car uuid; orc uuid; r jsonb; x numeric;
 BEGIN
   SELECT id INTO emp FROM public.empresas WHERE nome = 'CENTERFRIOS';
   IF emp IS NULL THEN RAISE EXCEPTION 'FALHA 0: empresa não encontrada'; END IF;
@@ -479,7 +479,7 @@ BEGIN
   -- 6 (R3). Reimportar a nota depois de trocar a carteira mantém o vendedor da venda.
   PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
   EXECUTE 'set local role authenticated';
-  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
+  PERFORM public.importar_vendas(emp, 'teste23.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
    'cliente_codigo', 'T22C1', 'data_faturamento', '2026-11-10', 'valor', 100, 'itens', jsonb_build_array(jsonb_build_object('produto', 'Item teste', 'quantidade', 1, 'valor_total', 100)))));
   EXECUTE 'reset role';
   PERFORM set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
@@ -488,7 +488,7 @@ BEGIN
   EXECUTE 'reset role';
   PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
   EXECUTE 'set local role authenticated';
-  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
+  PERFORM public.importar_vendas(emp, 'teste23.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
    'cliente_codigo', 'T22C1', 'data_faturamento', '2026-11-10', 'valor', 120, 'itens', jsonb_build_array(jsonb_build_object('produto', 'Item teste', 'quantidade', 1, 'valor_total', 120)))));
   EXECUTE 'reset role';
   SELECT count(*) INTO n FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 = 'T22N1' AND vendedor_id = v_id AND valor = 120;
@@ -496,10 +496,10 @@ BEGIN
   SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.codigo_shop9 = 'T22N1' AND v.empresa_id = emp AND i.vendedor_id = v_id;
   IF n <> 1 THEN RAISE EXCEPTION 'FALHA 6b: itens com outro vendedor'; END IF;
 
-  -- 7 (D1, D2). Venda com vendedor 2 dá 50% a cada um; devolução abate dos dois; não conta como compra.
+  -- 7 (D1, D2). Venda com vendedor 2 vira uma linha para cada (50%); devolução abate dos dois; não conta como compra.
   PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
   EXECUTE 'set local role authenticated';
-  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(
+  PERFORM public.importar_vendas(emp, 'teste23.csv', jsonb_build_array(
    jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cliente_codigo', 'T22C2', 'data_faturamento', '2026-11-12', 'valor', 1000,
     'vendedor_2_email', 'teste22.vendedor@centerfrios.com', 'tipo', 'venda',
     'itens', jsonb_build_array(jsonb_build_object('produto', 'Item compartilhado', 'quantidade', 1, 'valor_total', 1000))),
@@ -513,29 +513,32 @@ BEGIN
   IF n <> 1 THEN RAISE EXCEPTION 'FALHA 7c: devolução apareceu como compra'; END IF;
   EXECUTE 'reset role';
   IF (SELECT data_ultima_compra FROM public.clientes WHERE id = c2) <> '2026-11-12' THEN RAISE EXCEPTION 'FALHA 7d: devolução mudou a última compra'; END IF;
+  SELECT count(*) INTO n FROM public.vendas WHERE empresa_id = emp AND shop9_ordem = 'planilha:T22N2' AND shop9_tipo = 'saida';
+  IF n <> 2 THEN RAISE EXCEPTION 'FALHA 7e: venda compartilhada não virou duas linhas (%)', n; END IF;
+  SELECT id INTO n2 FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 = 'T22N2';
 
   -- 8 (D3). Meta do mês já batida: segue pontuando no dia com venda; sem venda, não.
   INSERT INTO public.metas(empresa_id, vendedor_id, mes, meta_vendas, meta_orcamentos, meta_cobertura, meta_reativacao) VALUES (emp, v_id, '2026-11-01', 100, 0, 0, 0);
   IF NOT public.gam_vendas_batida(emp, v_id, '2026-11-12') THEN RAISE EXCEPTION 'FALHA 8a: parou de pontuar depois da meta'; END IF;
   IF public.gam_vendas_batida(emp, v_id, '2026-11-11') THEN RAISE EXCEPTION 'FALHA 8b: pontuou sem venda no dia'; END IF;
 
-  -- 10 (D2). A ficha marca a devolução e não a conta na quantidade de compras.
+  -- 10 (D2). A ficha soma as partes por nota, marca a devolução e não a conta como compra.
   PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
   EXECUTE 'set local role authenticated';
   r := public.ficha_cliente(c2, '2026-11-20');
-  IF NOT (r->'compras') @> '[{"tipo":"devolucao","valor":-200}]'::jsonb OR (r->>'qtd_12m')::int <> 1 OR (r->>'total_12m')::numeric <> 800 THEN
-    RAISE EXCEPTION 'FALHA 10: ficha sem a devolução marcada ou contando-a como compra (%)', r->'compras'; END IF;
-  EXECUTE 'reset role';
+  IF NOT (r->'compras') @> '[{"tipo":"devolucao","valor":-200},{"tipo":"venda","valor":1000}]'::jsonb
+     OR (r->>'qtd_12m')::int <> 1 OR (r->>'total_12m')::numeric <> 800 THEN
+    RAISE EXCEPTION 'FALHA 10: ficha errada (%)', r->'compras'; END IF;
 
-  -- 11 (D1). O vendedor 2 vê a venda compartilhada e os itens dela.
+  -- 11 (D1). O vendedor 2 vê os itens da nota compartilhada (que ficam na linha do vendedor 1).
   PERFORM set_config('request.jwt.claims', json_build_object('sub', v_auth, 'role', 'authenticated')::text, true);
-  EXECUTE 'set local role authenticated';
-  SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.empresa_id = emp AND v.codigo_shop9 = 'T22N2';
+  SELECT count(*) INTO n FROM public.itens_venda WHERE venda_id = n2;
   IF n <> 1 THEN RAISE EXCEPTION 'FALHA 11: vendedor 2 não vê os itens da venda compartilhada (viu %)', n; END IF;
-  -- 12 (D1). A lista do vendedor traz as vendas compartilhadas dele, com a parte e os itens; sem o setor, recusa.
+
+  -- 12 (D1). A lista do vendedor traz as notas compartilhadas dele, com total, parte e itens; sem o setor, recusa.
   r := public.minhas_vendas_compartilhadas(emp, '2026-01-01');
-  IF NOT r @> '[{"codigo_shop9":"T22N2","minha_parte":500,"papel":2,"cliente":"Cliente 2 teste 22"}]'::jsonb
-     OR NOT r @> '[{"codigo_shop9":"DEV:T22D1","minha_parte":-100}]'::jsonb
+  IF NOT r @> '[{"codigo_shop9":"T22N2","valor":1000,"minha_parte":500,"papel":2,"cliente":"Cliente 2 teste 22"}]'::jsonb
+     OR NOT r @> '[{"codigo_shop9":"DEV:T22D1","tipo":"devolucao","minha_parte":-100}]'::jsonb
      OR jsonb_array_length((SELECT e->'itens' FROM jsonb_array_elements(r) e WHERE e->>'codigo_shop9' = 'T22N2')) <> 1 THEN
     RAISE EXCEPTION 'FALHA 12a: lista do vendedor 2 incompleta (%)', r; END IF;
   EXECUTE 'reset role';
@@ -545,11 +548,12 @@ BEGIN
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 12b: sem o setor Comercial leu a lista'; END IF;
   EXECUTE 'reset role';
 
-  -- 7e (D2). Nota cancelada sai do resultado.
+  -- 13 (D2). Nota cancelada sai do resultado (as duas linhas).
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
   EXECUTE 'set local role authenticated';
-  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cancelada', true)));
+  PERFORM public.importar_vendas(emp, 'teste23.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N2', 'cancelada', true)));
   EXECUTE 'reset role';
-  IF EXISTS (SELECT 1 FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 = 'T22N2') THEN RAISE EXCEPTION 'FALHA 7e: nota cancelada continuou'; END IF;
+  IF EXISTS (SELECT 1 FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 IN ('T22N2', 'T22N2/2')) THEN RAISE EXCEPTION 'FALHA 13: nota cancelada continuou'; END IF;
 
   -- 9 (D4). Carrinho conclui com o preço de tabela do dia e recusa produto fora de linha.
   INSERT INTO public.clientes(id, empresa_id, vendedor_id, nome, codigo_shop9) VALUES (c3, emp, v_id, 'Cliente 3 teste 22', 'T22C3');
@@ -576,7 +580,7 @@ BEGIN
   IF NOT ok THEN RAISE EXCEPTION 'FALHA 9b: concluiu com produto fora de linha'; END IF;
   EXECUTE 'reset role';
 
-  RAISE NOTICE 'Texto 22: testes 1 a 12 passaram.';
+  RAISE NOTICE 'Texto 22: testes 1 a 13 passaram.';
 END $t$;
 ROLLBACK;
 ```
