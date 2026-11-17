@@ -79,3 +79,119 @@ BEGIN
  RETURN public.importacao_registrar(_empresa_id,'vendas',_arquivo,jsonb_array_length(_linhas),ins,upd,erros);
 END $$;
 ```
+
+## Testes (SQL puro, nada fica gravado)
+
+```sql
+BEGIN;
+DO $t$
+DECLARE
+  emp uuid; n int; ok boolean;
+  x_id uuid := gen_random_uuid(); x_auth uuid := gen_random_uuid();  -- administrador sem acesso total
+  d_id uuid := gen_random_uuid(); d_auth uuid := gen_random_uuid();  -- diretoria, começa sem setor
+  v_id uuid := gen_random_uuid(); v_auth uuid := gen_random_uuid();  -- vendedor com setor Comercial
+  v2_id uuid := gen_random_uuid();                                  -- outro vendedor (sem login)
+  c1 uuid := gen_random_uuid(); c2 uuid := gen_random_uuid();
+BEGIN
+  SELECT id INTO emp FROM public.empresas WHERE nome = 'CENTERFRIOS';
+  IF emp IS NULL THEN RAISE EXCEPTION 'FALHA 0: empresa não encontrada'; END IF;
+  INSERT INTO public.usuarios(id, nome, email, empresa_id) VALUES
+   (x_id, 'Admin teste 22', 'teste22.admin@centerfrios.com', emp),
+   (d_id, 'Diretoria teste 22', 'teste22.diretoria@centerfrios.com', emp),
+   (v_id, 'Vendedor teste 22', 'teste22.vendedor@centerfrios.com', emp),
+   (v2_id, 'Vendedor 2 teste 22', 'teste22.vendedor2@centerfrios.com', emp);
+  INSERT INTO public.usuario_empresas(usuario_id, empresa_id) VALUES (x_id, emp), (d_id, emp), (v_id, emp);
+  INSERT INTO public.papeis_pre_cadastro(usuario_id, role, empresa_id) VALUES
+   (x_id, 'administrador', NULL), (d_id, 'diretoria', NULL), (v_id, 'vendedor', emp);
+  INSERT INTO public.usuario_setores(usuario_id, setor) VALUES (v_id, 'comercial');
+  INSERT INTO auth.users(id, instance_id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at) VALUES
+   (x_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teste22.admin@centerfrios.com', now(), '{}', '{}', now(), now()),
+   (d_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teste22.diretoria@centerfrios.com', now(), '{}', '{}', now(), now()),
+   (v_auth, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'teste22.vendedor@centerfrios.com', now(), '{}', '{}', now(), now());
+  INSERT INTO public.clientes(id, empresa_id, vendedor_id, nome, codigo_shop9) VALUES
+   (c1, emp, v_id, 'Cliente 1 teste 22', 'T22C1'), (c2, emp, v2_id, 'Cliente 2 teste 22', 'T22C2');
+  INSERT INTO public.registro_auditoria(empresa_id, acao, tabela, registro_id) VALUES
+   (emp, 'teste22', 'clientes', c1), (emp, 'teste22', 'usuarios', x_id);
+
+  -- 1 (S1). Administrador sem acesso total não grava papel direto nem se dá diretoria; dá a outra pessoa.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', x_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  ok := false; BEGIN INSERT INTO public.user_roles(user_id, role) VALUES (x_auth, 'diretoria'); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 1a: gravou papel direto em user_roles'; END IF;
+  ok := false; BEGIN INSERT INTO public.usuario_empresas(usuario_id, empresa_id) VALUES (v2_id, emp); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 1b: gravou vínculo direto'; END IF;
+  ok := false; BEGIN PERFORM public.admin_salvar_acessos(x_id, ARRAY['administrador','diretoria']::public.app_role[], ARRAY[emp], ARRAY['comercial']); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 1c: administrador se deu diretoria'; END IF;
+  PERFORM public.admin_salvar_acessos(v_id, ARRAY['vendedor']::public.app_role[], ARRAY[emp], ARRAY['comercial']);
+  EXECUTE 'reset role';
+
+  -- 3 (S3). Sem o setor Comercial, a auditoria comercial some; a administrativa continua para o administrador.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  SELECT count(*) INTO n FROM public.registro_auditoria WHERE acao = 'teste22' AND tabela = 'clientes';
+  IF n <> 0 THEN RAISE EXCEPTION 'FALHA 3a: diretoria sem setor leu auditoria comercial'; END IF;
+  EXECUTE 'reset role';
+  INSERT INTO public.usuario_setores(usuario_id, setor) VALUES (d_id, 'comercial');
+  EXECUTE 'set local role authenticated';
+  SELECT count(*) INTO n FROM public.registro_auditoria WHERE acao = 'teste22' AND tabela = 'clientes';
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 3b: diretoria com setor não leu auditoria comercial'; END IF;
+  EXECUTE 'reset role';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', x_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  SELECT count(*) INTO n FROM public.registro_auditoria WHERE acao = 'teste22' AND tabela = 'usuarios';
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 3c: administrador perdeu a auditoria administrativa'; END IF;
+  EXECUTE 'reset role';
+
+  -- 2 (S2). Contato só de cliente da carteira, com data de agora e sem marca de demonstração.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', v_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  INSERT INTO public.interacoes(empresa_id, cliente_id, vendedor_id, tipo, cliente_respondeu) VALUES (emp, c1, v_id, 'whatsapp', true);
+  ok := false; BEGIN INSERT INTO public.interacoes(empresa_id, cliente_id, vendedor_id, tipo) VALUES (emp, c2, v_id, 'whatsapp'); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 2a: contato em cliente de outra carteira'; END IF;
+  ok := false; BEGIN INSERT INTO public.interacoes(empresa_id, cliente_id, vendedor_id, tipo, data) VALUES (emp, c1, v_id, 'visita', now() - interval '10 days'); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 2b: contato com data antiga'; END IF;
+  ok := false; BEGIN INSERT INTO public.interacoes(empresa_id, cliente_id, vendedor_id, tipo, demo) VALUES (emp, c1, v_id, 'visita', true); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 2c: contato marcado como demonstração'; END IF;
+
+  -- 4 (S4). Post: só http(s), dos últimos 7 dias e sem repetir.
+  INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
+   VALUES (emp, v_id, 'https://instagram.com/p/teste22', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date);
+  ok := false; BEGIN INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
+   VALUES (emp, v_id, 'https://instagram.com/p/teste22', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 4a: post repetido'; END IF;
+  ok := false; BEGIN INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
+   VALUES (emp, v_id, 'javascript:alert(1)', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date); EXCEPTION WHEN check_violation THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 4b: endereço que não é http(s)'; END IF;
+  ok := false; BEGIN INSERT INTO public.posts_instagram(empresa_id, vendedor_id, url, legenda, data_post)
+   VALUES (emp, v_id, 'https://instagram.com/p/teste22b', '@centerfriosoficial', (now() AT TIME ZONE 'America/Maceio')::date - 30); EXCEPTION WHEN insufficient_privilege THEN ok := true; END;
+  IF NOT ok THEN RAISE EXCEPTION 'FALHA 4c: post de 30 dias atrás'; END IF;
+  EXECUTE 'reset role';
+
+  -- 5 (S5). Carga de demonstração só pelo servidor.
+  IF has_function_privilege('authenticated', 'public.carregar_dados_demo(uuid[])', 'EXECUTE') THEN
+    RAISE EXCEPTION 'FALHA 5: authenticated ainda carrega demonstração'; END IF;
+
+  -- 6 (R3). Reimportar a nota depois de trocar a carteira mantém o vendedor da venda.
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
+   'cliente_codigo', 'T22C1', 'data_faturamento', '2026-11-10', 'valor', 100, 'itens', jsonb_build_array(jsonb_build_object('produto', 'Item teste', 'quantidade', 1, 'valor_total', 100)))));
+  EXECUTE 'reset role';
+  PERFORM set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, true);
+  EXECUTE 'set local role service_role';
+  UPDATE public.clientes SET vendedor_id = v2_id WHERE id = c1;
+  EXECUTE 'reset role';
+  PERFORM set_config('request.jwt.claims', json_build_object('sub', d_auth, 'role', 'authenticated')::text, true);
+  EXECUTE 'set local role authenticated';
+  PERFORM public.importar_vendas(emp, 'teste22.csv', jsonb_build_array(jsonb_build_object('linha', 2, 'codigo_shop9', 'T22N1',
+   'cliente_codigo', 'T22C1', 'data_faturamento', '2026-11-10', 'valor', 120, 'itens', jsonb_build_array(jsonb_build_object('produto', 'Item teste', 'quantidade', 1, 'valor_total', 120)))));
+  EXECUTE 'reset role';
+  SELECT count(*) INTO n FROM public.vendas WHERE empresa_id = emp AND codigo_shop9 = 'T22N1' AND vendedor_id = v_id AND valor = 120;
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 6a: reimportação trocou o vendedor ou não atualizou o valor'; END IF;
+  SELECT count(*) INTO n FROM public.itens_venda i JOIN public.vendas v ON v.id = i.venda_id WHERE v.codigo_shop9 = 'T22N1' AND v.empresa_id = emp AND i.vendedor_id = v_id;
+  IF n <> 1 THEN RAISE EXCEPTION 'FALHA 6b: itens com outro vendedor'; END IF;
+
+  RAISE NOTICE 'Texto 22: testes 1 a 6 passaram.';
+END $t$;
+ROLLBACK;
+```
