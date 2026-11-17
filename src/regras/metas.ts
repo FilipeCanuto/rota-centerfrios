@@ -13,7 +13,11 @@ export function projecao(faturadoAteHoje: number, hoje: Date, feriados: Feriados
   return (faturadoAteHoje / decorridos) * diasUteisDoMes(hoje, feriados);
 }
 
-/** Meta do dia = (meta do mês − faturado até ontem) ÷ dias úteis restantes. Nunca negativa; sem dia útil restante → tudo o que falta. */
+/**
+ * Meta do dia = (meta do mês − faturado até ontem) ÷ dias úteis restantes; sem dia útil restante → tudo o que falta.
+ * Meta do mês já batida: a média diária do mês (meta ÷ dias úteis), para seguir pontuando (decisão da diretoria, 17/11/2026).
+ * A mesma conta está em gam_vendas_batida no banco.
+ */
 export function metaDoDia(
   metaMes: number,
   faturadoAteOntem: number,
@@ -22,6 +26,7 @@ export function metaDoDia(
 ): number {
   const restantes = diasUteisRestantes(hoje, feriados);
   const falta = Math.max(0, metaMes - faturadoAteOntem);
+  if (falta === 0 && metaMes > 0) return metaMes / Math.max(1, diasUteisDoMes(hoje, feriados));
   if (restantes <= 0) return falta;
   return falta / restantes;
 }

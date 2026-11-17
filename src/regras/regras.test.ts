@@ -74,8 +74,10 @@ describe("metas", () => {
   it("meta do dia = (meta − faturado até ontem) ÷ dias úteis restantes", () =>
     // (110.000 − 40.000) ÷ 14
     expect(metaDoDia(110000, 40000, d("2026-11-10"), NACIONAIS)).toBeCloseTo(5000));
-  it("meta do dia nunca é negativa", () =>
-    expect(metaDoDia(100, 500, d("2026-11-10"), NACIONAIS)).toBe(0));
+  it("meta do mês já batida: a meta do dia vira a média diária do mês (segue pontuando)", () =>
+    expect(metaDoDia(100, 500, d("2026-11-10"), NACIONAIS)).toBeCloseTo(
+      100 / diasUteisDoMes(d("2026-11-10"), NACIONAIS),
+    ));
   it("depois do último dia útil (sábado, 31/10), a meta do dia é tudo o que falta", () =>
     expect(metaDoDia(1000, 400, d("2026-10-31"), NACIONAIS)).toBe(600));
   it("feriado entre hoje e o fim do mês aumenta a meta do dia", () =>
